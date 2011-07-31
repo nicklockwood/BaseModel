@@ -1,7 +1,7 @@
 Purpose
 --------------
 
-BaseModel provides a base class for building model objects for your iOS or Mac OS projects. It saves you the hassle of writing boilerplate code, and encourage good practices by reducing the incentive to cut corners in your model implementation.
+BaseModel provides a base class for building model objects for your iOS or Mac OS projects. It saves you the hassle of writing boilerplate code, and encourages good practices by reducing the incentive to cut corners in your model implementation.
 
 The BaseModel object uses the NSCoding protocol for serialisation. It is not designed for use with Core Data, although in principle the class could easily be extended to work with Core Data if needed.
 
@@ -88,7 +88,7 @@ This method re-loads the shared object instance using the same search process as
 
 	+ (void)save;
 
-This method saves the shared object instance using the specified `documentFile`. If this is not set and exception will be thrown. The object will be saved using the NSCoding protocol.
+This method saves the shared object instance using the specified `documentFile`. If this is not set an exception will be thrown. The object will be saved using the NSCoding protocol.
 
 
 Usage
