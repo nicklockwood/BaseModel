@@ -76,7 +76,7 @@ This method does nothing unless you override it with your own implementation. It
 
 	+ (NSString *)documentFile;
 
-This method does nothing unless you override it with your own implementation. It returns the filename within the application bundle resources folder to be used by the `sharedInstance`, `reload` and `save` methods below. This can be a full or partial path name.
+This method does nothing unless you override it with your own implementation. It returns the filename within the application documents folder (or application support folder on Mac OS) to be used by the `sharedInstance`, `reload` and `save` methods below. This can be a full or partial path name.
 
 	+ (id)sharedInstance;
 
