@@ -1,7 +1,7 @@
 //
 //  BaseModel.h
 //
-//  Version 1.0
+//  Version 1.1
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design. All rights reserved.
@@ -33,34 +33,56 @@
 #import <Foundation/Foundation.h>
 
 
+//the BaseModel protocol defines optional methods that
+//you can define on your models to extend their functionality
+
+@protocol BaseModel <NSObject>
+@optional
+
+//merging
+- (void)mergeValuesFromObject:(id)object;
+
+//initialising from a dictionary or array, eg. from a plist of json
+- (id)initWithDict:(NSDictionary *)dict;
+- (id)initWithArray:(NSArray *)array;
+
+//configuration for singleton file loading/saving
++ (NSString *)resourceFile;
++ (NSString *)saveFile;
+
+@end
+
+
 //use the BaseModel class as the base class for any of your
 //model objects. BaseModels can be standalone object, or
 //act as sub-properties of a larger object
 
-@interface BaseModel : NSObject <NSCoding>
+@interface BaseModel : NSObject <BaseModel, NSCoding>
 
 //default constructors (all other constructors should call these)
 + (id)instance;
 - (id)init;
 
-//loading from a dictionary or array, e.g. from a plist or json
+//initialising from a dictionary or array, e.g. from a plist or json
 + (id)instanceWithDict:(NSDictionary *)dict;
 + (id)instanceWithArray:(NSArray *)array;
-- (id)initWithDict:(NSDictionary *)dict;
-- (id)initWithArray:(NSArray *)array;
 
 @end
 
 
-//use the document extensions for any top-level model
+//use the files extensions for any top-level model
 //objects that map directly to one or more files on disk, e.g.
 //a word processor document, or a cachable entity such
 //as a downloaded html page or json response.
 
-@interface BaseModel(Documents)
+@interface BaseModel(Files)
+
+//standard folders
++ (NSString *)cachesFolder;
++ (NSString *)documentsFolder;
++ (NSString *)applicationSupportFolder;
 
 //file management utility functions
-+ (NSString *)applicationDocumentsFolder;
 - (BOOL)fileExistsAtPath:(NSString *)filePath;
 - (void)removeFileAtPath:(NSString *)filePath;
 - (void)writeObject:(id)object toFile:(NSString *)filePath;
@@ -80,10 +102,6 @@
 //without needing to specify the filename each time
 
 @interface BaseModel(Singletons)
-
-//configuration
-+ (NSString *)resourceFile;
-+ (NSString *)documentFile;
 
 //singleton behaviour
 + (id)sharedInstance;

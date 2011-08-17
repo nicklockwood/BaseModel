@@ -1,7 +1,7 @@
 //
 //  BaseModel.m
 //
-//  Version 1.0
+//  Version 1.1
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design. All rights reserved.
@@ -77,8 +77,7 @@
 //if your model is immutable - i.e. it isn't modifed at runtime, then
 //you don't need to implement this stuff. you might want this for
 //models where the user can modify the data and save it, or for models
-//that are downloaded from a web service and need to be cached to the
-//user documents folder
+//that are downloaded from a web service and need to be saved locally
 
 
 - (id)initWithCoder:(NSCoder *)aDecoder
@@ -153,10 +152,24 @@
 	return self;
 }
 
+
+#pragma mark -
+#pragma mark Merging
+
+//this method is for merging model objects
+//it is useful for cases where a model object is initialised from data in the app
+//and then need
+
+- (id)mergeWithObject:(id)object
+{
+    //return the result of merging object into self
+    return nil;
+}
+
 @end
 
 
-@implementation BaseModel(Documents)
+@implementation BaseModel(Files)
 
 
 #pragma mark -
@@ -164,41 +177,60 @@
 
 //these utility methods make it easier to work with files from within
 //your model. they assume that paths are relative to the application
-//documents folder unless otherwise specified, so you can save effort on
+//support folder unless otherwise specified, so you can save effort on
 //building path strings. objects will automatically be saved and loaded
 //using whatever mechanism seems appropriate based on the extension and
 //data format
 
-
-+ (NSString *)applicationDocumentsFolder
++ (NSString *)applicationFolderForSearchPath:(NSSearchPathDirectory)searchPath appendAppName:(BOOL)appendAppName
 {
-#ifdef __IPHONE_OS_VERSION_MAX_ALLOWED
+    //get the path to the folder
+	NSString *folder = [NSSearchPathForDirectoriesInDomains(searchPath, NSUserDomainMask, YES) objectAtIndex:0];
     
-	//get the path to the application documents folder
-	return [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+#ifndef __IPHONE_OS_VERSION_MAX_ALLOWED
     
-#else
-    
-    //get the application support directory for this app
-    NSString *identifier = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleName"];
-	NSArray *paths = NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES);
-	NSString *supportDirectory = [[paths objectAtIndex:0] stringByAppendingPathComponent:identifier];
-	
-	if (![[NSFileManager defaultManager] fileExistsAtPath:supportDirectory]) {
-		[[NSFileManager defaultManager] createDirectoryAtPath:supportDirectory withIntermediateDirectories:YES attributes:nil error:NULL];
+    if (appendAppName)
+    {
+        //append application name on Mac OS, which doesn't have a sandboxed file system
+        NSString *identifier = [[NSBundle mainBundle] objectForInfoDictionaryKey:(NSString *)kCFBundleNameKey];
+        folder = [folder stringByAppendingPathComponent:identifier];
 	}
-	
-	return supportDirectory;
     
 #endif
+    
+    //create the folder if it doesn't exist
+	if (![[NSFileManager defaultManager] fileExistsAtPath:folder])
+    {
+		[[NSFileManager defaultManager] createDirectoryAtPath:folder withIntermediateDirectories:YES attributes:nil error:NULL];
+	}
+	
+	return folder;
 }
 
-+ (NSString *)documentFilePath:(NSString *)filePath
++ (NSString *)cachesFolder
+{
+    //get the path to the application caches folder
+    return [self applicationFolderForSearchPath:NSCachesDirectory appendAppName:YES];
+}
+
++ (NSString *)documentsFolder
+{
+    //get the path to the application documents folder
+	return [self applicationFolderForSearchPath:NSDocumentDirectory appendAppName:NO];
+}
+
++ (NSString *)applicationSupportFolder
+{
+    //get the application support directory
+	return [self applicationFolderForSearchPath:NSApplicationSupportDirectory appendAppName:NO];
+}
+
++ (NSString *)saveFilePath:(NSString *)filePath
 {
 	//check if the path is a full path or not
 	if (![filePath isAbsolutePath])
 	{
-		return [[self applicationDocumentsFolder] stringByAppendingPathComponent:filePath];
+		return [[self applicationSupportFolder] stringByAppendingPathComponent:filePath];
 	}
 	return filePath;
 }
@@ -213,10 +245,10 @@
 	return filePath;
 }
 
-+ (NSString *)documentOrBundleFilePath:(NSString *)filePath
++ (NSString *)saveOrBundleFilePath:(NSString *)filePath
 {
-	//first, check in the application documents folder
-    NSString *fullPath = [[self applicationDocumentsFolder] stringByAppendingPathComponent:filePath];
+	//first, check in the application support folder
+    NSString *fullPath = [[self applicationSupportFolder] stringByAppendingPathComponent:filePath];
 		
     //check if file exists, if not, look in the application bundle
     if (![[NSFileManager defaultManager] fileExistsAtPath:fullPath])
@@ -230,19 +262,19 @@
 
 - (BOOL)fileExistsAtPath:(NSString *)filePath
 {
-	return [[NSFileManager defaultManager] fileExistsAtPath:[[self class] documentFilePath:filePath]];
+	return [[NSFileManager defaultManager] fileExistsAtPath:[[self class] saveFilePath:filePath]];
 }
 
 - (void)removeFileAtPath:(NSString *)filePath
 {
-	[[NSFileManager defaultManager] removeItemAtPath:[[self class] documentFilePath:filePath] error:NULL];
+	[[NSFileManager defaultManager] removeItemAtPath:[[self class] saveFilePath:filePath] error:NULL];
 }
 
 - (void)writeObject:(id)object toFile:(NSString *)filePath
 {
 	//check if the path is a full path or not
-	//if not, assume we want to look in the application documents folder
-	filePath = [[self class] documentFilePath:filePath];
+	//if not, assume we want to look in the application support folder
+	filePath = [[self class] saveFilePath:filePath];
 	
 	if ([object isKindOfClass:[NSDictionary class]] ||
 		[object isKindOfClass:[NSArray class]] ||
@@ -272,31 +304,34 @@
 - (id)objectWithContentsofFile:(NSString *)filePath
 {
 	//get full path
-	filePath = [[self class] documentOrBundleFilePath:filePath];
+	filePath = [[self class] saveOrBundleFilePath:filePath];
     
     //load the file
     NSData *data = [NSData dataWithContentsOfFile:filePath];
-    
+
     //attempt to deserialise data as a plist
     id object = nil;
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSPropertyListFormat format;
-    if ([NSPropertyListSerialization respondsToSelector:@selector(propertyListWithData:options:format:error:)])
+    if (data)
     {
-        object = [NSPropertyListSerialization propertyListWithData:data options:NSPropertyListImmutable format:&format error:NULL];
+        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+        NSPropertyListFormat format;
+        if ([NSPropertyListSerialization respondsToSelector:@selector(propertyListWithData:options:format:error:)])
+        {
+            object = [NSPropertyListSerialization propertyListWithData:data options:NSPropertyListImmutable format:&format error:NULL];
+        }
+        else
+        {
+            object = [NSPropertyListSerialization propertyListFromData:data mutabilityOption:0 format:&format errorDescription:NULL];
+        }
+        [object retain];
+        [pool drain];
     }
-    else
-    {
-        object = [NSPropertyListSerialization propertyListFromData:data mutabilityOption:0 format:&format errorDescription:NULL];
-    }
-    [object retain];
-    [pool drain];
     
     //success?
     if (object)
     {
         //check if object is an NSCoded unarchive
-        if ([object isKindOfClass:[NSDictionary dictionary]] && [object objectForKey:@"$archiver"])
+        if ([object respondsToSelector:@selector(objectForKey:)] && [object objectForKey:@"$archiver"])
         {
             [object release];
             return [NSKeyedUnarchiver unarchiveObjectWithData:data];
@@ -317,8 +352,7 @@
 //if your model is immutable - i.e. it isn't modifed at runtime, then
 //you don't need to implement this stuff. you might want this for
 //models where the user can modify the data and save it, or for models
-//that are downloaded from a web service and need to be cached to the
-//user documents folder
+//that are downloaded from a web service and need to be cached
 
 
 + (id)instanceWithContentsOfFile:(NSString *)filePath
@@ -380,10 +414,10 @@
 	return nil;
 }
 
-+ (NSString *)documentFile
++ (NSString *)saveFile
 {
 	//override this method if you want to save or load
-	//your singleton from a file in the application documents folder
+	//your singleton from a file in the application support folder
 	return nil;
 }
 
@@ -466,16 +500,31 @@ static NSMutableDictionary *sharedInstances = nil;
 + (void)reload
 {
 	id instance = nil;
-	if ([self documentFile])
+	if ([self saveFile])
 	{
-		//try loading from documents
-		instance = [self instanceWithContentsOfFile:[self documentFilePath:[self documentFile]]];
+		//try loading previously saved version
+		instance = [self instanceWithContentsOfFile:[self saveFilePath:[self saveFile]]];
 	}
-	
-	if (instance == nil && [self resourceFile])
+
+    BOOL shouldMerge = instance && [self instancesRespondToSelector:@selector(mergeValuesFromObject:)];
+	if ((instance == nil || shouldMerge) && [self resourceFile])
 	{
 		//load from bundle resources
+        id savedInstance = instance;
 		instance = [self instanceWithContentsOfFile:[self bundleFilePath:[self resourceFile]]];
+        
+        //merging
+        if (shouldMerge)
+        {
+            if (shouldMerge && instance)
+            {
+                [instance mergeValuesFromObject:savedInstance];
+            }
+            else
+            {
+                instance = savedInstance;
+            }
+        }
 	}
 	
 	if (instance == nil)
@@ -490,15 +539,15 @@ static NSMutableDictionary *sharedInstances = nil;
 
 + (void)save
 {
-	//can't save if document file path is not set
-	if ([self documentFile] == nil)
+	//can't save if saveFile path is not set
+	if ([self saveFile] == nil)
 	{
 		[NSException raise:NSGenericException
-					format:@"Abstract +documentFile implementation - you need to override this to save files"];
+					format:@"Abstract +saveFile implementation - you need to override this to save files"];
 	}
 	
-	//save the shared instance to documents
-	[[self sharedInstance] writeToFile:[self documentFilePath:[self documentFile]]];
+	//save the shared instance
+	[[self sharedInstance] writeToFile:[self saveFilePath:[self saveFile]]];
 }
 
 @end

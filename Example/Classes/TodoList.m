@@ -16,13 +16,13 @@
 
 + (NSString *)resourceFile
 {
-    //name of the default list in the application bundle
+    //name of the default list in the application bundle resources
 	return @"TodoList.plist";
 }
 
-+ (NSString *)documentFile
++ (NSString *)saveFile
 {
-    //name of the save file in the documents folder
+    //name of the save file in the application support folder
 	return @"TodoList.plist";
 }
 
