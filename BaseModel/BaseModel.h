@@ -9,7 +9,7 @@
 //  Get the latest version of BaseModel from either of these locations:
 //
 //  http://charcoaldesign.co.uk/source/cocoa#basemodel
-//  https://github.com/demosthenese/BaseModel
+//  https://github.com/nicklockwood/BaseModel
 //
 //  This software is provided 'as-is', without any express or implied
 //  warranty.  In no event will the authors be held liable for any damages
