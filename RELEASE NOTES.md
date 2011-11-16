@@ -1,3 +1,7 @@
+Version 2.0
+
+- Major API redesign. It is not recommended to update projects that use BaseModel 1.1 or earlier to version 2.0
+
 Version 1.1
 
 - Added mergeValuesFromObject method.

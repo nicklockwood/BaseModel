@@ -7,6 +7,7 @@
 //
 
 #import "TodoItem.h"
+#import "TodoList.h"
 
 
 @implementation TodoItem
@@ -21,20 +22,22 @@
 	return item;
 }
 
-- (id)initWithCoder:(NSCoder *)aDecoder
+- (void)setWithCoder:(NSCoder *)aDecoder
 {
-	if ((self = [self init]))
-	{
-		self.label = [aDecoder decodeObjectForKey:@"label"];
-		self.checked = [aDecoder decodeBoolForKey:@"checked"];
-	}
-	return self;
+	self.label = [aDecoder decodeObjectForKey:@"label"];
+	self.checked = [aDecoder decodeBoolForKey:@"checked"];
 }
 
 - (void)encodeWithCoder:(NSCoder *)aCoder
 {
 	[aCoder encodeObject:label forKey:@"label"];
 	[aCoder encodeBool:checked forKey:@"checked"];
+}
+
+- (void)save
+{
+	//save the todolist
+	[[TodoList sharedInstance] save];
 }
 
 - (void)dealloc

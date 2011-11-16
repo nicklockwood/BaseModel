@@ -39,8 +39,8 @@
 		item.label = textView.text;
 	}
 	
-	//save the TodoList
-	[TodoList save];
+	//save the item
+	[item save];
 }
 
 #pragma mark -

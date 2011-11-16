@@ -40,7 +40,8 @@
 {	
 	TodoItem *item = [[TodoList sharedInstance].items objectAtIndex:indexPath.row];
 	item.checked = !item.checked;
-	[TodoList save];
+	[item save];
+	
 	[tableView reloadData];
 }
 
@@ -49,11 +50,12 @@
 	return UITableViewCellEditingStyleDelete;
 }
 
-- (void)tableView:(UITableView *)_tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
 	[[TodoList sharedInstance].items removeObjectAtIndex:indexPath.row];
-	[TodoList save];
-	[self.tableView reloadData];
+	[[TodoList sharedInstance] save];
+	
+	[tableView reloadData];
 }
 
 #pragma mark -

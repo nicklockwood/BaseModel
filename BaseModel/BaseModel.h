@@ -1,7 +1,7 @@
 //
 //  BaseModel.h
 //
-//  Version 1.1
+//  Version 2.0
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design. All rights reserved.
@@ -33,79 +33,77 @@
 #import <Foundation/Foundation.h>
 
 
+extern NSString *const BaseModelSharedInstanceUpdatedNotification;
+
+
+//BaseModel extends NSObject with the following methods
+
+@interface NSObject (BaseModel)
+
+//loading
+
++ (id)objectWithContentsOfFile:(NSString *)path;
+- (void)writeToFile:(NSString *)filePath atomically:(BOOL)useAuxiliaryFile;
+
+@end
+
+
 //the BaseModel protocol defines optional methods that
-//you can define on your models to extend their functionality
+//you can define on your BaseModel subclasses to extend their functionality
 
 @protocol BaseModel <NSObject>
 @optional
 
-//merging
-- (void)mergeValuesFromObject:(id)object;
+//loading sequence:
+//setUp called first
+//then setWithDictionary/Array if resource file exists
+//then setWithCoder if save file exists
 
-//initialising from a dictionary or array, eg. from a plist of json
-- (id)initWithDict:(NSDictionary *)dict;
-- (id)initWithArray:(NSArray *)array;
-
-//configuration for singleton file loading/saving
-+ (NSString *)resourceFile;
-+ (NSString *)saveFile;
+- (void)setUp;
+- (void)setWithDictionary:(NSDictionary *)dict;
+- (void)setWithArray:(NSArray *)array;
+- (void)setWithCoder:(NSCoder *)aDecoder;
 
 @end
 
 
 //use the BaseModel class as the base class for any of your
-//model objects. BaseModels can be standalone object, or
+//model objects. BaseModels can be standalone objects, or
 //act as sub-properties of a larger object
 
-@interface BaseModel : NSObject <BaseModel, NSCoding>
+@interface BaseModel : NSObject <NSCoding, BaseModel>
 
-//default constructors (all other constructors should call these)
+//instance properties
+
+@property (nonatomic, copy) NSString *uniqueID;
+
+//new autoreleased instance
 + (id)instance;
-- (id)init;
 
-//initialising from a dictionary or array, e.g. from a plist or json
-+ (id)instanceWithDict:(NSDictionary *)dict;
-+ (id)instanceWithArray:(NSArray *)array;
-
-@end
-
-
-//use the files extensions for any top-level model
-//objects that map directly to one or more files on disk, e.g.
-//a word processor document, or a cachable entity such
-//as a downloaded html page or json response.
-
-@interface BaseModel(Files)
-
-//standard folders
-+ (NSString *)cachesFolder;
-+ (NSString *)documentsFolder;
-+ (NSString *)applicationSupportFolder;
+//shared (singelton) instance
++ (id)sharedInstance;
++ (BOOL)hasSharedInstance;
++ (void)setSharedInstance:(BaseModel *)instance;
++ (void)reloadSharedInstance;
 
 //file management utility functions
-- (BOOL)fileExistsAtPath:(NSString *)filePath;
-- (void)removeFileAtPath:(NSString *)filePath;
-- (void)writeObject:(id)object toFile:(NSString *)filePath;
-- (id)objectWithContentsofFile:(NSString *)filePath;
++ (id)instanceWithDictionary:(NSDictionary *)dict;
+- (id)initWithDictionary:(NSDictionary *)dict;
++ (id)instanceWithArray:(NSArray *)array;
+- (id)initWithArray:(NSArray *)array;
 
 //loading and saving the model from a plist file
-+ (id)instanceWithContentsOfFile:(NSString *)filePath;
-- (id)initWithContentsOfFile:(NSString *)filePath;
-- (void)writeToFile:(NSString *)filePath;
++ (id)instanceWithContentsOfFile:(NSString *)path;
+- (id)initWithContentsOfFile:(NSString *)path;
 
-@end
+//resourceFile is a file, typically within the resource bundle that
+//is used to initialise any BaseModel instance
+//savefile is a path, typically within application support that
+//is used to save the shared instance of the model
++ (NSString *)resourceFile;
++ (NSString *)saveFile;
 
-
-//use the singleton extensions for root models that have
-//only a single instance in the application. the singleton
-//category provides handy methods to load and save the file
-//without needing to specify the filename each time
-
-@interface BaseModel(Singletons)
-
-//singleton behaviour
-+ (id)sharedInstance;
-+ (void)reload;
-+ (void)save;
+//save the model
+- (void)save;
 
 @end
