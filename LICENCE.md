@@ -1,5 +1,6 @@
 BaseModel
-version 2.0, November 15th, 2011
+
+version 2.1, Februrary 8th, 2011
 
 Copyright (C) 2011 Charcoal Design
 

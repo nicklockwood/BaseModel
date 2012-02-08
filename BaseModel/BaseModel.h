@@ -1,12 +1,13 @@
 //
 //  BaseModel.h
 //
-//  Version 2.0
+//  Version 2.1
 //
 //  Created by Nick Lockwood on 25/06/2011.
-//  Copyright 2011 Charcoal Design. All rights reserved.
+//  Copyright 2011 Charcoal Design
 //
-//  Get the latest version of BaseModel from either of these locations:
+//  Distributed under the permissive zlib license
+//  Get the latest version from either of these locations:
 //
 //  http://charcoaldesign.co.uk/source/cocoa#basemodel
 //  https://github.com/nicklockwood/BaseModel
@@ -30,22 +31,43 @@
 //  3. This notice may not be removed or altered from any source distribution.
 //
 
+//
+//  ARC Helper
+//
+//  Version 1.2
+//
+//  Created by Nick Lockwood on 05/01/2012.
+//  Copyright 2012 Charcoal Design
+//
+//  Distributed under the permissive zlib license
+//  Get the latest version from here:
+//
+//  https://gist.github.com/1563325
+//
+
+#ifndef AH_RETAIN
+#if __has_feature(objc_arc)
+#define AH_RETAIN(x) x
+#define AH_RELEASE(x)
+#define AH_AUTORELEASE(x) x
+#define AH_SUPER_DEALLOC
+#else
+#define __AH_WEAK
+#define AH_WEAK assign
+#define AH_RETAIN(x) [x retain]
+#define AH_RELEASE(x) [x release]
+#define AH_AUTORELEASE(x) [x autorelease]
+#define AH_SUPER_DEALLOC [super dealloc]
+#endif
+#endif
+
+//  ARC Helper ends
+
+
 #import <Foundation/Foundation.h>
 
 
 extern NSString *const BaseModelSharedInstanceUpdatedNotification;
-
-
-//BaseModel extends NSObject with the following methods
-
-@interface NSObject (BaseModel)
-
-//loading
-
-+ (id)objectWithContentsOfFile:(NSString *)path;
-- (void)writeToFile:(NSString *)filePath atomically:(BOOL)useAuxiliaryFile;
-
-@end
 
 
 //the BaseModel protocol defines optional methods that
@@ -64,6 +86,10 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 - (void)setWithArray:(NSArray *)array;
 - (void)setWithCoder:(NSCoder *)aDecoder;
 
+//NSCoding
+
+- (void)encodeWithCoder:(NSCoder *)aCoder;
+
 @end
 
 
@@ -71,7 +97,7 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 //model objects. BaseModels can be standalone objects, or
 //act as sub-properties of a larger object
 
-@interface BaseModel : NSObject <NSCoding, BaseModel>
+@interface BaseModel : NSObject <BaseModel>
 
 //instance properties
 
@@ -91,15 +117,19 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 - (id)initWithDictionary:(NSDictionary *)dict;
 + (id)instanceWithArray:(NSArray *)array;
 - (id)initWithArray:(NSArray *)array;
+- (id)initWithCoder:(NSCoder *)aDecoder;
 
 //loading and saving the model from a plist file
 + (id)instanceWithContentsOfFile:(NSString *)path;
 - (id)initWithContentsOfFile:(NSString *)path;
+- (void)writeToFile:(NSString *)path atomically:(BOOL)atomically;
 
 //resourceFile is a file, typically within the resource bundle that
 //is used to initialise any BaseModel instance
-//savefile is a path, typically within application support that
+//saveFile is a path, typically within application support that
 //is used to save the shared instance of the model
+//saveFileForID is a path, typically within application support that
+//is used to save any instance of the model
 + (NSString *)resourceFile;
 + (NSString *)saveFile;
 
