@@ -1,7 +1,7 @@
 //
 //  BaseModel.m
 //
-//  Version 2.1
+//  Version 2.2
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design. All rights reserved.
@@ -31,7 +31,7 @@
 //
 
 #import "BaseModel.h"
-#include <sys/xattr.h>
+#import <objc/message.h>
 
 
 NSString *const BaseModelSharedInstanceUpdatedNotification = @"BaseModelSharedInstanceUpdatedNotification";
@@ -223,63 +223,74 @@ static BOOL loadingFromResourceFile = NO;
     }
 }
 
-- (id)initWithCoder:(NSCoder *)aDecoder
++ (id)instanceWithObject:(id)object
+{
+    //return nil if object is nil
+    return object? AH_AUTORELEASE([[self alloc] initWithObject:object]): nil;
+}
+
+- (NSString *)setterNameForClass:(Class)class
+{
+    NSString *className = NSStringFromClass(class);
+    if ([className hasPrefix:@"__CF"])
+    {
+        className = [className substringFromIndex:4];
+    }
+    if ([className hasPrefix:@"NS"])
+    {
+        className = [className substringFromIndex:2];
+    }
+    return [NSString stringWithFormat:@"setWith%@:", className];
+}
+
+- (id)initWithObject:(id)object
+{
+    if ((self = [self init]))
+    {
+        Class class = [object class];
+        while (class != [NSObject class])
+        {
+            SEL setter = NSSelectorFromString([self setterNameForClass:class]);
+            if ([self respondsToSelector:setter])
+            {
+                objc_msgSend(self, setter, object);
+                return self;
+            }
+            class = [class superclass];
+        }
+        [NSException raise:NSGenericException
+                    format:@"setWith%@: not implemented", [self setterNameForClass:[object class]]];
+    }
+    return self;
+}
+
++ (NSArray *)instancesWithArray:(NSArray *)array
+{
+    NSMutableArray *result = [NSMutableArray array];
+    for (id object in array)
+    {
+        [result addObject:[self instanceWithObject:object]];
+    }
+    return result;
+}
+
++ (id)instanceWithCoder:(NSCoder *)decoder
+{
+    //return nil if coder is nil
+    return decoder? AH_AUTORELEASE([[self alloc] initWithCoder:decoder]): nil;
+}
+
+- (id)initWithCoder:(NSCoder *)decoder
 {
     if ((self = [self init]))
     {
         if ([self respondsToSelector:@selector(setWithCoder:)])
         {
-            [self setWithCoder:aDecoder];
+            [self setWithCoder:decoder];
         }
         else
         {
-            [NSException raise:NSGenericException
-                        format:@"-setWithCoder: not implemented"];
-        }
-    }
-    return self;
-}
-
-+ (id)instanceWithDictionary:(NSDictionary *)dict
-{
-    //return nil if dict is nil
-    return dict? AH_AUTORELEASE([[self alloc] initWithDictionary:dict]): nil;
-}
-
-- (id)initWithDictionary:(NSDictionary *)dict
-{
-    if ((self = [self init]))
-    {
-        if ([self respondsToSelector:@selector(setWithDictionary:)])
-        {
-            [self setWithDictionary:dict];
-        }
-        else
-        {
-            [NSException raise:NSGenericException
-                        format:@"setWithDictionary: not implemented"];
-        }
-    }
-    return self;
-}
-
-+ (id)instanceWithArray:(NSArray *)array
-{
-    //return nil if array is nil
-    return array? AH_AUTORELEASE([[self alloc] initWithArray:array]): nil;
-}
-
-- (id)initWithArray:(NSArray *)array
-{
-    if ((self = [self init]))
-    {
-        if ([self respondsToSelector:@selector(setWithArray:)])
-        {
-            [self setWithArray:array];
-        }
-        else
-        {
-            [NSException raise:NSGenericException format:@"setWithArray: not implemented"];
+            [NSException raise:NSGenericException format:@"-setWithCoder: not implemented"];
         }
     }
     return self;
@@ -362,21 +373,8 @@ static BOOL loadingFromResourceFile = NO;
             [cachedResourceFiles setObject:object forKey:filePath];
         }
         
-        if ([object isKindOfClass:[NSDictionary class]])
-        {
-            //load as dictionary
-            return ((self = [self initWithDictionary:object]));
-        }
-        else if ([object isKindOfClass:[NSArray class]])
-        {
-            //load as array
-            return ((self = [self initWithArray:object]));
-        }
-        else
-        {
-            //invalid
-            [NSException raise:NSGenericException format:@"Attempted to load %@ as %@", [object class], [self class]];
-        }
+        //load with object
+        return ((self = [self initWithObject:object]));
     }
     else if (isResourceFile)
     {

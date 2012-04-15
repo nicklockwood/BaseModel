@@ -15,11 +15,14 @@
 @synthesize label;
 @synthesize checked;
 
-+ (TodoItem *)instanceWithLabel:(NSString *)_label
++ (TodoItem *)instanceWithLabel:(NSString *)label
 {
-	TodoItem *item = [self instance];
-	item.label = _label;
-	return item;
+	return [self instanceWithObject:label];
+}
+
+- (void)setWithString:(NSString *)string
+{
+    self.label = string;
 }
 
 - (void)setWithCoder:(NSCoder *)aDecoder

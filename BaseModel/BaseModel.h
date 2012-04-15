@@ -1,7 +1,7 @@
 //
 //  BaseModel.h
 //
-//  Version 2.1
+//  Version 2.2
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -34,7 +34,7 @@
 //
 //  ARC Helper
 //
-//  Version 1.2
+//  Version 1.2.2
 //
 //  Created by Nick Lockwood on 05/01/2012.
 //  Copyright 2012 Charcoal Design
@@ -47,16 +47,16 @@
 
 #ifndef AH_RETAIN
 #if __has_feature(objc_arc)
-#define AH_RETAIN(x) x
-#define AH_RELEASE(x)
-#define AH_AUTORELEASE(x) x
-#define AH_SUPER_DEALLOC
+#define AH_RETAIN(x) (x)
+#define AH_RELEASE(x) (void)(x)
+#define AH_AUTORELEASE(x) (x)
+#define AH_SUPER_DEALLOC (void)(0)
 #else
 #define __AH_WEAK
 #define AH_WEAK assign
-#define AH_RETAIN(x) [x retain]
-#define AH_RELEASE(x) [x release]
-#define AH_AUTORELEASE(x) [x autorelease]
+#define AH_RETAIN(x) [(x) retain]
+#define AH_RELEASE(x) [(x) release]
+#define AH_AUTORELEASE(x) [(x) autorelease]
 #define AH_SUPER_DEALLOC [super dealloc]
 #endif
 #endif
@@ -78,17 +78,20 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 
 //loading sequence:
 //setUp called first
-//then setWithDictionary/Array if resource file exists
+//then setWithDictionary/Array/String if resource file exists
 //then setWithCoder if save file exists
 
 - (void)setUp;
 - (void)setWithDictionary:(NSDictionary *)dict;
 - (void)setWithArray:(NSArray *)array;
-- (void)setWithCoder:(NSCoder *)aDecoder;
+- (void)setWithString:(NSString *)string;
+- (void)setWithNumber:(NSNumber *)number;
+- (void)setWithData:(NSData *)data;
+- (void)setWithCoder:(NSCoder *)coder;
 
 //NSCoding
 
-- (void)encodeWithCoder:(NSCoder *)aCoder;
+- (void)encodeWithCoder:(NSCoder *)coder;
 
 @end
 
@@ -112,12 +115,14 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 + (void)setSharedInstance:(BaseModel *)instance;
 + (void)reloadSharedInstance;
 
-//file management utility functions
-+ (id)instanceWithDictionary:(NSDictionary *)dict;
-- (id)initWithDictionary:(NSDictionary *)dict;
-+ (id)instanceWithArray:(NSArray *)array;
-- (id)initWithArray:(NSArray *)array;
-- (id)initWithCoder:(NSCoder *)aDecoder;
+//creating instances from collection or string
++ (id)instanceWithObject:(id)object;
+- (id)initWithObject:(id)object;
++ (NSArray *)instancesWithArray:(NSArray *)array;
+
+//creating an instance using NSCoding
++ (id)instanceWithCoder:(NSCoder *)decoder;
+- (id)initWithCoder:(NSCoder *)decoder;
 
 //loading and saving the model from a plist file
 + (id)instanceWithContentsOfFile:(NSString *)path;

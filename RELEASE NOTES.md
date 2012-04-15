@@ -1,3 +1,9 @@
+Version 2.2
+
+- Added new instancesWithArray: method for loading an array of models in one go.
+- Added setWithString:, setWithNumber: and setWithData: methods.
+- Replaced instanceWithDictionary/Array: and initWithDictionary/Array: methods and replaced them with instanceWithObject: and initWithObject:
+
 Version 2.1
 
 - Added automatic support for ARC compile targets

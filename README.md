@@ -13,7 +13,7 @@ BaseModel is designed to work with the AutoCoding library (https://github.com/ni
 Supported OS & SDK Versions
 -----------------------------
 
-* Supported build target - iOS 5.0 / Mac OS 10.7 (Xcode 4.2, Apple LLVM compiler 3.0)
+* Supported build target - iOS 5.1 / Mac OS 10.7 (Xcode 4.3.2, Apple LLVM compiler 3.1)
 * Earliest supported deployment target - iOS 4.3 / Mac OS 10.6
 * Earliest compatible deployment target - iOS 4.0 / Mac OS 10.6
 
@@ -55,12 +55,15 @@ BaseModel's initialisation routine is quite complex, and it is not advised that 
 
     - (id)setWithDictionary:(NSDictionary *)dict;
     - (id)setWithArray:(NSArray *)array;
+    - (id)setWithString:(NSString *)string;
+    - (id)setWithNumber:(NSNumber *)number;
+    - (id)setWithData:(NSData *)data;
 
-These methods are used to extend you model with the capability to be initialised from an array or dictionary. This is useful as it allows objects to be automatically loaded from a Plist in your application bundle. It could also be used to instantiate objects from other formats like JSON or XML via an intermediate library like TouchJSON or XMLDictionary. These methods are called after the `setUp` method, so you should not assume that class properties and ivars do not already have values at the point when this method is called. Be careful to safely release any property values before setting them. 
+These methods are used to extend you model with the capability to be initialised from a standard object type (i.e. one that is supported by the Plist format). This is useful as it allows objects to be automatically loaded from a Plist in your application bundle. It could also be used to instantiate objects from other formats like JSON or XML. These methods are called after the `setUp` method, so you should not assume that class properties and ivars do not already have values at the point when this method is called. IF you are not using ARC, be careful to safely release any property values before setting them. **Note:** these methods are defined in the protocol only to help with code autocompletion - it is actually possible to initialise a BaseModel instance with any kind of object if you define an appropriate setup method of the form `setWith[ClassName]:` in your BaseModel subclass.
 
     - (void)setWithCoder:(NSCoder *)aDecoder;
     
-This method is called by `initWithCoder:` as part of the NSCoding implementation. If you are implementing NSCoding serialisation for your class, you should implement this method instead of overriding `initWithCoder:`. This method is called after the `setUp` method and potentially may be called after default values have been loaded using `setWithDictionary:` or `setWithArray:`, so you should not assume that class properties and ivars do not already have values at the point when this method is called. Be careful to safely release any property values before setting them. Note that if you are using the AutoCoding library, this method is already implemented for you.
+This method is called by `initWithCoder:` as part of the NSCoding implementation. If you are implementing NSCoding serialisation for your class, you should implement this method instead of overriding `initWithCoder:`. This method is called after the `setUp` method and potentially may be called after default values have been loaded using `setWith[ClassName]:`, so you should not assume that class properties and ivars do not already have values at the point when this method is called. Be careful to safely release any property values before setting them. Note that if you are using the AutoCoding library, this method is already implemented for you.
 
     - (void)encodeWithCoder:(NSCoder *)aCoder;
 
@@ -87,20 +90,24 @@ The BaseModel class has the following methods:
     
 Create an autoreleased instance or initialises a retained instance of the class respectively. These methods will first call `setUp`, and will then attempt to initialise the class from `resourceFile` if that file exists.
     
-    + (id)instanceWithDictionary:(NSDictionary *)dict;
-    - (id)initWithDictionary:(NSDictionary *)dict;
+    + (id)instanceWithObject:(NSDictionary *)dict;
+    - (id)initWithObject:(NSDictionary *)dict;
     
-Creates an instance of the class and initialise it using a dictionary. This is useful when loading a model from an embedded Plist file in the application bundle, or creating model objects from JSON data returned by a web service. This method requires the `setWithDictionary:` method to be defined on your subclass, or calling it will throw an exception. This method will attempt to initialise the class from `resourceFile` (if that file exists) prior to calling `setWithDictionary:`, so if your resourceFile is already a serialised NSDictionary this method will be called twice (with different input).
+Creates an instance of the class and initialises it using the supplied object. This is useful when loading a model from an embedded Plist file in the application bundle, or creating model objects from JSON data returned by a web service. This method requires that an appropriate setter method is defined on your class, where the setter name is of the form `setWith[ClassName]:`. For example, to initialise the model using an NSDictionary, your BaseModel subclass must have a method called `setWithDictionary:`. This method will attempt to initialise the class from `resourceFile` (if that file exists) prior to calling `setWith[ClassName]:`, so if your resourceFile contains a serialised object, this method will be called twice (with different input).
     
-    + (id)instanceWithArray:(NSArray *)array;
-    - (id)initWithArray:(NSArray *)array;
-    
-As above, except the model object is initialised with an array. Useful if your Plist or JSON file does not use a dictionary as the root object. This method requires the `setWithArray:` method to be defined on your subclass. This method will attempt to initialise the class from `resourceFile` (if that file exists) prior to calling `setWithArray:`, so if your resourceFile is already a serialised NSArray this method will be called twice (with different input).
+    + (NSArray *)instancesWithArray:(NSArray *)array;
+
+This is similar to `instanceWithArray:` but instead of initialising the object with an array, it iterates over each item in the array and creates an instance from each object by calling `instanceWithArray:` or `instanceWithDictionary:`, depending on the object type. The resultant objects are then returned as a new array. It is expected that the  objects in the array will be either NSDictionary or NSArray instances. Any other object type will be returned unmodified.
+
+    + (id)instanceWithCoder:(NSCoder *)decoder;
+    - (id)initWithCoder:(NSCoder *)decoder;
+
+Initialises the object from an NSCoded archive using the NSCoding protocol. This method requires the `setWithCoder:` method to be defined on your subclass. This method will attempt to initialise the class from `resourceFile` (if that file exists) prior to calling `setWithCoder:`, which allows you to first initialise your object with a static data file before loading additional properties from an NSCoded archive.
 
     + (id)instanceWithContentsOfFile:(NSString *)filePath;
     - (id)initWithContentsOfFile:(NSString *)filePath;
     
-Creates/initialises an instance of the model class from a file. If the file is a Plist representing NSArray or NSDictionary objects then the model will be initialised using the `setWithArray:` or `setWithDict:` methods. If the file is an NSCoded archive of an instance of the model then the object will be initialised using `setWithCoder:`. If the file format is not recognised, or the appropriate set function is not implemented, the method will return nil.
+Creates/initialises an instance of the model class from a file. If the file is a Plist then the model will be initialised using the appropriate `setWith[ClassName]:` method, depending on the type of the root object in the Plist. If the file is an NSCoded archive of an instance of the model then the object will be initialised using `setWithCoder:`. If the file format is not recognised, or the appropriate setWith... function is not implemented, the method will return nil.
 
     + (id)sharedInstance;
 

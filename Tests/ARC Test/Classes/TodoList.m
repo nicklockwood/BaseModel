@@ -30,10 +30,7 @@
 - (void)setWithArray:(NSArray *)array
 {
 	//initialise with default list from plist
-	for (NSString *label in array)
-	{
-		[items addObject:[TodoItem instanceWithLabel:label]];
-	}
+    [items setArray:[TodoItem instancesWithArray:array]];
 }
 
 - (void)setWithCoder:(NSCoder *)aDecoder
