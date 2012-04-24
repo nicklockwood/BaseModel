@@ -1,7 +1,7 @@
 //
 //  NSObject+AutoCoding.m
 //
-//  Version 1.0
+//  Version 1.1.1
 //
 //  Created by Nick Lockwood on 19/11/2011.
 //  Copyright (c) 2011 Charcoal Design
@@ -83,7 +83,7 @@
     
     //archive object
     NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self];
-    [data writeToFile:filePath atomically:YES];
+    [data writeToFile:filePath atomically:useAuxiliaryFile];
 }
 
 - (NSArray *)codableKeys
@@ -97,9 +97,15 @@
         for (int i = 0; i < count; i++)
         {
             objc_property_t property = properties[i];
-            const char *name = property_getName(property);
-            NSString *key = [NSString stringWithCString:name encoding:NSUTF8StringEncoding];
-            [array addObject:key];
+            const char *attributes = property_getAttributes(property);
+            NSString *encoding = [NSString stringWithCString:attributes encoding:NSUTF8StringEncoding];
+            if (![[encoding componentsSeparatedByString:@","] containsObject:@"R"])
+            {
+                //omit read-only properties
+                const char *name = property_getName(property);
+                NSString *key = [NSString stringWithCString:name encoding:NSUTF8StringEncoding];
+                [array addObject:key];
+            }
         }
         free(properties);
         class = [class superclass];
@@ -143,6 +149,17 @@
         id object = [self valueForKey:key];
         [aCoder encodeObject:object forKey:key];
     }
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+    NSObject *copy = [[[self class] allocWithZone:zone] init];
+    for (NSString *key in [self codableKeys])
+    {
+        id object = [self valueForKey:key];
+        [copy setValue:object forKey:key];
+    }
+    return copy;
 }
 
 @end
