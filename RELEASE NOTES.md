@@ -1,3 +1,8 @@
+Version 2.2.1
+
+- Fixed minor bug in setter name generation logic
+- Removed deprecated property list serialisation methods
+
 Version 2.2
 
 - Added new instancesWithArray: method for loading an array of models in one go.
