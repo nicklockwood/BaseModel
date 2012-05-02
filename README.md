@@ -7,7 +7,9 @@ The BaseModel object uses Plists and the NSCoding protocol for serialisation. It
 
 BaseModel is really designed as an *alternative* to Core Data for developers who prefer to have a little more control over the implementation of their data stack. BaseModel gives you precise control over the location and serialisation of your data files, whilst still proving enough automatic behaviour to save you from writing the same code over and over again.
 
-BaseModel is designed to work with the AutoCoding library (https://github.com/nicklockwood/AutoCoding). It does not require this library to function, but when used in combination, BaseModel objects support automatic loading and saving without needing to write your own NSCoding methods.
+BaseModel is designed to work with the AutoCoding library (https://github.com/nicklockwood/AutoCoding). It does not require this library to function, but when used in combination, BaseModel objects support automatic loading and saving without needing to write your own NSCoding methods. Use of AutoCoding is completely optional. For an example of how it works, check out the *AutoTodoList* example.
+
+BaseModel is also designed to work with the HRCoder library (https://github.com/nicklockwood/HRCoder) as an alternative mechanism for loading an saving data in a human readable/editable format. When used in conjunction with AutoCoding, HRCoder allows you to specify your data files in a standard format and avoid having to write any `setWith...` methods. Use of HRCoder is completely optional. For an example of how this works, check out the *HRTodoList* and *HRAutoTodoList* examples.
 
 
 Supported OS & SDK Versions
@@ -59,7 +61,11 @@ BaseModel's initialisation routine is quite complex, and it is not advised that 
     - (id)setWithNumber:(NSNumber *)number;
     - (id)setWithData:(NSData *)data;
 
-These methods are used to extend you model with the capability to be initialised from a standard object type (i.e. one that is supported by the Plist format). This is useful as it allows objects to be automatically loaded from a Plist in your application bundle. It could also be used to instantiate objects from other formats like JSON or XML. These methods are called after the `setUp` method, so you should not assume that class properties and ivars do not already have values at the point when this method is called. IF you are not using ARC, be careful to safely release any property values before setting them. **Note:** these methods are defined in the protocol only to help with code autocompletion - it is actually possible to initialise a BaseModel instance with any kind of object if you define an appropriate setup method of the form `setWith[ClassName]:` in your BaseModel subclass.
+These methods are used to extend you model with the capability to be initialised from a standard object type (i.e. one that is supported by the Plist format). This is useful as it allows objects to be automatically loaded from a Plist in your application bundle. It could also be used to instantiate objects from other formats like JSON or XML.
+
+These methods are called after the `setUp` method, so you should not assume that class properties and ivars do not already have values at the point when this method is called. If you are not using ARC, be careful to safely release any property values before setting them. **Note:** these methods are defined in the protocol only to help with code autocompletion - it is actually possible to initialise a BaseModel instance with any kind of object if you define an appropriate setup method of the form `setWith[ClassName]:` in your BaseModel subclass.
+
+If you are using the HRCoder library, you probably don't need to implement these methods, provided that you create your data files in the correct format. Files loaded using HRCoder will call the `setWithCoder:` method instead of `setWithDictionary/Array/etc:`.
 
     - (void)setWithCoder:(NSCoder *)aDecoder;
     
@@ -129,6 +135,10 @@ This method reloads the shared instance of the model using the file specified by
 
 This method attempts to serialise the model object to the specified file using NSCoding. If you are not using the AutoCoding library, you will need to implement the `encodeWithCoder:` method, otherwise using this method will throw and exception. The path can be absolute or relative. Relative paths will be automatically prefixed with `~/Library/Application Support/`.
 
+    - (BOOL)useHRCoderIfAvailable;
+
+Normally, BaseModel saves files using NSCoding and the NSKeyedArchiver, which creates binary Plist files in a complex format that is not human-readable or editable. The HRCoder library provides an alternative format for NSCoding that is more similar to an ordinary, hand-written Plist file. BaseModel detects the presence of the HRCoder class if it's included in the project and will use it by default if available. If you do not want to use HRCoder for saving a particular model, override this method and return NO.
+
     + (NSString *)resourceFile;
 
 This method returns the filename for a file to be used to initialise every instance of the object. This would typically be a Plist file stored in the application bundle, and is a fantastic way to quickly define complex default data sets for model objects without having to hard-code them in the `setUp` method. This can be a full or partial path name. Partial paths will be treated as relative to the application bundle resources folder. The default return value for this method is *ClassName.plist* where ClassName is the name of the model class, but you can override this method in your own subclasses to change the file name. If you specify a relative rather than absolute filename or path, it will be automatically prefixed with the application bundle directory. 
@@ -168,3 +178,5 @@ Usage
 -----------
 
 The BaseModel class is abstract, and is not designed to be instantiated directly. To implement a model object, create a new subclass of the BaseModel class and implement or override the methods that need to be customised for your specific requirements. Look at the *TodoList* project for an example of how to do this.
+
+By using the HRCoder and AutoCoding libraries, and following a conventional format for your configuration files, you can dramatically reduce your development time by eliminating boilerplate code. Compare the *AutoTodoList*, *HRTodoList* and *HRAutoTodoList* to the original *TodoList* project to see how these libraries can reduce setup code in your model objects.

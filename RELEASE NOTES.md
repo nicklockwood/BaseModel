@@ -1,3 +1,7 @@
+Version 2.2.2
+
+- Added support for the HRCoder library, which provides human-readable object serialisation and de-serialisation using NSCoding
+
 Version 2.2.1
 
 - Fixed minor bug in setter name generation logic

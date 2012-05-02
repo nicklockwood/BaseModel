@@ -1,7 +1,7 @@
 //
 //  BaseModel.h
 //
-//  Version 2.2
+//  Version 2.2.2
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -130,6 +130,7 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 + (id)instanceWithContentsOfFile:(NSString *)path;
 - (id)initWithContentsOfFile:(NSString *)path;
 - (void)writeToFile:(NSString *)path atomically:(BOOL)atomically;
+- (BOOL)useHRCoderIfAvailable;
 
 //resourceFile is a file, typically within the resource bundle that
 //is used to initialise any BaseModel instance

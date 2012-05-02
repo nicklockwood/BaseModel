@@ -1,7 +1,7 @@
 //
 //  BaseModel.m
 //
-//  Version 2.2
+//  Version 2.2.2
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design. All rights reserved.
@@ -162,6 +162,11 @@ static NSMutableDictionary *sharedInstances = nil;
     return [NSStringFromClass(self) stringByAppendingPathExtension:@"plist"];
 }
 
+- (BOOL)useHRCoderIfAvailable
+{
+    return YES;
+}
+
 - (void)save
 {
     if ([sharedInstances objectForKey:NSStringFromClass([self class])] == self)
@@ -231,15 +236,16 @@ static BOOL loadingFromResourceFile = NO;
 
 - (NSString *)setterNameForClass:(Class)class
 {
+    //get class name
     NSString *className = NSStringFromClass(class);
-    if ([className hasPrefix:@"__CF"])
-    {
-        className = [className substringFromIndex:4];
-    }
+    
+    //strip NS prefix
     if ([className hasPrefix:@"NS"])
     {
         className = [className substringFromIndex:2];
     }
+    
+    //return setter name
     return [NSString stringWithFormat:@"setWith%@:", className];
 }
 
@@ -248,7 +254,7 @@ static BOOL loadingFromResourceFile = NO;
     if ((self = [self init]))
     {
         Class class = [object class];
-        while (class != [NSObject class])
+        while (true)
         {
             SEL setter = NSSelectorFromString([self setterNameForClass:class]);
             if ([self respondsToSelector:setter])
@@ -256,10 +262,11 @@ static BOOL loadingFromResourceFile = NO;
                 objc_msgSend(self, setter, object);
                 return self;
             }
+            if ([class superclass] == [NSObject class]) break;
             class = [class superclass];
         }
         [NSException raise:NSGenericException
-                    format:@"setWith%@: not implemented", [self setterNameForClass:[object class]]];
+                    format:@"%@ not implemented", [self setterNameForClass:class]];
     }
     return self;
 }
@@ -290,7 +297,7 @@ static BOOL loadingFromResourceFile = NO;
         }
         else
         {
-            [NSException raise:NSGenericException format:@"-setWithCoder: not implemented"];
+            [NSException raise:NSGenericException format:@"setWithCoder: not implemented"];
         }
     }
     return self;
@@ -343,23 +350,30 @@ static BOOL loadingFromResourceFile = NO;
     if (data)
     {
         NSPropertyListFormat format;
-        if ([NSPropertyListSerialization respondsToSelector:@selector(propertyListWithData:options:format:error:)])
-        {
-            object = [NSPropertyListSerialization propertyListWithData:data options:NSPropertyListImmutable format:&format error:NULL];
-        }
-        else
-        {
-            object = [NSPropertyListSerialization propertyListFromData:data mutabilityOption:NSPropertyListImmutable format:&format errorDescription:NULL];
-        }
+        NSPropertyListReadOptions options = NSPropertyListMutableContainersAndLeaves;
+        object = [NSPropertyListSerialization propertyListWithData:data options:options format:&format error:NULL];
     }
         
     //success?
     if (object)
     {
-        //check if object is an NSCoded unarchive
-        if ([object respondsToSelector:@selector(objectForKey:)] && [object objectForKey:@"$archiver"])
+        //check if object is an NSCoded archive
+        if ([object respondsToSelector:@selector(objectForKey:)])
         {
-            object = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+            if ([object objectForKey:@"$archiver"])
+            {
+                object = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+            }
+            else
+            {
+                Class coderClass = NSClassFromString(@"HRCoder");
+                NSString *classNameKey = [coderClass valueForKey:@"classNameKey"];
+                if ([object objectForKey:classNameKey])
+                {
+                    object = objc_msgSend(coderClass, @selector(unarchiveObjectWithPlist:), object);
+                }
+            }
+            
             if ([object isKindOfClass:[self class]])
             {
                 //return object
@@ -367,7 +381,8 @@ static BOOL loadingFromResourceFile = NO;
                 return ((self = AH_RETAIN(object)));
             }
         }
-        else if (isResourceFile)
+
+        if (isResourceFile)
         {
             //cache for next time
             [cachedResourceFiles setObject:object forKey:filePath];
@@ -389,7 +404,18 @@ static BOOL loadingFromResourceFile = NO;
 
 - (void)writeToFile:(NSString *)path atomically:(BOOL)atomically
 {
-    NSData *data = [NSKeyedArchiver archivedDataWithRootObject:self];
+    NSData *data = nil;
+    Class coderClass = NSClassFromString(@"HRCoder");
+    if (coderClass && [self useHRCoderIfAvailable])
+    {
+        id plist = objc_msgSend(coderClass, @selector(archivedPlistWithRootObject:), self);
+        NSPropertyListFormat format = NSPropertyListBinaryFormat_v1_0;
+        data = [NSPropertyListSerialization dataWithPropertyList:plist format:format options:0 error:NULL];
+    }
+    else
+    {
+        data = [NSKeyedArchiver archivedDataWithRootObject:self];
+    }
     [data writeToFile:[[self class] saveFilePath:path] atomically:YES];
 }
 

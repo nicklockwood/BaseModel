@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>$class</key>
+			<string>TodoItem</string>
+			<key>label</key>
+			<string>Do washing</string>
+		</dict>
+		<dict>
+			<key>$class</key>
+			<string>TodoItem</string>
+			<key>label</key>
+			<string>Mow lawn</string>
+		</dict>
+		<dict>
+			<key>$class</key>
+			<string>TodoItem</string>
+			<key>label</key>
+			<string>Write an open source library</string>
+		</dict>
+		<dict>
+			<key>$class</key>
+			<string>TodoItem</string>
+			<key>label</key>
+			<string>Feed the cat</string>
+		</dict>
+	</array>
+	<key>$class</key>
+	<string>TodoList</string>
+</dict>
+</plist>

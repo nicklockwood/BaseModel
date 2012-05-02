@@ -17,12 +17,9 @@
 
 + (TodoItem *)instanceWithLabel:(NSString *)label
 {
-	return [self instanceWithObject:label];
-}
-
-- (void)setWithString:(NSString *)string
-{
-    self.label = string;
+	TodoItem *instance = [self instance];
+    instance.label = label;
+    return instance;
 }
 
 - (void)setWithCoder:(NSCoder *)aDecoder
@@ -42,5 +39,12 @@
 	//save the todolist
 	[[TodoList sharedInstance] save];
 }
+
+- (void)dealloc
+{
+	[label release];
+	[super dealloc];
+}
+
 
 @end
