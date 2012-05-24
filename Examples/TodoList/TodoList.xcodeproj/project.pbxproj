@@ -246,6 +246,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = TodoList_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = "BASEMODEL_ENABLE_UNIQUE_ID=1";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "TodoList-Info.plist";
 				PRODUCT_NAME = TodoList;
@@ -260,6 +261,7 @@
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = TodoList_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = "BASEMODEL_ENABLE_UNIQUE_ID=1";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				INFOPLIST_FILE = "TodoList-Info.plist";
 				PRODUCT_NAME = TodoList;

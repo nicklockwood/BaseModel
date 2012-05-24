@@ -1,7 +1,7 @@
 //
 //  BaseModel.h
 //
-//  Version 2.2.2
+//  Version 2.3
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -34,7 +34,7 @@
 //
 //  ARC Helper
 //
-//  Version 1.3
+//  Version 1.3.1
 //
 //  Created by Nick Lockwood on 05/01/2012.
 //  Copyright 2012 Charcoal Design
@@ -104,10 +104,6 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 
 @interface BaseModel : NSObject <BaseModel>
 
-//instance properties
-
-@property (nonatomic, copy) NSString *uniqueID;
-
 //new autoreleased instance
 + (id)instance;
 
@@ -143,5 +139,19 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 
 //save the model
 - (void)save;
+
+//generate unique identifier
+//useful for creating universally unique
+//identifiers and filenames for model objects
++ (NSString *)newUniqueIdentifier;
+
+#ifdef BASEMODEL_ENABLE_UNIQUE_ID
+
+//optional uniqueID property
+//you can enable this by adding BASEMODEL_ENABLE_UNIQUE_ID
+//to your preprocessor macros in the project build settings
+@property (nonatomic, strong) NSString *uniqueID;
+
+#endif
 
 @end

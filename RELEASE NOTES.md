@@ -1,3 +1,7 @@
+Version 2.3
+
+- Removed the uniqueID property by default and replaced it with a more flexible `newUniqueIdentifier` class method. To re-enable the uniqueID property, add BASEMODEL_ENABLE_UNIQUE_ID to your project's preprocessor macros
+
 Version 2.2.2
 
 - Added support for the HRCoder library, which provides human-readable object serialisation and de-serialisation using NSCoding

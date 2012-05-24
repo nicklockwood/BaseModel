@@ -76,14 +76,14 @@ This method is called by `initWithCoder:` as part of the NSCoding implementation
 The BaseModel class can optionally implement the NSCoding protocol methods. If you are implementing NSCoding serialisation for your class, you should implement this method. Note that if you are using the AutoCoding library, this method is already implemented for you.
 
 
-Properties
+Optional properties
 --------------
 
-The BaseModel class has the following instance properties:
+The BaseModel class has the following instance property, which is disabled by default (to allow developer complete control over their model structure) but can be enabled by adding BASEMODEL_ENABLE_UNIQUE_ID to your project's preprocessor macros, which can be found in the build settings:
 
     @property (nonatomic, retain) NSString *uniqueID;
     
-This property is used to store a unique identifier for a given BaseModel instance. The uniqueID getter method is actually a lazy constructor that uses the CFUUID APIs to create a globally unique ID the first time it is called for each model instance, so you should normally not need to set this property unless you need to override the ID for a specific object. Note however that responsibility for loading, saving and copying this ID is left to the developer. If you do not preserve this value when saving and loading your model then it will be different each time the object is re-instantiated (unless you are using the AutoCoding library in which case this property is automatically saved and loaded along with the other class properties).
+This property is used to store a unique identifier for a given BaseModel instance. The uniqueID getter method is actually a lazy constructor that uses the `newUniqueIdentifier` method to create a globally unique ID the first time it is called for each model instance, so you should normally not need to set this property unless you need to override the ID for a specific object. Note however that responsibility for loading, saving and copying this ID is left to the developer. If you do not preserve this value when saving and loading your model then it will be different each time the object is re-instantiated (unless you are using the AutoCoding library in which case this property is automatically saved and loaded along with the other class properties).
 
 
 Methods
@@ -172,6 +172,10 @@ You can then load the file again later using:
         MyModel *instance = [MyModel instanceWithContentsOfFile:[THE_UNIQUE_ID stringByAppendingFileExtension:@"plist"]];
 
 Note: that if you are using this approach (and you are not using the AutoCoding library) you will need to ensure that you save and load the uniqueID property, or the class will be saved with a different file name each time (leading to a proliferation of files). Also, unless you are using a custom, hard-coded value for uniqueID, you will need to save a reference to it in another file, otherwise you won't know what the name of the file is in order to load it again.
+
+    + (NSString *)newUniqueIdentifier;
+    
+This method is used to generate a new, globally unique identifier. Each time it is called it uses the CFUUID APIs to create a new value that will never be repeated on any device. You can store this value in a property in your model to give it a unique identifier suitable for maintaining references to the object when it is loaded and saved (or enabled the built-in `uniqueID` property that does this already). Note however that responsibility for loading, saving and copying this ID is left to the developer. If you do not preserve this value when saving and loading your model then it will be different each time the object is re-instantiated.
 
 
 Usage

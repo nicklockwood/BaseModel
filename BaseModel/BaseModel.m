@@ -1,7 +1,7 @@
 //
 //  BaseModel.m
 //
-//  Version 2.2.2
+//  Version 2.3
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design. All rights reserved.
@@ -38,8 +38,6 @@ NSString *const BaseModelSharedInstanceUpdatedNotification = @"BaseModelSharedIn
 
 
 @implementation BaseModel
-
-@synthesize uniqueID;
 
 #pragma mark -
 #pragma mark Private utility methods
@@ -419,21 +417,36 @@ static BOOL loadingFromResourceFile = NO;
     [data writeToFile:[[self class] saveFilePath:path] atomically:YES];
 }
 
+#pragma mark -
+#pragma mark Unique identifier generation
+
++ (NSString *)newUniqueIdentifier
+{
+    CFUUIDRef uuid = CFUUIDCreate(NULL);
+    CFStringRef identifier = CFUUIDCreateString(NULL, uuid);
+    CFRelease(uuid);
+    return (__AH_BRIDGE NSString *)identifier;
+}
+
+#ifdef BASEMODEL_ENABLE_UNIQUE_ID
+
+@synthesize uniqueID = _uniqueID;
+
 - (NSString *)uniqueID
 {
-    if (uniqueID == nil)
+    if (_uniqueID == nil)
     {
-        CFUUIDRef uuid = CFUUIDCreate(NULL);
-        uniqueID = AH_RETAIN(CFBridgingRelease(CFUUIDCreateString(NULL, uuid)));
-        CFRelease(uuid);
+        _uniqueID = [[self class] newUniqueIdentifier];
     }
-    return uniqueID;
+    return _uniqueID;
 }
 
 - (void)dealloc
 {
-    AH_RELEASE(uniqueID);
+    AH_RELEASE(_uniqueID);
     AH_SUPER_DEALLOC;
 }
+
+#endif
 
 @end
