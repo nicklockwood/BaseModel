@@ -425,7 +425,7 @@ static BOOL loadingFromResourceFile = NO;
     CFUUIDRef uuid = CFUUIDCreate(NULL);
     CFStringRef identifier = CFUUIDCreateString(NULL, uuid);
     CFRelease(uuid);
-    return (__AH_BRIDGE NSString *)identifier;
+    return AH_RETAIN(CFBridgingRelease(identifier));
 }
 
 #ifdef BASEMODEL_ENABLE_UNIQUE_ID
