@@ -16,6 +16,6 @@
 @property (nonatomic, retain) NSString *label;
 @property (nonatomic, assign) BOOL checked;
 
-+ (id)instanceWithLabel:(NSString *)label;
++ (instancetype)instanceWithLabel:(NSString *)label;
 
 @end

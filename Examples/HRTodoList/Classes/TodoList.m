@@ -14,14 +14,6 @@
 
 @synthesize items;
 
-//override the generic sharedInstance
-//with a concrete type, this makes it
-//easier to use without casting
-+ (TodoList *)sharedInstance
-{
-	return [super sharedInstance];
-}
-
 - (void)setUp
 {
     self.items = [NSMutableArray array];

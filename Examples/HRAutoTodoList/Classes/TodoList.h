@@ -15,9 +15,4 @@
 
 @property (nonatomic, retain) NSMutableArray *items;
 
-//override the generic sharedInstance
-//with a concrete type, this makes it
-//easier to use without casting
-+ (TodoList *)sharedInstance;
-
 @end

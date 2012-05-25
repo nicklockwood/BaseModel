@@ -15,7 +15,7 @@
 @synthesize label;
 @synthesize checked;
 
-+ (TodoItem *)instanceWithLabel:(NSString *)label
++ (instancetype)instanceWithLabel:(NSString *)label
 {
 	return [self instanceWithObject:label];
 }

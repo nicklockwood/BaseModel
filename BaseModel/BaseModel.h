@@ -1,7 +1,7 @@
 //
 //  BaseModel.h
 //
-//  Version 2.3
+//  Version 2.3.1
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -105,26 +105,26 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 @interface BaseModel : NSObject <BaseModel>
 
 //new autoreleased instance
-+ (id)instance;
++ (instancetype)instance;
 
 //shared (singelton) instance
-+ (id)sharedInstance;
++ (instancetype)sharedInstance;
 + (BOOL)hasSharedInstance;
 + (void)setSharedInstance:(BaseModel *)instance;
 + (void)reloadSharedInstance;
 
 //creating instances from collection or string
-+ (id)instanceWithObject:(id)object;
-- (id)initWithObject:(id)object;
++ (instancetype)instanceWithObject:(id)object;
+- (instancetype)initWithObject:(id)object;
 + (NSArray *)instancesWithArray:(NSArray *)array;
 
 //creating an instance using NSCoding
-+ (id)instanceWithCoder:(NSCoder *)decoder;
-- (id)initWithCoder:(NSCoder *)decoder;
++ (instancetype)instanceWithCoder:(NSCoder *)decoder;
+- (instancetype)initWithCoder:(NSCoder *)decoder;
 
 //loading and saving the model from a plist file
-+ (id)instanceWithContentsOfFile:(NSString *)path;
-- (id)initWithContentsOfFile:(NSString *)path;
++ (instancetype)instanceWithContentsOfFile:(NSString *)path;
+- (instancetype)initWithContentsOfFile:(NSString *)path;
 - (void)writeToFile:(NSString *)path atomically:(BOOL)atomically;
 - (BOOL)useHRCoderIfAvailable;
 

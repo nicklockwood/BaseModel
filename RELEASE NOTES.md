@@ -1,3 +1,7 @@
+Version 2.3.1
+
+- Switched constructors to return new type-safe `instancetype` instead of id, making it easier to use dot-syntax property accessors on basemodel singletons.
+
 Version 2.3
 
 - Removed the uniqueID property by default and replaced it with a more flexible `newUniqueIdentifier` class method. To re-enable the uniqueID property, add BASEMODEL_ENABLE_UNIQUE_ID to your project's preprocessor macros

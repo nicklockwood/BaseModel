@@ -1,7 +1,7 @@
 //
 //  BaseModel.m
 //
-//  Version 2.3
+//  Version 2.3.1
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design. All rights reserved.
@@ -117,7 +117,7 @@ static NSMutableDictionary *sharedInstances = nil;
     return [sharedInstances objectForKey:NSStringFromClass(self)] != nil;
 }
 
-+ (id)sharedInstance
++ (instancetype)sharedInstance
 {
     sharedInstances = sharedInstances ?: [[NSMutableDictionary alloc] init];
     id instance = [sharedInstances objectForKey:NSStringFromClass(self)];
@@ -187,14 +187,14 @@ static NSMutableDictionary *sharedInstances = nil;
     //override this
 }
 
-+ (id)instance
++ (instancetype)instance
 {
     return AH_AUTORELEASE([[self alloc] init]);
 }
 
 static BOOL loadingFromResourceFile = NO;
 
-- (id)init
+- (instancetype)init
 {
     @synchronized ([BaseModel class])
     {
@@ -226,7 +226,7 @@ static BOOL loadingFromResourceFile = NO;
     }
 }
 
-+ (id)instanceWithObject:(id)object
++ (instancetype)instanceWithObject:(id)object
 {
     //return nil if object is nil
     return object? AH_AUTORELEASE([[self alloc] initWithObject:object]): nil;
@@ -247,7 +247,7 @@ static BOOL loadingFromResourceFile = NO;
     return [NSString stringWithFormat:@"setWith%@:", className];
 }
 
-- (id)initWithObject:(id)object
+- (instancetype)initWithObject:(id)object
 {
     if ((self = [self init]))
     {
@@ -279,13 +279,13 @@ static BOOL loadingFromResourceFile = NO;
     return result;
 }
 
-+ (id)instanceWithCoder:(NSCoder *)decoder
++ (instancetype)instanceWithCoder:(NSCoder *)decoder
 {
     //return nil if coder is nil
     return decoder? AH_AUTORELEASE([[self alloc] initWithCoder:decoder]): nil;
 }
 
-- (id)initWithCoder:(NSCoder *)decoder
+- (instancetype)initWithCoder:(NSCoder *)decoder
 {
     if ((self = [self init]))
     {
@@ -301,7 +301,7 @@ static BOOL loadingFromResourceFile = NO;
     return self;
 }
 
-+ (id)instanceWithContentsOfFile:(NSString *)filePath
++ (instancetype)instanceWithContentsOfFile:(NSString *)filePath
 {
     //check if the path is a full path or not
     NSString *path = filePath;
@@ -319,7 +319,7 @@ static BOOL loadingFromResourceFile = NO;
     return AH_AUTORELEASE([[self alloc] initWithContentsOfFile:path]);
 }
 
-- (id)initWithContentsOfFile:(NSString *)filePath
+- (instancetype)initWithContentsOfFile:(NSString *)filePath
 {
     static NSCache *cachedResourceFiles = nil;
     if (cachedResourceFiles == nil)

@@ -55,11 +55,11 @@ The BaseModel class implements the BaseModel protocol, which specifies some opti
     
 BaseModel's initialisation routine is quite complex, and it is not advised that you attempt to override any of the constructor methods (there is no 'designated initializer'). Instead, to perform initialisation logic, implement the setUp method. This is called after the class has been successfully initialised, so there is no need to verify that self is not nil or call `[super setUp]` (although it is safe to do so). Like `init`, `setUp` is called only once at the start of the lifetime of an instance, so it is safe to set properties without releasing their existing values. You should never call `setUp` yourself directly, except in the context of calling `[super setUp]` when subclassing your own BaseModel subclasses.
 
-    - (id)setWithDictionary:(NSDictionary *)dict;
-    - (id)setWithArray:(NSArray *)array;
-    - (id)setWithString:(NSString *)string;
-    - (id)setWithNumber:(NSNumber *)number;
-    - (id)setWithData:(NSData *)data;
+    - (void)setWithDictionary:(NSDictionary *)dict;
+    - (void)setWithArray:(NSArray *)array;
+    - (void)setWithString:(NSString *)string;
+    - (void)setWithNumber:(NSNumber *)number;
+    - (void)setWithData:(NSData *)data;
 
 These methods are used to extend you model with the capability to be initialised from a standard object type (i.e. one that is supported by the Plist format). This is useful as it allows objects to be automatically loaded from a Plist in your application bundle. It could also be used to instantiate objects from other formats like JSON or XML.
 
@@ -91,13 +91,13 @@ Methods
 
 The BaseModel class has the following methods:
 
-    + (id)instance;
-    - (id)init;
+    + (instancetype)instance;
+    - (instancetype)init;
     
 Create an autoreleased instance or initialises a retained instance of the class respectively. These methods will first call `setUp`, and will then attempt to initialise the class from `resourceFile` if that file exists.
     
-    + (id)instanceWithObject:(NSDictionary *)dict;
-    - (id)initWithObject:(NSDictionary *)dict;
+    + (instancetype)instanceWithObject:(NSDictionary *)dict;
+    - (instancetype)initWithObject:(NSDictionary *)dict;
     
 Creates an instance of the class and initialises it using the supplied object. This is useful when loading a model from an embedded Plist file in the application bundle, or creating model objects from JSON data returned by a web service. This method requires that an appropriate setter method is defined on your class, where the setter name is of the form `setWith[ClassName]:`. For example, to initialise the model using an NSDictionary, your BaseModel subclass must have a method called `setWithDictionary:`. This method will attempt to initialise the class from `resourceFile` (if that file exists) prior to calling `setWith[ClassName]:`, so if your resourceFile contains a serialised object, this method will be called twice (with different input).
     
@@ -105,17 +105,17 @@ Creates an instance of the class and initialises it using the supplied object. T
 
 This is similar to `instanceWithArray:` but instead of initialising the object with an array, it iterates over each item in the array and creates an instance from each object by calling `instanceWithArray:` or `instanceWithDictionary:`, depending on the object type. The resultant objects are then returned as a new array. It is expected that the  objects in the array will be either NSDictionary or NSArray instances. Any other object type will be returned unmodified.
 
-    + (id)instanceWithCoder:(NSCoder *)decoder;
-    - (id)initWithCoder:(NSCoder *)decoder;
+    + (instancetype)instanceWithCoder:(NSCoder *)decoder;
+    - (instancetype)initWithCoder:(NSCoder *)decoder;
 
 Initialises the object from an NSCoded archive using the NSCoding protocol. This method requires the `setWithCoder:` method to be defined on your subclass. This method will attempt to initialise the class from `resourceFile` (if that file exists) prior to calling `setWithCoder:`, which allows you to first initialise your object with a static data file before loading additional properties from an NSCoded archive.
 
-    + (id)instanceWithContentsOfFile:(NSString *)filePath;
-    - (id)initWithContentsOfFile:(NSString *)filePath;
+    + (instancetype)instanceWithContentsOfFile:(NSString *)filePath;
+    - (instancetype)initWithContentsOfFile:(NSString *)filePath;
     
 Creates/initialises an instance of the model class from a file. If the file is a Plist then the model will be initialised using the appropriate `setWith[ClassName]:` method, depending on the type of the root object in the Plist. If the file is an NSCoded archive of an instance of the model then the object will be initialised using `setWithCoder:`. If the file format is not recognised, or the appropriate setWith... function is not implemented, the method will return nil.
 
-    + (id)sharedInstance;
+    + (instancetype)sharedInstance;
 
 This returns a shared instance of the model object, so any BaseModel subclass can easily be used as a 'singleton' via this method. The shared instance is created lazily the first time it is called, so this functionality has no overhead until it is used. The shared instance is created by first calling `setUp` and then attempting to load first the file specified by the `resourceFile` method and finally the file specified by`saveFile`, so your instance may be initialised up to three times from different sources.
 
@@ -133,11 +133,11 @@ This method reloads the shared instance of the model using the file specified by
 
     - (void)writeToFile:(NSString *)path atomically:(BOOL)atomically;
 
-This method attempts to serialise the model object to the specified file using NSCoding. If you are not using the AutoCoding library, you will need to implement the `encodeWithCoder:` method, otherwise using this method will throw and exception. The path can be absolute or relative. Relative paths will be automatically prefixed with `~/Library/Application Support/`.
+This method attempts to serialise the model object to the specified file using NSCoding. If you are not using the AutoCoding library, you will need to implement the `encodeWithCoder:` method, otherwise using this method will throw an exception. The path can be absolute or relative. Relative paths will be automatically prefixed with `~/Library/Application Support/`.
 
     - (BOOL)useHRCoderIfAvailable;
 
-Normally, BaseModel saves files using NSCoding and the NSKeyedArchiver, which creates binary Plist files in a complex format that is not human-readable or editable. The HRCoder library provides an alternative format for NSCoding that is more similar to an ordinary, hand-written Plist file. BaseModel detects the presence of the HRCoder class if it's included in the project and will use it by default if available. If you do not want to use HRCoder for saving a particular model, override this method and return NO.
+Normally, BaseModel saves files using NSCoding and the NSKeyedArchiver, which creates binary Plist files in a complex format that is not human-readable or editable. The HRCoder library provides an alternative format for NSCoding that is more similar to an ordinary, hand-written Plist file. BaseModel detects the presence of the HRCoder class if it's included in the project and will use it by default if available. If you do not want to use HRCoder for saving a particular model, override this method and return NO. BaseModel is still able to load archives that are encoded using the HRCoding protocol regardless of this setting, but will save using ordinary NSCoding.
 
     + (NSString *)resourceFile;
 
