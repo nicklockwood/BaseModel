@@ -1,7 +1,7 @@
 //
 //  BaseModel.m
 //
-//  Version 2.3.1
+//  Version 2.3.2
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design. All rights reserved.
@@ -29,6 +29,36 @@
 //
 //  3. This notice may not be removed or altered from any source distribution.
 //
+
+//
+//  ARC Helper
+//
+//  Version 2.1
+//
+//  Created by Nick Lockwood on 05/01/2012.
+//  Copyright 2012 Charcoal Design
+//
+//  Distributed under the permissive zlib license
+//  Get the latest version from here:
+//
+//  https://gist.github.com/1563325
+//
+
+#ifndef ah_retain
+#if __has_feature(objc_arc)
+#define ah_retain self
+#define ah_dealloc self
+#define release self
+#define autorelease self
+#else
+#define ah_retain retain
+#define ah_dealloc dealloc
+#define __bridge
+#endif
+#endif
+
+//  ARC Helper ends
+
 
 #import "BaseModel.h"
 #import <objc/message.h>
@@ -99,13 +129,21 @@ static NSMutableDictionary *sharedInstances = nil;
 
 + (void)setSharedInstance:(BaseModel *)instance
 {
-    if (![instance isKindOfClass:self])
+    if (instance && ![instance isKindOfClass:self])
     {
         [NSException raise:NSGenericException format:@"setSharedInstance: instance class does not match"];
     }
+    NSString *classKey = NSStringFromClass(self);
     sharedInstances = sharedInstances ?: [[NSMutableDictionary alloc] init];
-    id oldInstance = [sharedInstances objectForKey:NSStringFromClass(self)];
-    [sharedInstances setObject:instance forKey:NSStringFromClass(self)];
+    id oldInstance = [sharedInstances objectForKey:classKey];
+    if (instance)
+    {
+        [sharedInstances setObject:instance forKey:classKey];
+    }
+    else
+    {
+        [sharedInstances removeObjectForKey:classKey];
+    }
     if (oldInstance)
     {
         [[NSNotificationCenter defaultCenter] postNotificationName:BaseModelSharedInstanceUpdatedNotification object:oldInstance];
@@ -119,15 +157,16 @@ static NSMutableDictionary *sharedInstances = nil;
 
 + (instancetype)sharedInstance
 {
+    NSString *classKey = NSStringFromClass(self);
     sharedInstances = sharedInstances ?: [[NSMutableDictionary alloc] init];
-    id instance = [sharedInstances objectForKey:NSStringFromClass(self)];
+    id instance = [sharedInstances objectForKey:classKey];
     if (instance == nil)
     {
         //load or create instance
         [self reloadSharedInstance];
         
         //get loaded instance
-        instance = [sharedInstances objectForKey:NSStringFromClass(self)];
+        instance = [sharedInstances objectForKey:classKey];
     }
     return instance;
 }
@@ -189,7 +228,7 @@ static NSMutableDictionary *sharedInstances = nil;
 
 + (instancetype)instance
 {
-    return AH_AUTORELEASE([[self alloc] init]);
+    return [[[self alloc] init] autorelease];
 }
 
 static BOOL loadingFromResourceFile = NO;
@@ -206,7 +245,7 @@ static BOOL loadingFromResourceFile = NO;
             loadingFromResourceFile = NO;
             if (object)
             {
-                AH_RELEASE(self);
+                [self release];
                 self = object;
                 return self;
             }
@@ -229,7 +268,7 @@ static BOOL loadingFromResourceFile = NO;
 + (instancetype)instanceWithObject:(id)object
 {
     //return nil if object is nil
-    return object? AH_AUTORELEASE([[self alloc] initWithObject:object]): nil;
+    return object? [[[self alloc] initWithObject:object] autorelease]: nil;
 }
 
 - (NSString *)setterNameForClass:(Class)class
@@ -282,7 +321,7 @@ static BOOL loadingFromResourceFile = NO;
 + (instancetype)instanceWithCoder:(NSCoder *)decoder
 {
     //return nil if coder is nil
-    return decoder? AH_AUTORELEASE([[self alloc] initWithCoder:decoder]): nil;
+    return decoder? [[[self alloc] initWithCoder:decoder] autorelease]: nil;
 }
 
 - (instancetype)initWithCoder:(NSCoder *)decoder
@@ -316,7 +355,7 @@ static BOOL loadingFromResourceFile = NO;
         }
     }
 
-    return AH_AUTORELEASE([[self alloc] initWithContentsOfFile:path]);
+    return [[[self alloc] initWithContentsOfFile:path] autorelease];
 }
 
 - (instancetype)initWithContentsOfFile:(NSString *)filePath
@@ -335,8 +374,8 @@ static BOOL loadingFromResourceFile = NO;
         id object = [cachedResourceFiles objectForKey:filePath];
         if (object)
         {
-            AH_RELEASE(self);
-            return ((self = (object == [NSNull null])? nil: AH_RETAIN(object)));
+            [self release];
+            return ((self = (object == [NSNull null])? nil: [object ah_retain]));
         }
     }
     
@@ -375,8 +414,8 @@ static BOOL loadingFromResourceFile = NO;
             if ([object isKindOfClass:[self class]])
             {
                 //return object
-                AH_RELEASE(self);
-                return ((self = AH_RETAIN(object)));
+                [self release];
+                return ((self = [object ah_retain]));
             }
         }
 
@@ -396,7 +435,7 @@ static BOOL loadingFromResourceFile = NO;
     }
     
     //failed to load
-    AH_RELEASE(self);
+    [self release];
     return ((self = nil));
 }
 
@@ -425,7 +464,7 @@ static BOOL loadingFromResourceFile = NO;
     CFUUIDRef uuid = CFUUIDCreate(NULL);
     CFStringRef identifier = CFUUIDCreateString(NULL, uuid);
     CFRelease(uuid);
-    return AH_RETAIN(CFBridgingRelease(identifier));
+    return [CFBridgingRelease(identifier) ah_retain];
 }
 
 #ifdef BASEMODEL_ENABLE_UNIQUE_ID
@@ -443,8 +482,8 @@ static BOOL loadingFromResourceFile = NO;
 
 - (void)dealloc
 {
-    AH_RELEASE(_uniqueID);
-    AH_SUPER_DEALLOC;
+    [_uniqueID release];
+    [super ah_dealloc];
 }
 
 #endif

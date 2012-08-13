@@ -1,3 +1,7 @@
+Version 2.3.2
+
+- It is now possible to set the shared instance of a BaseModel to nil, which allows you to reclaim memory for BaseModel shared instances if they are no longer needed, or in the event of a memory warning.
+
 Version 2.3.1
 
 - Switched constructors to return new type-safe `instancetype` instead of id, making it easier to use dot-syntax property accessors on basemodel singletons.
