@@ -10,6 +10,7 @@
 		014579F11176FCB8005BBF82 /* TodoList.plist in Resources */ = {isa = PBXBuildFile; fileRef = 014579F01176FCB8005BBF82 /* TodoList.plist */; };
 		01457AEB117723E2005BBF82 /* NewItemViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 01457AE9117723E2005BBF82 /* NewItemViewController.m */; };
 		01457AEC117723E2005BBF82 /* NewItemViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 01457AEA117723E2005BBF82 /* NewItemViewController.xib */; };
+		01CDB2001611339300B929AD /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 01CDB1FF1611339300B929AD /* Default-568h@2x.png */; };
 		1D3623260D0F684500981E51 /* TodoListAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* TodoListAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
@@ -28,6 +29,7 @@
 		01457AE8117723E2005BBF82 /* NewItemViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewItemViewController.h; sourceTree = "<group>"; };
 		01457AE9117723E2005BBF82 /* NewItemViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NewItemViewController.m; sourceTree = "<group>"; };
 		01457AEA117723E2005BBF82 /* NewItemViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = NewItemViewController.xib; path = Classes/NewItemViewController.xib; sourceTree = "<group>"; };
+		01CDB1FF1611339300B929AD /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* TodoListAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TodoListAppDelegate.h; path = Classes/TodoListAppDelegate.h; sourceTree = SOURCE_ROOT; };
 		1D3623250D0F684500981E51 /* TodoListAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TodoListAppDelegate.m; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				01CDB1FF1611339300B929AD /* Default-568h@2x.png */,
 				2899E5210DE3E06400AC0155 /* TodoListViewController.xib */,
 				01457AEA117723E2005BBF82 /* NewItemViewController.xib */,
 				28AD733E0D9D9553002E5188 /* MainWindow.xib */,
@@ -214,6 +217,7 @@
 				2899E5220DE3E06400AC0155 /* TodoListViewController.xib in Resources */,
 				014579F11176FCB8005BBF82 /* TodoList.plist in Resources */,
 				01457AEC117723E2005BBF82 /* NewItemViewController.xib in Resources */,
+				01CDB2001611339300B929AD /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

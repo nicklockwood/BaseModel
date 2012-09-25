@@ -1,15 +1,14 @@
 //
 //  BaseModel.h
 //
-//  Version 2.3.2
+//  Version 2.3.3
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
 //
 //  Distributed under the permissive zlib license
-//  Get the latest version from either of these locations:
+//  Get the latest version from here:
 //
-//  http://charcoaldesign.co.uk/source/cocoa#basemodel
 //  https://github.com/nicklockwood/BaseModel
 //
 //  This software is provided 'as-is', without any express or implied

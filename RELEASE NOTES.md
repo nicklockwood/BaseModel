@@ -1,3 +1,8 @@
+Version 2.3.3
+
+- Added support for CryptoCoding
+- Updated for iOS6 / Xcode 4.5
+
 Version 2.3.2
 
 - It is now possible to set the shared instance of a BaseModel to nil, which allows you to reclaim memory for BaseModel shared instances if they are no longer needed, or in the event of a memory warning.

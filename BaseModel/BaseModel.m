@@ -1,14 +1,14 @@
 //
 //  BaseModel.m
 //
-//  Version 2.3.2
+//  Version 2.3.3
 //
 //  Created by Nick Lockwood on 25/06/2011.
-//  Copyright 2011 Charcoal Design. All rights reserved.
+//  Copyright 2011 Charcoal Design
 //
-//  Get the latest version of BaseModel from either of these locations:
+//  Distributed under the permissive zlib license
+//  Get the latest version from here:
 //
-//  http://charcoaldesign.co.uk/source/cocoa#basemodel
 //  https://github.com/nicklockwood/BaseModel
 //
 //  This software is provided 'as-is', without any express or implied
@@ -399,15 +399,20 @@ static BOOL loadingFromResourceFile = NO;
         {
             if ([object objectForKey:@"$archiver"])
             {
-                object = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+                Class coderClass = NSClassFromString(@"CryptoCoder");
+                if (!coderClass)
+                {
+                    coderClass = [NSKeyedUnarchiver class];
+                }
+                object = [coderClass unarchiveObjectWithData:data];
             }
             else
             {
-                Class coderClass = NSClassFromString(@"HRCoder");
-                NSString *classNameKey = [coderClass valueForKey:@"classNameKey"];
+                Class HRCoderClass = NSClassFromString(@"HRCoder");
+                NSString *classNameKey = [HRCoderClass valueForKey:@"classNameKey"];
                 if ([object objectForKey:classNameKey])
                 {
-                    object = objc_msgSend(coderClass, @selector(unarchiveObjectWithPlist:), object);
+                    object = objc_msgSend(HRCoderClass, @selector(unarchiveObjectWithPlist:), object);
                 }
             }
             
@@ -442,10 +447,15 @@ static BOOL loadingFromResourceFile = NO;
 - (void)writeToFile:(NSString *)path atomically:(BOOL)atomically
 {
     NSData *data = nil;
-    Class coderClass = NSClassFromString(@"HRCoder");
-    if (coderClass && [self useHRCoderIfAvailable])
+    Class CryptoCoderClass = NSClassFromString(@"CryptoCoder");
+    Class HRCoderClass = NSClassFromString(@"HRCoder");
+    if (CryptoCoderClass && [[self class] respondsToSelector:@selector(CCPassword)])
     {
-        id plist = objc_msgSend(coderClass, @selector(archivedPlistWithRootObject:), self);
+        data = [CryptoCoderClass archivedDataWithRootObject:self];
+    }
+    else if (HRCoderClass && [self useHRCoderIfAvailable])
+    {
+        id plist = objc_msgSend(HRCoderClass, @selector(archivedPlistWithRootObject:), self);
         NSPropertyListFormat format = NSPropertyListBinaryFormat_v1_0;
         data = [NSPropertyListSerialization dataWithPropertyList:plist format:format options:0 error:NULL];
     }
