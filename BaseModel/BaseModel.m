@@ -477,7 +477,7 @@ static BOOL loadingFromResourceFile = NO;
     return [CFBridgingRelease(identifier) ah_retain];
 }
 
-#ifdef BASEMODEL_ENABLE_UNIQUE_ID
+//#ifdef BASEMODEL_ENABLE_UNIQUE_ID
 
 @synthesize uniqueID = _uniqueID;
 
@@ -496,6 +496,6 @@ static BOOL loadingFromResourceFile = NO;
     [super ah_dealloc];
 }
 
-#endif
+//#endif
 
 @end
