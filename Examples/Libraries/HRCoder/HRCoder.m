@@ -31,16 +31,12 @@
 //
 
 #import "HRCoder.h"
-
-
 @interface NSObject (HRCoding)
 
 - (id)unarchiveObjectWithHRCoder:(HRCoder *)coder;
 - (id)archivedObjectWithHRCoder:(HRCoder *)coder;
 
 @end
-
-
 @implementation HRCoderAliasPlaceholder
 
 + (HRCoderAliasPlaceholder *)placeholder
@@ -59,8 +55,6 @@
 }
 
 @end
-
-
 @interface HRCoder ()
 
 @property (nonatomic, strong) NSMutableArray *stack;
@@ -71,8 +65,6 @@
 + (NSString *)classNameKey;
 
 @end
-
-
 @implementation HRCoder
 
 @synthesize stack;
@@ -367,8 +359,6 @@
 }
 
 @end
-
-
 @implementation NSObject(HRCoding)
 
 - (id)unarchiveObjectWithHRCoder:(HRCoder *)coder
@@ -387,8 +377,6 @@
 }
 
 @end    
-
-
 @implementation NSDictionary(HRCoding)
 
 - (id)unarchiveObjectWithHRCoder:(HRCoder *)coder
@@ -432,8 +420,6 @@
 }
 
 @end
-
-
 @implementation NSArray(HRCoding)
 
 - (id)unarchiveObjectWithHRCoder:(HRCoder *)coder
@@ -462,8 +448,6 @@
 }
 
 @end
-
-
 @implementation NSString(HRCoding)
 
 - (id)archivedObjectWithHRCoder:(HRCoder *)coder
@@ -472,8 +456,6 @@
 }
 
 @end
-
-
 @implementation NSData(HRCoding)
 
 - (id)archivedObjectWithHRCoder:(HRCoder *)coder
@@ -482,8 +464,6 @@
 }
 
 @end
-
-
 @implementation NSNumber(HRCoding)
 
 - (id)archivedObjectWithHRCoder:(HRCoder *)coder
@@ -492,8 +472,6 @@
 }
 
 @end
-
-
 @implementation NSDate(HRCoding)
 
 - (id)archivedObjectWithHRCoder:(HRCoder *)coder

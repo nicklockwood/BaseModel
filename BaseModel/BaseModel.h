@@ -29,14 +29,8 @@
 //
 //  3. This notice may not be removed or altered from any source distribution.
 //
-
-
 #import <Foundation/Foundation.h>
-
-
 extern NSString *const BaseModelSharedInstanceUpdatedNotification;
-
-
 //the BaseModel protocol defines optional methods that
 //you can define on your BaseModel subclasses to extend their functionality
 
@@ -61,8 +55,6 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 - (void)encodeWithCoder:(NSCoder *)coder;
 
 @end
-
-
 //use the BaseModel class as the base class for any of your
 //model objects. BaseModels can be standalone objects, or
 //act as sub-properties of a larger object

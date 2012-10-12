@@ -58,15 +58,9 @@
 #endif
 
 //  ARC Helper ends
-
-
 #import "BaseModel.h"
 #import <objc/message.h>
-
-
 NSString *const BaseModelSharedInstanceUpdatedNotification = @"BaseModelSharedInstanceUpdatedNotification";
-
-
 @implementation BaseModel
 
 #pragma mark -

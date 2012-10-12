@@ -32,8 +32,6 @@
 
 #import "NSObject+AutoCoding.h"
 #import <objc/runtime.h> 
-
-
 @implementation NSObject (AutoCoding)
 
 + (instancetype)objectWithContentsOfFile:(NSString *)filePath

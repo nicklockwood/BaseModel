@@ -63,23 +63,15 @@
 #endif
 
 //  ARC Helper ends
-
-
 #import <Foundation/Foundation.h>
-
-
 static NSString *const HRCoderClassNameKey = @"$class";
 static NSString *const HRCoderRootObjectKey = @"$root";
 static NSString *const HRCoderObjectAliasKey = @"$alias";
-
-
 @interface HRCoderAliasPlaceholder : NSObject
 
 + (HRCoderAliasPlaceholder *)placeholder;
 
 @end
-
-
 @interface HRCoder : NSCoder
 
 + (id)unarchiveObjectWithPlist:(id)plist;
