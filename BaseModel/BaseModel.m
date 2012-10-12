@@ -135,10 +135,10 @@ static NSMutableDictionary *sharedInstances = nil;
     }
     NSString *classKey = NSStringFromClass(self);
     sharedInstances = sharedInstances ?: [[NSMutableDictionary alloc] init];
-    id oldInstance = [sharedInstances objectForKey:classKey];
+    id oldInstance = sharedInstances[classKey];
     if (instance)
     {
-        [sharedInstances setObject:instance forKey:classKey];
+        sharedInstances[classKey] = instance;
     }
     else
     {
@@ -152,21 +152,21 @@ static NSMutableDictionary *sharedInstances = nil;
 
 + (BOOL)hasSharedInstance
 {
-    return [sharedInstances objectForKey:NSStringFromClass(self)] != nil;
+    return sharedInstances[NSStringFromClass(self)] != nil;
 }
 
 + (instancetype)sharedInstance
 {
     NSString *classKey = NSStringFromClass(self);
     sharedInstances = sharedInstances ?: [[NSMutableDictionary alloc] init];
-    id instance = [sharedInstances objectForKey:classKey];
+    id instance = sharedInstances[classKey];
     if (instance == nil)
     {
         //load or create instance
         [self reloadSharedInstance];
         
         //get loaded instance
-        instance = [sharedInstances objectForKey:classKey];
+        instance = sharedInstances[classKey];
     }
     return instance;
 }
@@ -206,7 +206,7 @@ static NSMutableDictionary *sharedInstances = nil;
 
 - (void)save
 {
-    if ([sharedInstances objectForKey:NSStringFromClass([self class])] == self)
+    if (sharedInstances[NSStringFromClass([self class])] == self)
     {
         //shared (singleton) instance
         [self writeToFile:[[self class] saveFilePath] atomically:YES];
@@ -371,7 +371,7 @@ static BOOL loadingFromResourceFile = NO;
     BOOL isResourceFile = [filePath hasPrefix:[[NSBundle mainBundle] bundlePath]];
     if (isResourceFile)
     {
-        id object = [cachedResourceFiles objectForKey:filePath];
+        id object = cachedResourceFiles[filePath];
         if (object)
         {
             [self release];
@@ -397,7 +397,7 @@ static BOOL loadingFromResourceFile = NO;
         //check if object is an NSCoded archive
         if ([object respondsToSelector:@selector(objectForKey:)])
         {
-            if ([object objectForKey:@"$archiver"])
+            if (object[@"$archiver"])
             {
                 Class coderClass = NSClassFromString(@"CryptoCoder");
                 if (!coderClass)
@@ -410,7 +410,7 @@ static BOOL loadingFromResourceFile = NO;
             {
                 Class HRCoderClass = NSClassFromString(@"HRCoder");
                 NSString *classNameKey = [HRCoderClass valueForKey:@"classNameKey"];
-                if ([object objectForKey:classNameKey])
+                if (object[classNameKey])
                 {
                     object = objc_msgSend(HRCoderClass, @selector(unarchiveObjectWithPlist:), object);
                 }
@@ -427,7 +427,7 @@ static BOOL loadingFromResourceFile = NO;
         if (isResourceFile)
         {
             //cache for next time
-            [cachedResourceFiles setObject:object forKey:filePath];
+            cachedResourceFiles[filePath] = object;
         }
         
         //load with object
@@ -436,7 +436,7 @@ static BOOL loadingFromResourceFile = NO;
     else if (isResourceFile)
     {
         //store null for non-existent files to improve performance next time
-        [cachedResourceFiles setObject:[NSNull null] forKey:filePath];
+        cachedResourceFiles[filePath] = [NSNull null];
     }
     
     //failed to load

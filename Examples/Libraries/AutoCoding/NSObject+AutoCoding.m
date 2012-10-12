@@ -59,7 +59,7 @@
 		if (object)
 		{
 			//check if object is an NSCoded unarchive
-			if ([object respondsToSelector:@selector(objectForKey:)] && [object objectForKey:@"$archiver"])
+			if ([object respondsToSelector:@selector(objectForKey:)] && object[@"$archiver"])
 			{
 				object = [NSKeyedUnarchiver unarchiveObjectWithData:data];
 			}
@@ -98,12 +98,12 @@
         {
             objc_property_t property = properties[i];
             const char *attributes = property_getAttributes(property);
-            NSString *encoding = [NSString stringWithCString:attributes encoding:NSUTF8StringEncoding];
+            NSString *encoding = @(attributes);
             if (![[encoding componentsSeparatedByString:@","] containsObject:@"R"])
             {
                 //omit read-only properties
                 const char *name = property_getName(property);
-                NSString *key = [NSString stringWithCString:name encoding:NSUTF8StringEncoding];
+                NSString *key = @(name);
                 [array addObject:key];
             }
         }
