@@ -1,7 +1,7 @@
 //
-//  NSObject+AutoCoding.h
+//  AutoCoding.h
 //
-//  Version 1.1.2
+//  Version 1.2.1
 //
 //  Created by Nick Lockwood on 19/11/2011.
 //  Copyright (c) 2011 Charcoal Design
@@ -36,10 +36,11 @@
 
 - (NSArray *)codableKeys;
 - (NSArray *)uncodableKeys;
+- (void)setWithCoder:(NSCoder *)aDecoder;
 
 //loading / saving
 
 + (instancetype)objectWithContentsOfFile:(NSString *)path;
-- (void)writeToFile:(NSString *)filePath atomically:(BOOL)useAuxiliaryFile;
+- (BOOL)writeToFile:(NSString *)filePath atomically:(BOOL)useAuxiliaryFile;
 
 @end

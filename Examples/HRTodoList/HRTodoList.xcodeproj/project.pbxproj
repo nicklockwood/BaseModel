@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		013F132E154BE91B00F50A5E /* HRCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 013F132D154BE91B00F50A5E /* HRCoder.m */; };
 		014579F11176FCB8005BBF82 /* TodoList.plist in Resources */ = {isa = PBXBuildFile; fileRef = 014579F01176FCB8005BBF82 /* TodoList.plist */; };
 		01457AEB117723E2005BBF82 /* NewItemViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 01457AE9117723E2005BBF82 /* NewItemViewController.m */; };
 		01457AEC117723E2005BBF82 /* NewItemViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 01457AEA117723E2005BBF82 /* NewItemViewController.xib */; };
 		01CDB20C161133F600B929AD /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 01CDB20B161133F600B929AD /* Default-568h@2x.png */; };
+		01F9DEE3162B749800877219 /* HRCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 01F9DEE2162B749800877219 /* HRCoder.m */; };
 		1D3623260D0F684500981E51 /* TodoListAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* TodoListAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
@@ -26,13 +26,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		013F132C154BE91B00F50A5E /* HRCoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HRCoder.h; sourceTree = "<group>"; };
-		013F132D154BE91B00F50A5E /* HRCoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HRCoder.m; sourceTree = "<group>"; };
 		014579F01176FCB8005BBF82 /* TodoList.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = TodoList.plist; sourceTree = "<group>"; };
 		01457AE8117723E2005BBF82 /* NewItemViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewItemViewController.h; sourceTree = "<group>"; };
 		01457AE9117723E2005BBF82 /* NewItemViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NewItemViewController.m; sourceTree = "<group>"; };
 		01457AEA117723E2005BBF82 /* NewItemViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = NewItemViewController.xib; path = Classes/NewItemViewController.xib; sourceTree = "<group>"; };
 		01CDB20B161133F600B929AD /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		01F9DEE1162B749800877219 /* HRCoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HRCoder.h; sourceTree = "<group>"; };
+		01F9DEE2162B749800877219 /* HRCoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HRCoder.m; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* TodoListAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TodoListAppDelegate.h; path = Classes/TodoListAppDelegate.h; sourceTree = SOURCE_ROOT; };
 		1D3623250D0F684500981E51 /* TodoListAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TodoListAppDelegate.m; sourceTree = "<group>"; };
@@ -68,16 +68,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		013F132B154BE91B00F50A5E /* HRCoder */ = {
-			isa = PBXGroup;
-			children = (
-				013F132C154BE91B00F50A5E /* HRCoder.h */,
-				013F132D154BE91B00F50A5E /* HRCoder.m */,
-			);
-			name = HRCoder;
-			path = ../Libraries/HRCoder;
-			sourceTree = "<group>";
-		};
 		01457AF311772690005BBF82 /* View Controllers */ = {
 			isa = PBXGroup;
 			children = (
@@ -102,6 +92,15 @@
 			name = Model;
 			sourceTree = "<group>";
 		};
+		01F9DEE0162B749800877219 /* HRCoder */ = {
+			isa = PBXGroup;
+			children = (
+				01F9DEE1162B749800877219 /* HRCoder.h */,
+				01F9DEE2162B749800877219 /* HRCoder.m */,
+			);
+			path = HRCoder;
+			sourceTree = "<group>";
+		};
 		080E96DDFE201D6D7F000001 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
@@ -122,7 +121,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				013F132B154BE91B00F50A5E /* HRCoder */,
+				01F9DEE0162B749800877219 /* HRCoder */,
 				B25BC0F8146AA0FB00008FB3 /* BaseModel */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
@@ -249,7 +248,7 @@
 				B2CE7D5413E1729C00AB7DB4 /* TodoItem.m in Sources */,
 				B2CE7D5713E172A700AB7DB4 /* TodoList.m in Sources */,
 				B25BC0FB146AA0FB00008FB3 /* BaseModel.m in Sources */,
-				013F132E154BE91B00F50A5E /* HRCoder.m in Sources */,
+				01F9DEE3162B749800877219 /* HRCoder.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
