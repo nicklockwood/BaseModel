@@ -9,9 +9,11 @@ BaseModel is really designed as an *alternative* to Core Data for developers who
 
 BaseModel is designed to work with the AutoCoding library (https://github.com/nicklockwood/AutoCoding). It does not require this library to function, but when used in combination, BaseModel objects support automatic loading and saving without needing to write your own NSCoding methods. Use of AutoCoding is completely optional. For an example of how it works, check out the *AutoTodoList* example.
 
-BaseModel is also designed to work with the HRCoder library (https://github.com/nicklockwood/HRCoder) as an alternative mechanism for loading an saving data in a human readable/editable format. When used in conjunction with AutoCoding, HRCoder allows you to specify your data files in a standard format and avoid having to write any `setWith...` methods. Use of HRCoder is completely optional. For an example of how this works, check out the *HRTodoList* and *HRAutoTodoList* examples.
+BaseModel is also designed to work with the HRCoder library (https://github.com/nicklockwood/HRCoder) as an alternative mechanism for loading an saving data in a human readable/editable format. When used in conjunction with AutoCoding, HRCoder allows you to specify your data files in a standard format and avoid having to write any `setWith...` methods. Use of HRCoder is completely optional. For an example of how this works, check out the *HRTodoList* example.
 
 BaseModel is also designed to work with the CryptoCoding library (https://github.com/nicklockwood/CryptoCoding). It does not require this library to function, but when used in conjunction with CryptoCoding, BaseModel objects support automatic AES encryption of the entire object when saved or loaded to disk. Use of CryptoCoding is completely optional. For an example of how it works, check out the *CryptoTodoList* example.
+
+**Note:** You can combine AutoCoding with either HRCoder or CryptoCoding. AutoCoding is independent of the coding scheme used.
 
 
 Supported OS & SDK Versions
@@ -185,4 +187,4 @@ Usage
 
 The BaseModel class is abstract, and is not designed to be instantiated directly. To implement a model object, create a new subclass of the BaseModel class and implement or override the methods that need to be customised for your specific requirements. Look at the *TodoList* project for an example of how to do this.
 
-By using the HRCoder and AutoCoding libraries, and following a conventional format for your configuration files, you can dramatically reduce your development time by eliminating boilerplate code. Compare the *AutoTodoList*, *HRTodoList* and *HRAutoTodoList* to the original *TodoList* project to see how these libraries can reduce setup code in your model objects.
+By using the HRCoder and AutoCoding libraries, and following a conventional format for your configuration files, you can dramatically reduce your development time by eliminating boilerplate code. Compare the *AutoTodoList*, *HRTodoList* to the original *TodoList* project to see how these libraries can reduce setup code in your model objects.
