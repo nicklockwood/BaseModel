@@ -1,7 +1,7 @@
 //
 //  HRCoder.m
 //
-//  Version 1.1.2
+//  Version 1.1.3
 //
 //  Created by Nick Lockwood on 24/04/2012.
 //  Copyright (c) 2011 Charcoal Design
@@ -466,14 +466,14 @@
         //encoded object
         [coder.stack addObject:self];
         Class class = NSClassFromString(className);
-        id object = [[class alloc] initWithCoder:coder];
+        id object = [[[class alloc] initWithCoder:coder] awakeAfterUsingCoder:coder];
         
 #if !__has_feature(objc_arc)
         [object autorelease];
 #endif
         
         [coder.stack removeLastObject];
-        return [object awakeAfterUsingCoder:coder];
+        return object;
     }
     else
     {
