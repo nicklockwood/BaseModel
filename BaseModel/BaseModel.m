@@ -336,7 +336,11 @@ static BOOL loadingFromResourceFile = NO;
 
 + (instancetype)instanceWithContentsOfFile:(NSString *)filePath
 {
-    //check if the path is a full path or not
+	[NSThread stackTrace];
+	return nil;
+}
+/*
+	//check if the path is a full path or not
     NSString *path = filePath;
     if (![path isAbsolutePath])
     {
@@ -351,9 +355,15 @@ static BOOL loadingFromResourceFile = NO;
 
     return [[[self alloc] initWithContentsOfFile:path] autorelease];
 }
+*/
 
 - (instancetype)initWithContentsOfFile:(NSString *)filePath
 {
+	[NSThread stackTrace];
+	return nil;
+}
+
+/*
     static NSCache *cachedResourceFiles = nil;
     if (cachedResourceFiles == nil)
     {
@@ -459,6 +469,7 @@ static BOOL loadingFromResourceFile = NO;
     }
     [data writeToFile:[[self class] saveFilePath:path] atomically:YES];
 }
+*/
 
 #pragma mark -
 #pragma mark Unique identifier generation
