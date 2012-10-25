@@ -1,7 +1,7 @@
 //
 //  BaseModel.m
 //
-//  Version 2.3.3
+//  Version 2.3.4
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -360,6 +360,9 @@ static BOOL loadingFromResourceFile = NO;
 
 - (instancetype)initWithContentsOfFile:(NSString *)filePath
 {
+    id object = nil;
+    NSData *data = nil;
+    
     static NSCache *cachedResourceFiles = nil;
     if (cachedResourceFiles == nil)
     {
@@ -371,24 +374,38 @@ static BOOL loadingFromResourceFile = NO;
     BOOL isResourceFile = [filePath hasPrefix:[[NSBundle mainBundle] bundlePath]];
     if (isResourceFile)
     {
-        id object = [cachedResourceFiles objectForKey:filePath];
-        if (object)
+        object = [cachedResourceFiles objectForKey:filePath];
+        if (object == [NSNull null])
         {
-            [self release];
-            return ((self = (object == [NSNull null])? nil: [object ah_retain]));
+            object = nil;
+        }
+        else if ([object isKindOfClass:[NSData class]])
+        {
+            data = object;
+            object = nil;
         }
     }
     
-    //load the file
-    NSData *data = [NSData dataWithContentsOfFile:filePath];
-    
-    //attempt to deserialise data as a plist
-    id object = nil;
-    if (data)
+    //load object if no cached version found
+    if (!object)
     {
-        NSPropertyListFormat format;
-        NSPropertyListReadOptions options = NSPropertyListMutableContainersAndLeaves;
-        object = [NSPropertyListSerialization propertyListWithData:data options:options format:&format error:NULL];
+        if (!data)
+        {
+            //load the file
+            data = [NSData dataWithContentsOfFile:filePath];
+        }
+        
+        //attempt to deserialise data as a plist
+        if (data)
+        {
+            NSPropertyListFormat format;
+            NSPropertyListReadOptions options = NSPropertyListMutableContainersAndLeaves;
+            if (!(object = [NSPropertyListSerialization propertyListWithData:data options:options format:&format error:NULL]))
+            {
+                //data is not a plist
+                object = data;
+            }
+        }
     }
         
     //success?
@@ -399,6 +416,13 @@ static BOOL loadingFromResourceFile = NO;
         {
             if ([object objectForKey:@"$archiver"])
             {
+                if (isResourceFile)
+                {
+                    //cache data for next time
+                    [cachedResourceFiles setObject:data forKey:filePath];
+                }
+                
+                //unarchive object
                 Class coderClass = NSClassFromString(@"CryptoCoder");
                 if (!coderClass)
                 {
@@ -408,6 +432,13 @@ static BOOL loadingFromResourceFile = NO;
             }
             else
             {
+                if (isResourceFile)
+                {
+                    //cache object for next time
+                    [cachedResourceFiles setObject:object forKey:filePath];
+                }
+                
+                //unarchive object
                 Class HRCoderClass = NSClassFromString(@"HRCoder");
                 NSString *classNameKey = [HRCoderClass valueForKey:@"classNameKey"];
                 if ([object objectForKey:classNameKey])
@@ -423,10 +454,9 @@ static BOOL loadingFromResourceFile = NO;
                 return ((self = [object ah_retain]));
             }
         }
-
-        if (isResourceFile)
+        else if (isResourceFile)
         {
-            //cache for next time
+            //cache object for next time
             [cachedResourceFiles setObject:object forKey:filePath];
         }
         

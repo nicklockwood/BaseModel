@@ -1,3 +1,7 @@
+Version 2.3.4
+
+- Fixed bug in resource file caching mechanism
+
 Version 2.3.3
 
 - Added support for CryptoCoding

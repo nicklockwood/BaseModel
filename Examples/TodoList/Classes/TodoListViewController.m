@@ -19,6 +19,9 @@
 	[super viewDidLoad];
 	self.navigationItem.leftBarButtonItem = self.editButtonItem;
 	self.clearsSelectionOnViewWillAppear = YES;
+    
+    [TodoList sharedInstance];
+    [TodoList reloadSharedInstance];
 }
 
 - (void)viewWillAppear:(BOOL)animated

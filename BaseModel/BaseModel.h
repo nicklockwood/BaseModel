@@ -1,7 +1,7 @@
 //
 //  BaseModel.h
 //
-//  Version 2.3.3
+//  Version 2.3.4
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -56,7 +56,7 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 - (void)setWithData:(NSData *)data;
 - (void)setWithCoder:(NSCoder *)coder;
 
-//NSCoding
+//coding
 
 - (void)encodeWithCoder:(NSCoder *)coder;
 
