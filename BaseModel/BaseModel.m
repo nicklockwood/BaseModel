@@ -231,19 +231,19 @@ static BOOL loadingFromResourceFile = NO;
 {
     @synchronized ([BaseModel class])
     {
-        if (!loadingFromResourceFile)
-        {
+//        if (!loadingFromResourceFile)
+//        {
             //attempt to load from resource file
-            loadingFromResourceFile = YES;
-            id object = [[[self class] alloc] initWithContentsOfFile:[[self class] resourceFilePath]];
-            loadingFromResourceFile = NO;
-            if (object)
-            {
-                [self release];
-                self = object;
-                return self;
-            }
-        }
+//            loadingFromResourceFile = YES;
+//            id object = [[[self class] alloc] initWithContentsOfFile:[[self class] resourceFilePath]];
+//            loadingFromResourceFile = NO;
+//            if (object)
+//            {
+//                [self release];
+//                self = object;
+//                return self;
+//            }
+//        }
         if ((self = [super init]))
         {
             
@@ -336,7 +336,7 @@ static BOOL loadingFromResourceFile = NO;
 
 + (instancetype)instanceWithContentsOfFile:(NSString *)filePath
 {
-	[NSThread stackTrace];
+//	[NSThread stackTrace];
 	return nil;
 }
 /*
@@ -359,7 +359,7 @@ static BOOL loadingFromResourceFile = NO;
 
 - (instancetype)initWithContentsOfFile:(NSString *)filePath
 {
-	[NSThread stackTrace];
+//	[NSThread stackTrace];
 	return nil;
 }
 
@@ -504,3 +504,4 @@ static BOOL loadingFromResourceFile = NO;
 //#endif
 
 @end
+
