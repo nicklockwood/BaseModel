@@ -1,7 +1,7 @@
 //
 //  BaseModel.m
 //
-//  Version 2.3.4
+//  Version 2.3.5
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -62,9 +62,14 @@
 
 #import "BaseModel.h"
 #import <objc/message.h>
+#import <objc/runtime.h>
 
 
 NSString *const BaseModelSharedInstanceUpdatedNotification = @"BaseModelSharedInstanceUpdatedNotification";
+
+
+static NSString *const BaseModelSharedInstanceKey = @"sharedInstance";
+static NSString *const BaseModelLoadingFromResourceFileKey = @"loadingFromResourceFile";
 
 
 @implementation BaseModel
@@ -122,10 +127,40 @@ NSString *const BaseModelSharedInstanceUpdatedNotification = @"BaseModelSharedIn
     return [self saveFilePath:[self saveFile]];
 }
 
+static NSMutableDictionary *classValues = nil;
+
++ (id)classPropertyForKey:(NSString *)key
+{
+    NSString *className = NSStringFromClass(self);
+    return [[classValues objectForKey:className] objectForKey:key];
+}
+
++ (void)setClassProperty:(id)property forKey:(NSString *)key
+{
+    NSString *className = NSStringFromClass(self);
+    if (!classValues)
+    {
+        classValues = [NSMutableDictionary dictionary];
+    }
+    NSMutableDictionary *values = [classValues objectForKey:className];
+    if (!values)
+    {
+        values = [NSMutableDictionary dictionary];
+        [classValues setObject:values forKey:className];
+    }
+    if (property)
+    {
+        [values setObject:property forKey:key];
+    }
+    else
+    {
+        [values removeObjectForKey:key];
+    }
+}
+
+
 #pragma mark -
 #pragma mark Singleton behaviour
-
-static NSMutableDictionary *sharedInstances = nil;
 
 + (void)setSharedInstance:(BaseModel *)instance
 {
@@ -133,17 +168,8 @@ static NSMutableDictionary *sharedInstances = nil;
     {
         [NSException raise:NSGenericException format:@"setSharedInstance: instance class does not match"];
     }
-    NSString *classKey = NSStringFromClass(self);
-    sharedInstances = sharedInstances ?: [[NSMutableDictionary alloc] init];
-    id oldInstance = [sharedInstances objectForKey:classKey];
-    if (instance)
-    {
-        [sharedInstances setObject:instance forKey:classKey];
-    }
-    else
-    {
-        [sharedInstances removeObjectForKey:classKey];
-    }
+    id oldInstance = [self classPropertyForKey:BaseModelSharedInstanceKey];
+    [self setClassProperty:instance forKey:BaseModelSharedInstanceKey];
     if (oldInstance)
     {
         [[NSNotificationCenter defaultCenter] postNotificationName:BaseModelSharedInstanceUpdatedNotification object:oldInstance];
@@ -152,21 +178,19 @@ static NSMutableDictionary *sharedInstances = nil;
 
 + (BOOL)hasSharedInstance
 {
-    return [sharedInstances objectForKey:NSStringFromClass(self)] != nil;
+    return [self classPropertyForKey:BaseModelSharedInstanceKey] != nil;
 }
 
 + (instancetype)sharedInstance
 {
-    NSString *classKey = NSStringFromClass(self);
-    sharedInstances = sharedInstances ?: [[NSMutableDictionary alloc] init];
-    id instance = [sharedInstances objectForKey:classKey];
+    id instance = [self classPropertyForKey:BaseModelSharedInstanceKey];
     if (instance == nil)
     {
         //load or create instance
         [self reloadSharedInstance];
         
         //get loaded instance
-        instance = [sharedInstances objectForKey:classKey];
+        instance = [self classPropertyForKey:BaseModelSharedInstanceKey];
     }
     return instance;
 }
@@ -206,7 +230,7 @@ static NSMutableDictionary *sharedInstances = nil;
 
 - (void)save
 {
-    if ([sharedInstances objectForKey:NSStringFromClass([self class])] == self)
+    if ([[self class] classPropertyForKey:BaseModelSharedInstanceKey] == self)
     {
         //shared (singleton) instance
         [self writeToFile:[[self class] saveFilePath] atomically:YES];
@@ -217,6 +241,7 @@ static NSMutableDictionary *sharedInstances = nil;
         [NSException raise:NSGenericException format:@"Unable to save object, save method not implemented"];
     }
 }
+
 
 #pragma mark -
 #pragma mark Default constructors
@@ -231,18 +256,16 @@ static NSMutableDictionary *sharedInstances = nil;
     return [[[self alloc] init] autorelease];
 }
 
-static BOOL loadingFromResourceFile = NO;
-
 - (instancetype)init
 {
-    @synchronized ([BaseModel class])
+    @synchronized ([self class])
     {
-        if (!loadingFromResourceFile)
+        if (![[[self class] classPropertyForKey:BaseModelLoadingFromResourceFileKey] boolValue])
         {
             //attempt to load from resource file
-            loadingFromResourceFile = YES;
+            [[self class] setClassProperty:[NSNumber numberWithBool:YES] forKey:BaseModelLoadingFromResourceFileKey];
             id object = [[[self class] alloc] initWithContentsOfFile:[[self class] resourceFilePath]];
-            loadingFromResourceFile = NO;
+            [[self class] setClassProperty:nil forKey:BaseModelLoadingFromResourceFileKey];
             if (object)
             {
                 [self release];
@@ -495,6 +518,7 @@ static BOOL loadingFromResourceFile = NO;
     }
     [data writeToFile:[[self class] saveFilePath:path] atomically:YES];
 }
+
 
 #pragma mark -
 #pragma mark Unique identifier generation

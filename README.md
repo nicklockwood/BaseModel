@@ -19,9 +19,9 @@ BaseModel is also designed to work with the CryptoCoding library (https://github
 Supported OS & SDK Versions
 -----------------------------
 
-* Supported build target - iOS 6.0 / Mac OS 10.8 (Xcode 4.5, Apple LLVM compiler 4.1)
+* Supported build target - iOS 6.0 / Mac OS 10.8 (Xcode 4.5.1, Apple LLVM compiler 4.1)
 * Earliest supported deployment target - iOS 5.0 / Mac OS 10.7
-* Earliest compatible deployment target - iOS 4.0 / Mac OS 10.6
+* Earliest compatible deployment target - iOS 4.3 / Mac OS 10.6
 
 NOTE: 'Supported' means that the library has been tested with this version. 'Compatible' means that the library should work on this iOS version (i.e. it doesn't rely on any unavailable SDK features) but is no longer being tested for compatibility and may require tweaking or bug fixes to run correctly.
 
@@ -35,13 +35,13 @@ As of version 1.2.1, BaseModel automatically works with both ARC and non-ARC pro
 Thread Safety
 --------------
 
-You can create BaseModel instances on any thread, but each instance should only be used on a single thread. The sharedInstance methods should only be used on the main thread.
+BaseModel instances can only be safely created on the main thread. Once created, it should be safe to access them from multiple threads, provided that any custom methods and properties that are added by the user are thread-safe.
 
 
 Installation
 --------------
 
-To use the BaseModel class in your project, just drag the class files into your project. It has no dependencies, however you may wish to also include the AutoCoding library (https://github.com/nicklockwood/AutoCoding) to get the full benefit of using BaseModel.
+To use the BaseModel class in your project, just drag the BaseModel.h and .m files into your project. BaseModel has no required dependencies, however you may wish to also include the optional AutoCoding library (https://github.com/nicklockwood/AutoCoding) to get the full benefits of using BaseModel, and you may also wish to include the HRCoding (https://github.com/nicklockwood/HRCoding) and CryptoCoding (https://github.com/nicklockwood/CryptoCoding) libraries to enable additional BaseModel functionality.
 
 
 Classes

@@ -1,3 +1,7 @@
+Version 2.3.5
+
+- Fixed a bug when creating BaseModel instances that are initialised with a resource file from within the init method of another BaseModel instance.
+
 Version 2.3.4
 
 - Fixed bug in resource file caching mechanism
