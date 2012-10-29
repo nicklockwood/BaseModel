@@ -140,7 +140,7 @@ static NSMutableDictionary *classValues = nil;
     NSString *className = NSStringFromClass(self);
     if (!classValues)
     {
-        classValues = [NSMutableDictionary dictionary];
+        classValues = [[NSMutableDictionary alloc] init];
     }
     NSMutableDictionary *values = [classValues objectForKey:className];
     if (!values)
