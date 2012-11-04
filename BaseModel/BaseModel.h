@@ -80,8 +80,8 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 - (instancetype)initWithCoder:(NSCoder *)decoder;
 
 //loading and saving the model from a plist file
-+ (instancetype)instanceWithContentsOfFile:(NSString *)path;
-- (instancetype)initWithContentsOfFile:(NSString *)path;
+//+ (instancetype)instanceWithContentsOfFile:(NSString *)path;
+//- (instancetype)initWithContentsOfFile:(NSString *)path;
 - (void)writeToFile:(NSString *)path atomically:(BOOL)atomically;
 - (BOOL)useHRCoderIfAvailable;
 
