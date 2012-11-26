@@ -1,7 +1,7 @@
 //
 //  HRCoder.h
 //
-//  Version 1.0
+//  Version 1.2
 //
 //  Created by Nick Lockwood on 24/04/2012.
 //  Copyright (c) 2011 Charcoal Design
@@ -30,58 +30,48 @@
 //  3. This notice may not be removed or altered from any source distribution.
 //
 
-//
-//  ARC Helper
-//
-//  Version 1.3
-//
-//  Created by Nick Lockwood on 05/01/2012.
-//  Copyright 2012 Charcoal Design
-//
-//  Distributed under the permissive zlib license
-//  Get the latest version from here:
-//
-//  https://gist.github.com/1563325
-//
 
-#ifndef AH_RETAIN
-#if __has_feature(objc_arc)
-#define AH_RETAIN(x) (x)
-#define AH_RELEASE(x) (void)(x)
-#define AH_AUTORELEASE(x) (x)
-#define AH_SUPER_DEALLOC (void)(0)
-#define __AH_BRIDGE __bridge
-#else
-#define __AH_WEAK
-#define AH_WEAK assign
-#define AH_RETAIN(x) [(x) retain]
-#define AH_RELEASE(x) [(x) release]
-#define AH_AUTORELEASE(x) [(x) autorelease]
-#define AH_SUPER_DEALLOC [super dealloc]
-#define __AH_BRIDGE
-#endif
-#endif
-
-//  ARC Helper ends
 #import <Foundation/Foundation.h>
+
+
 static NSString *const HRCoderClassNameKey = @"$class";
 static NSString *const HRCoderRootObjectKey = @"$root";
 static NSString *const HRCoderObjectAliasKey = @"$alias";
+
+
 @interface HRCoderAliasPlaceholder : NSObject
 
 + (HRCoderAliasPlaceholder *)placeholder;
 
 @end
+
+
 @interface HRCoder : NSCoder
 
+//required for 32-bit Macs
+#ifdef __i386
+{
+    NSMutableArray *_stack;
+    NSMutableDictionary *_knownObjects;
+    NSMutableDictionary *_unresolvedAliases;
+    NSString *_keyPath;
+    NSMutableData *_data;
+    NSPropertyListFormat _outputFormat;
+}
+#endif
+
+@property (nonatomic, assign) NSPropertyListFormat outputFormat;
+
 + (id)unarchiveObjectWithPlist:(id)plist;
++ (id)unarchiveObjectWithData:(NSData *)data;
 + (id)unarchiveObjectWithFile:(NSString *)path;
-+ (id)archivedPlistWithRootObject:(id)object;
++ (id)archivedPlistWithRootObject:(id)rootObject;
++ (NSData *)archivedDataWithRootObject:(id)rootObject;
 + (BOOL)archiveRootObject:(id)rootObject toFile:(NSString *)path;
 
-- (id)unarchiveObjectWithPlist:(id)plist;
-- (id)unarchiveObjectWithFile:(NSString *)path;
-- (id)archivedPlistWithRootObject:(id)object;
-- (BOOL)archiveRootObject:(id)rootObject toFile:(NSString *)path;
+- (id)initForReadingWithData:(NSData *)data;
+- (id)initForWritingWithMutableData:(NSMutableData *)data;
+- (void)finishDecoding;
+- (void)finishEncoding;
 
 @end

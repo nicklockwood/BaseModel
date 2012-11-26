@@ -1,7 +1,7 @@
 //
 //  HRCoder.m
 //
-//  Version 1.0
+//  Version 1.2
 //
 //  Created by Nick Lockwood on 24/04/2012.
 //  Copyright (c) 2011 Charcoal Design
@@ -31,12 +31,16 @@
 //
 
 #import "HRCoder.h"
-@interface NSObject (HRCoding)
+
+
+@interface NSObject (HRCoding_Private)
 
 - (id)unarchiveObjectWithHRCoder:(HRCoder *)coder;
 - (id)archivedObjectWithHRCoder:(HRCoder *)coder;
 
 @end
+
+
 @implementation HRCoderAliasPlaceholder
 
 + (HRCoderAliasPlaceholder *)placeholder
@@ -55,22 +59,27 @@
 }
 
 @end
+
+
 @interface HRCoder ()
 
 @property (nonatomic, strong) NSMutableArray *stack;
 @property (nonatomic, strong) NSMutableDictionary *knownObjects;
 @property (nonatomic, strong) NSMutableDictionary *unresolvedAliases;
 @property (nonatomic, strong) NSString *keyPath;
+@property (nonatomic, strong) NSMutableData *data;
 
 + (NSString *)classNameKey;
 
 @end
+
+
 @implementation HRCoder
 
-@synthesize stack;
-@synthesize knownObjects;
-@synthesize unresolvedAliases;
-@synthesize keyPath;
+@synthesize stack = _stack;
+@synthesize knownObjects = _knownObjects;
+@synthesize unresolvedAliases = _unresolvedAliases;
+@synthesize keyPath = _keyPath;
 
 + (NSString *)classNameKey
 {
@@ -82,46 +91,77 @@
 {
     if ((self = [super init]))
     {
-        stack = [[NSMutableArray alloc] initWithObjects:[NSMutableDictionary dictionary], nil];
-        knownObjects = [[NSMutableDictionary alloc] init];
-        unresolvedAliases = [[NSMutableDictionary alloc] init];
+        self.stack = [NSMutableArray arrayWithObject:[NSMutableDictionary dictionary]];
+        _knownObjects = [[NSMutableDictionary alloc] init];
+        _unresolvedAliases = [[NSMutableDictionary alloc] init];
+        _outputFormat = NSPropertyListXMLFormat_v1_0;
     }
     return self;
 }
 
+#if !__has_feature(objc_arc)
+
+- (void)dealloc
+{
+    [_stack release];
+    [_knownObjects release];
+    [_unresolvedAliases release];
+    [_keyPath release];
+    [_data release];
+    [super dealloc];
+}
+
+#endif
+
+
+#pragma mark -
+#pragma mark Unarchiving
+
 + (id)unarchiveObjectWithPlist:(id)plist
 {
-    return [AH_AUTORELEASE([[self alloc] init]) unarchiveObjectWithPlist:plist];
+    HRCoder *coder = [[self alloc] init];
+
+#if !__has_feature(objc_arc)
+    [coder autorelease];
+#endif
+
+    return [coder unarchiveRootObjectWithPlist:plist];
+}
+
++ (id)unarchiveObjectWithData:(NSData *)data
+{
+    //attempt to deserialise data as a plist
+    id plist = nil;
+    if (data)
+    {
+        NSPropertyListFormat format;
+        NSPropertyListReadOptions options = NSPropertyListMutableContainersAndLeaves;
+        plist = [NSPropertyListSerialization propertyListWithData:data options:options format:&format error:NULL];
+    }
+
+    //unarchive
+    return [self unarchiveObjectWithPlist:plist];
 }
 
 + (id)unarchiveObjectWithFile:(NSString *)path
 {
-    return [AH_AUTORELEASE([[self alloc] init]) unarchiveObjectWithFile:path];
+    //load the file
+    return [self unarchiveObjectWithData:[NSData dataWithContentsOfFile:path]];
 }
 
-+ (id)archivedPlistWithRootObject:(id)object
+- (id)unarchiveRootObjectWithPlist:(id)plist
 {
-    return [AH_AUTORELEASE([[self alloc] init]) archivedPlistWithRootObject:object];
-}
-
-+ (BOOL)archiveRootObject:(id)rootObject toFile:(NSString *)path
-{
-    return [AH_AUTORELEASE([[self alloc] init]) archiveRootObject:rootObject toFile:path];
-}
-
-- (id)unarchiveObjectWithPlist:(id)plist
-{
-    [stack removeAllObjects];
-    [knownObjects removeAllObjects];
-    [unresolvedAliases removeAllObjects];
+    [_stack removeAllObjects];
+    [_knownObjects removeAllObjects];
+    [_unresolvedAliases removeAllObjects];
     id rootObject = [plist unarchiveObjectWithHRCoder:self];
     if (rootObject)
     {
-        knownObjects[HRCoderRootObjectKey] = rootObject;
-        for (NSString *_keyPath in unresolvedAliases)
+        [_knownObjects setObject:rootObject forKey:HRCoderRootObjectKey];
+        for (NSString *keyPath in _unresolvedAliases)
         {
-            id aliasKeyPath = unresolvedAliases[_keyPath];
-            id aliasedObject = knownObjects[aliasKeyPath];
+            id aliasKeyPath = [_unresolvedAliases objectForKey:keyPath];
+            id aliasedObject = [_knownObjects objectForKey:aliasKeyPath];
             id node = rootObject;
             for (NSString *key in [_keyPath componentsSeparatedByString:@"."])
             {
@@ -129,10 +169,10 @@
                 if ([node isKindOfClass:[NSArray class]])
                 {
                     NSInteger index = [key integerValue];
-                    _node = node[index];
+                    _node = [node objectAtIndex:index];
                     if (_node == [HRCoderAliasPlaceholder placeholder])
                     {
-                        node[index] = aliasedObject;
+                        [node replaceObjectAtIndex:index withObject:aliasedObject];
                         break;
                     }
                 }
@@ -149,56 +189,115 @@
             }
         }
     }
-    [unresolvedAliases removeAllObjects];
-    [knownObjects removeAllObjects];
-    [stack removeAllObjects];
+    [self finishDecoding];
     return rootObject;
 }
 
-- (id)unarchiveObjectWithFile:(NSString *)path
+- (id)initForReadingWithData:(NSData *)data
 {
-    //load the file
-    NSData *data = [NSData dataWithContentsOfFile:path];
-    
-    //attempt to deserialise data as a plist
-    id plist = nil;
-    if (data)
+    if ((self = [self init]))
     {
-        NSPropertyListFormat format;
-        NSPropertyListReadOptions options = NSPropertyListMutableContainersAndLeaves;
-        plist = [NSPropertyListSerialization propertyListWithData:data options:options format:&format error:NULL];
+        //attempt to deserialise data as a plist
+        if (data)
+        {
+            //load plist
+            NSPropertyListReadOptions options = NSPropertyListMutableContainersAndLeaves;
+            id plist = [NSPropertyListSerialization propertyListWithData:data
+                                                                 options:options
+                                                                  format:&_outputFormat
+                                                                   error:NULL];
+            //only works if root object is a dictionary
+            if ([plist isKindOfClass:[NSDictionary class]])
+            {
+                [_stack addObject:plist];
+            }
+            else
+            {
+                [NSException raise:NSGenericException format:@"initForReadingWithData: method requires that the root object in the plist data is an NSDictionary. Decoding an %@ is not supported with this method. Try using unarchiveObjectWithData: instead.", [plist class]];
+            }
+        }
     }
-    
-    //unarchive
-    return [self unarchiveObjectWithPlist:plist];
+    return self;
 }
 
-- (id)archivedPlistWithRootObject:(id)rootObject
+- (void)finishDecoding
 {
-    [stack removeAllObjects];
-    [knownObjects removeAllObjects];
-    knownObjects[HRCoderRootObjectKey] = rootObject;
-    id plist = [rootObject archivedObjectWithHRCoder:self];
-    [knownObjects removeAllObjects];
-    [stack removeAllObjects];
+    [_unresolvedAliases removeAllObjects];
+    [_knownObjects removeAllObjects];
+    [_stack setArray:[NSMutableArray arrayWithObject:[NSMutableDictionary dictionary]]];
+}
+
+
+#pragma mark -
+#pragma mark Archiving
+
++ (id)archivedPlistWithRootObject:(id)rootObject
+{
+    HRCoder *coder = [[self alloc] init];
+    id plist = [coder archiveRootObject:rootObject];
+
+#if !__has_feature(objc_arc)
+    [coder release];
+#endif
+
     return plist;
 }
 
-- (BOOL)archiveRootObject:(id)rootObject toFile:(NSString *)path
++ (NSData *)archivedDataWithRootObject:(id)rootObject
 {
-    id object = [self archivedPlistWithRootObject:rootObject];
-    NSPropertyListFormat format = NSPropertyListBinaryFormat_v1_0;
-    NSData *data = [NSPropertyListSerialization dataWithPropertyList:object format:format options:0 error:NULL];
-    return [data writeToFile:path atomically:YES];
+    NSMutableData *data = [NSMutableData data];
+    HRCoder *coder = [[self alloc] initForWritingWithMutableData:data];
+    [coder archiveRootObject:rootObject];
+
+#if !__has_feature(objc_arc)
+    [coder release];
+#endif
+
+    return data;
 }
 
-- (void)dealloc
++ (BOOL)archiveRootObject:(id)rootObject toFile:(NSString *)path
 {
-    AH_RELEASE(stack);
-    AH_RELEASE(knownObjects);
-    AH_RELEASE(unresolvedAliases);
-    AH_SUPER_DEALLOC;
+    return [[self archivedDataWithRootObject:rootObject] writeToFile:path atomically:YES];
 }
+
+- (id)initForWritingWithMutableData:(NSMutableData *)data
+{
+    if ((self = [self init]))
+    {
+        //set data
+        self.data = data;
+    }
+    return self;
+}
+
+- (id)archiveRootObject:(id)rootObject
+{
+    [_knownObjects removeAllObjects];
+    [self encodeRootObject:rootObject];
+    id plist = [_stack lastObject];
+    [self finishEncoding];
+    return plist;
+}
+
+- (void)finishEncoding
+{
+    if (_data)
+    {
+        NSData *data = [NSPropertyListSerialization dataWithPropertyList:[_stack lastObject]
+                                                                  format:_outputFormat
+                                                                 options:0
+                                                                   error:NULL];
+        [_data setData:data];
+        self.data = nil;
+    }
+    [_knownObjects removeAllObjects];
+    [_stack setArray:[NSMutableArray arrayWithObject:[NSMutableDictionary dictionary]]];
+}
+
+
+#pragma mark -
+#pragma mark NSCoding
 
 - (BOOL)allowsKeyedCoding
 {
@@ -207,40 +306,53 @@
 
 - (BOOL)containsValueForKey:(NSString *)key
 {
-    return [stack lastObject][key] != nil;
+    return [[_stack lastObject] objectForKey:key] != nil;
 }
 
-- (id)encodedObject:(id)objv forKey:(NSString *)key
+- (id)encodedObject:(id)object forKey:(NSString *)key
 {
-    NSInteger knownIndex = [[knownObjects allValues] indexOfObject:objv];
-    if (knownIndex != NSNotFound)
+    if (object && key)
     {
-        //create alias
-        NSString *aliasKeyPath = [knownObjects allKeys][knownIndex];
-        NSDictionary *alias = @{HRCoderObjectAliasKey: aliasKeyPath};
-        return alias;
+        NSInteger knownIndex = [[_knownObjects allValues] indexOfObject:object];
+        if (knownIndex != NSNotFound)
+        {
+            //create alias
+            NSString *aliasKeyPath = [[_knownObjects allKeys] objectAtIndex:knownIndex];
+            NSDictionary *alias = [NSDictionary dictionaryWithObject:aliasKeyPath forKey:HRCoderObjectAliasKey];
+            return alias;
+        }
+        else
+        {
+            //encode object
+            NSString *oldKeyPath = _keyPath;
+            self.keyPath = _keyPath? [_keyPath stringByAppendingPathExtension:key]: key;
+            [_knownObjects setObject:object forKey:_keyPath];
+            id encodedObject = [object archivedObjectWithHRCoder:self];
+            self.keyPath = oldKeyPath;
+            return encodedObject;
+        }
     }
-    else
-    {
-        //encode object
-        NSString *oldKeyPath = keyPath;
-        self.keyPath = keyPath? [keyPath stringByAppendingPathExtension:key]: key;
-        knownObjects[keyPath] = objv;
-        id encodedObject = [objv archivedObjectWithHRCoder:self];
-        self.keyPath = oldKeyPath;
-        return encodedObject;
-    }
+    return nil;
 }
 
 - (void)encodeObject:(id)objv forKey:(NSString *)key
 {
     id object = [self encodedObject:objv forKey:key];
-    [stack lastObject][key] = object;
+    if (object) [[_stack lastObject] setObject:object forKey:key];
+}
+
+- (void)encodeRootObject:(id)rootObject
+{
+    if (rootObject)
+    {
+        [_knownObjects setObject:rootObject forKey:HRCoderRootObjectKey];
+        [_stack setArray:[NSMutableArray arrayWithObject:[rootObject archivedObjectWithHRCoder:self]]];
+    }
 }
 
 - (void)encodeConditionalObject:(id)objv forKey:(NSString *)key
 {
-    if ([[knownObjects allValues] containsObject:objv])
+    if ([[_knownObjects allValues] containsObject:objv])
     {
         [self encodeObject:objv forKey:key];
     }
@@ -248,37 +360,37 @@
 
 - (void)encodeBool:(BOOL)boolv forKey:(NSString *)key
 {
-    [stack lastObject][key] = @(boolv);
+    [[_stack lastObject] setObject:[NSNumber numberWithBool:boolv] forKey:key];
 }
 
 - (void)encodeInt:(int)intv forKey:(NSString *)key
 {
-    [stack lastObject][key] = @(intv);
+    [[_stack lastObject] setObject:[NSNumber numberWithInt:intv] forKey:key];
 }
 
 - (void)encodeInt32:(int32_t)intv forKey:(NSString *)key
 {
-    [stack lastObject][key] = [NSNumber numberWithLong:intv];
+    [[_stack lastObject] setObject:[NSNumber numberWithLong:intv] forKey:key];
 }
 
 - (void)encodeInt64:(int64_t)intv forKey:(NSString *)key
 {
-    [stack lastObject][key] = @(intv);
+    [[_stack lastObject] setObject:[NSNumber numberWithLongLong:intv] forKey:key];
 }
 
 - (void)encodeFloat:(float)realv forKey:(NSString *)key
 {
-    [stack lastObject][key] = @(realv);
+    [[_stack lastObject] setObject:[NSNumber numberWithFloat:realv] forKey:key];
 }
 
 - (void)encodeDouble:(double)realv forKey:(NSString *)key
 {
-    [stack lastObject][key] = @(realv);
+    [[_stack lastObject] setObject:[NSNumber numberWithDouble:realv] forKey:key];
 }
 
 - (void)encodeBytes:(const uint8_t *)bytesp length:(NSUInteger)lenv forKey:(NSString *)key
 {
-    [stack lastObject][key] = [NSData dataWithBytes:bytesp length:lenv];
+    [[_stack lastObject] setObject:[NSData dataWithBytes:bytesp length:lenv] forKey:key];
 }
 
 - (id)decodeObject:(id)object forKey:(NSString *)key
@@ -286,30 +398,30 @@
     if (object && key)
     {
         //new keypath
-        NSString *newKeyPath = keyPath? [keyPath stringByAppendingPathExtension:key]: key;
-        
+        NSString *newKeyPath = _keyPath? [_keyPath stringByAppendingPathExtension:key]: key;
+
         //check if object is an alias
         if ([object isKindOfClass:[NSDictionary class]])
         {
-            NSString *aliasKeyPath = ((NSDictionary *)object)[HRCoderObjectAliasKey];
+            NSString *aliasKeyPath = [(NSDictionary *)object objectForKey:HRCoderObjectAliasKey];
             if (aliasKeyPath)
             {
                 //object alias
-                id decodedObject = knownObjects[aliasKeyPath];
+                id decodedObject = [_knownObjects objectForKey:aliasKeyPath];
                 if (!decodedObject)
                 {
-                    unresolvedAliases[newKeyPath] = aliasKeyPath;
+                    [_unresolvedAliases setObject:aliasKeyPath forKey:newKeyPath];
                     decodedObject = [HRCoderAliasPlaceholder placeholder];
                 }
                 return decodedObject;
             }
         }
-        
+
         //new object
-        NSString *oldKeyPath = keyPath;
+        NSString *oldKeyPath = _keyPath;
         self.keyPath = newKeyPath;
         id decodedObject = [object unarchiveObjectWithHRCoder:self];
-        knownObjects[keyPath] = decodedObject;
+        if (decodedObject) [_knownObjects setObject:decodedObject forKey:_keyPath];
         self.keyPath = oldKeyPath;
         return decodedObject;
     }
@@ -318,76 +430,86 @@
 
 - (id)decodeObjectForKey:(NSString *)key
 {
-    return [self decodeObject:[stack lastObject][key] forKey:key];
+    return [self decodeObject:[[_stack lastObject] objectForKey:key] forKey:key];
 }
 
 - (BOOL)decodeBoolForKey:(NSString *)key
 {
-    return [[stack lastObject][key] boolValue];
+    return [[[_stack lastObject] objectForKey:key] boolValue];
 }
 
 - (int)decodeIntForKey:(NSString *)key
 {
-    return [[stack lastObject][key] intValue];
+    return [[[_stack lastObject] objectForKey:key] intValue];
 }
 
 - (int32_t)decodeInt32ForKey:(NSString *)key
 {
-    return [[stack lastObject][key] longValue];
+    return [[[_stack lastObject] objectForKey:key] longValue];
 }
 
 - (int64_t)decodeInt64ForKey:(NSString *)key
 {
-    return [[stack lastObject][key] longLongValue];
+    return [[[_stack lastObject] objectForKey:key] longLongValue];
 }
 
 - (float)decodeFloatForKey:(NSString *)key
 {
-    return [[stack lastObject][key] floatValue];
+    return [[[_stack lastObject] objectForKey:key] floatValue];
 }
 
 - (double)decodeDoubleForKey:(NSString *)key
 {
-    return [[stack lastObject][key] doubleValue];
+    return [[[_stack lastObject] objectForKey:key] doubleValue];
 }
 
 - (const uint8_t *)decodeBytesForKey:(NSString *)key returnedLength:(NSUInteger *)lengthp
 {
-    NSData *data = [stack lastObject][key];
+    NSData *data = [[_stack lastObject] objectForKey:key];
     *lengthp = [data length];
     return data.bytes;
 }
 
 @end
+
+
 @implementation NSObject(HRCoding)
 
 - (id)unarchiveObjectWithHRCoder:(HRCoder *)coder
 {
-    return self;
+    [NSException raise:NSGenericException format:@"%@ is not a supported HRCoder archive type", [self class]];
+    return nil;
 }
 
 - (id)archivedObjectWithHRCoder:(HRCoder *)coder
 {
     NSMutableDictionary *result = [NSMutableDictionary dictionary];
     [coder.stack addObject:result];
-    result[HRCoderClassNameKey] = NSStringFromClass([self class]);
-    [(id <NSCoding>)self encodeWithCoder:coder];
+    [result setObject:NSStringFromClass([self classForCoder]) forKey:HRCoderClassNameKey];
+    [(id <NSCoding>)[self replacementObjectForCoder:coder] encodeWithCoder:coder];
     [coder.stack removeLastObject];
     return result;
 }
 
-@end    
+@end
+
+
 @implementation NSDictionary(HRCoding)
 
 - (id)unarchiveObjectWithHRCoder:(HRCoder *)coder
 {
-    NSString *className = self[HRCoderClassNameKey];
+    NSString *className = [self objectForKey:HRCoderClassNameKey];
     if (className)
     {
         //encoded object
         [coder.stack addObject:self];
         Class class = NSClassFromString(className);
-        id object = AH_AUTORELEASE([[class alloc] initWithCoder:coder]);
+        id object = [[[class alloc] initWithCoder:coder] awakeAfterUsingCoder:coder];
+
+#if !__has_feature(objc_arc)
+        [object autorelease];
+#endif
+
         [coder.stack removeLastObject];
         return object;
     }
@@ -398,12 +520,15 @@
         for (NSString *key in self)
         {
             id object = [coder decodeObjectForKey:key];
-            if (object)
-            {
-                result[key] = object;
-            }
+            if (object) [result setObject:object forKey:key];
         }
-        return AH_AUTORELEASE([result copy]);
+        result = [result copy];
+
+#if !__has_feature(objc_arc)
+        [result autorelease];
+#endif
+
+        return result;
     }
 }
 
@@ -413,13 +538,15 @@
     [coder.stack addObject:result];
     for (NSString *key in self)
     {
-        [coder encodeObject:self[key] forKey:key];
+        [coder encodeObject:[self objectForKey:key] forKey:key];
     }
     [coder.stack removeLastObject];
     return result;
 }
 
 @end
+
+
 @implementation NSArray(HRCoding)
 
 - (id)unarchiveObjectWithHRCoder:(HRCoder *)coder
@@ -428,7 +555,7 @@
     for (int i = 0; i < [self count]; i++)
     {
         NSString *key = [NSString stringWithFormat:@"%i", i];
-        id encodedObject = self[i];
+        id encodedObject = [self objectAtIndex:i];
         id decodedObject = [coder decodeObject:encodedObject forKey:key];
         [result addObject:decodedObject];
     }
@@ -440,7 +567,7 @@
     NSMutableArray *result = [NSMutableArray array];
     for (int i = 0; i < [self count]; i++)
     {
-        id object = self[i];
+        id object = [self objectAtIndex:i];
         NSString *key = [NSString stringWithFormat:@"%i", i];
         [result addObject:[coder encodedObject:object forKey:key]];
     }
@@ -448,31 +575,59 @@
 }
 
 @end
+
+
 @implementation NSString(HRCoding)
 
+- (id)unarchiveObjectWithHRCoder:(HRCoder *)coder
+{
+    return self;
+}
+
 - (id)archivedObjectWithHRCoder:(HRCoder *)coder
 {
     return self;
 }
 
 @end
+
+
 @implementation NSData(HRCoding)
 
+- (id)unarchiveObjectWithHRCoder:(HRCoder *)coder
+{
+    return self;
+}
+
 - (id)archivedObjectWithHRCoder:(HRCoder *)coder
 {
     return self;
 }
 
 @end
+
+
 @implementation NSNumber(HRCoding)
 
+- (id)unarchiveObjectWithHRCoder:(HRCoder *)coder
+{
+    return self;
+}
+
 - (id)archivedObjectWithHRCoder:(HRCoder *)coder
 {
     return self;
 }
 
 @end
+
+
 @implementation NSDate(HRCoding)
+
+- (id)unarchiveObjectWithHRCoder:(HRCoder *)coder
+{
+    return self;
+}
 
 - (id)archivedObjectWithHRCoder:(HRCoder *)coder
 {

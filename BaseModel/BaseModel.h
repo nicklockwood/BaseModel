@@ -1,7 +1,7 @@
 //
 //  BaseModel.h
 //
-//  Version 2.3.3
+//  Version 2.4.1
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -29,8 +29,14 @@
 //
 //  3. This notice may not be removed or altered from any source distribution.
 //
+
+
 #import <Foundation/Foundation.h>
+
+
 extern NSString *const BaseModelSharedInstanceUpdatedNotification;
+
+
 //the BaseModel protocol defines optional methods that
 //you can define on your BaseModel subclasses to extend their functionality
 
@@ -39,22 +45,22 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 
 //loading sequence:
 //setUp called first
-//then setWithDictionary/Array/String if resource file exists
+//then setWithDictionary/Array/String/etc if resource file exists
 //then setWithCoder if save file exists
 
 - (void)setUp;
 - (void)setWithDictionary:(NSDictionary *)dict;
 - (void)setWithArray:(NSArray *)array;
 - (void)setWithString:(NSString *)string;
-- (void)setWithNumber:(NSNumber *)number;
-- (void)setWithData:(NSData *)data;
 - (void)setWithCoder:(NSCoder *)coder;
 
-//NSCoding
+//coding
 
 - (void)encodeWithCoder:(NSCoder *)coder;
 
 @end
+
+
 //use the BaseModel class as the base class for any of your
 //model objects. BaseModels can be standalone objects, or
 //act as sub-properties of a larger object
@@ -80,8 +86,8 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 - (instancetype)initWithCoder:(NSCoder *)decoder;
 
 //loading and saving the model from a plist file
-//+ (instancetype)instanceWithContentsOfFile:(NSString *)path;
-//- (instancetype)initWithContentsOfFile:(NSString *)path;
++ (instancetype)instanceWithContentsOfFile:(NSString *)path;
+- (instancetype)initWithContentsOfFile:(NSString *)path;
 - (void)writeToFile:(NSString *)path atomically:(BOOL)atomically;
 - (BOOL)useHRCoderIfAvailable;
 
@@ -101,15 +107,5 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 //useful for creating universally unique
 //identifiers and filenames for model objects
 + (NSString *)newUniqueIdentifier;
-
-//#define BASEMODEL_ENABLE_UNIQUE_ID 0
-//#ifdef BASEMODEL_ENABLE_UNIQUE_ID
-
-//optional uniqueID property
-//you can enable this by adding BASEMODEL_ENABLE_UNIQUE_ID
-//to your preprocessor macros in the project build settings
-@property (nonatomic, strong) NSString *uniqueID;
-
-//#endif
 
 @end

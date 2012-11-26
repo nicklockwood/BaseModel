@@ -1,0 +1,18 @@
+//
+// Prefix header for all source files of the 'MacHRAutoTodoList' target in the 'MacHRAutoTodoList' project
+//
+
+#ifdef __OBJC__
+
+	#import <Foundation/Foundation.h>
+	#import <Cocoa/Cocoa.h>
+
+@interface CheckedValueTransformer : NSValueTransformer
+@end
+
+typedef void (^updateKVCKeyBlock)();
+@interface NSObject (KVONotifyBlock)
+- (void)updateKey:(NSString*)key inBlock:(updateKVCKeyBlock)block;
+@end
+
+#endif
