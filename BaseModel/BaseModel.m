@@ -1,7 +1,7 @@
 //
 //  BaseModel.m
 //
-//  Version 2.4
+//  Version 2.4.1
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -404,10 +404,8 @@ static NSMutableDictionary *classValues = nil;
         
         if (data)
         {
-            //attempt to deserialise data as a plist
-            NSPropertyListFormat format;
-            NSPropertyListReadOptions options = NSPropertyListMutableContainersAndLeaves;
-            if (!(object = [NSPropertyListSerialization propertyListWithData:data options:options format:&format error:NULL]))
+            NSString *extension = [[filePath pathExtension] lowercaseString];
+            if ([extension isEqualToString:@"json"] || [extension isEqualToString:@"js"])
             {
                 //attempt to deserialise data as json
                 Class FXJSONClass = NSClassFromString(@"FXJSON");
@@ -415,19 +413,30 @@ static NSMutableDictionary *classValues = nil;
                 {
                     object = objc_msgSend(FXJSONClass, @selector(objectWithJSONData:), data);
                 }
-                else if ([NSJSONSerialization class])
-                {
-                    object = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingAllowFragments error:NULL];
-                }
                 else
                 {
-                    [NSException raise:NSGenericException format:@"No JSON deserialisation class found. Add FXJSON (https://github.com/nicklockwood/FXJSON) to the project to resolve this."];
+                    
+#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_5_0 || __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_7
+
+                    object = [NSJSONSerialization JSONObjectWithData:data
+                                                             options:NSJSONReadingAllowFragments
+                                                               error:NULL];
+#else
+                    [NSException raise:NSGenericException format:@"NSJSONSerialization is not available on some of the platforms you are targeting. Add FXJSON (https://github.com/nicklockwood/FXJSON) to the project to resolve this."];
+#endif
                 }
-                if (!object)
-                {
-                    //data is not a known serialisation format
-                    object = data;
-                }
+            }
+            else
+            {
+                //attempt to deserialise data as a plist
+                NSPropertyListFormat format;
+                NSPropertyListReadOptions options = NSPropertyListMutableContainersAndLeaves;
+                object = [NSPropertyListSerialization propertyListWithData:data options:options format:&format error:NULL];
+            }
+            if (!object)
+            {
+                //data is not a known serialisation format
+                object = data;
             }
         }
     }

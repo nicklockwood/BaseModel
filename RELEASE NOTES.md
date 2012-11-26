@@ -1,3 +1,8 @@
+Version 2.4.1
+
+- BaseModel will no longer attempt to treat resource files as JSON unless the file has a "json" or "js" extension
+- Added more robust warning if using JSON when targeting platforms that do not support it
+
 Version 2.4
 
 - Added support for loading resource files encoded in JSON format
