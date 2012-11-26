@@ -1,7 +1,7 @@
 //
 //  HRCoder.h
 //
-//  Version 1.1.3
+//  Version 1.2
 //
 //  Created by Nick Lockwood on 24/04/2012.
 //  Copyright (c) 2011 Charcoal Design
@@ -55,8 +55,12 @@ static NSString *const HRCoderObjectAliasKey = @"$alias";
     NSMutableDictionary *_knownObjects;
     NSMutableDictionary *_unresolvedAliases;
     NSString *_keyPath;
+    NSMutableData *_data;
+    NSPropertyListFormat _outputFormat;
 }
 #endif
+
+@property (nonatomic, assign) NSPropertyListFormat outputFormat;
 
 + (id)unarchiveObjectWithPlist:(id)plist;
 + (id)unarchiveObjectWithData:(NSData *)data;
@@ -65,11 +69,9 @@ static NSString *const HRCoderObjectAliasKey = @"$alias";
 + (NSData *)archivedDataWithRootObject:(id)rootObject;
 + (BOOL)archiveRootObject:(id)rootObject toFile:(NSString *)path;
 
-- (id)unarchiveObjectWithPlist:(id)plist;
-- (id)unarchiveObjectWithData:(NSData *)data;
-- (id)unarchiveObjectWithFile:(NSString *)path;
-- (id)archivedPlistWithRootObject:(id)rootObject;
-- (NSData *)archivedDataWithRootObject:(id)rootObject;
-- (BOOL)archiveRootObject:(id)rootObject toFile:(NSString *)path;
+- (id)initForReadingWithData:(NSData *)data;
+- (id)initForWritingWithMutableData:(NSMutableData *)data;
+- (void)finishDecoding;
+- (void)finishEncoding;
 
 @end

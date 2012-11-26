@@ -1,3 +1,10 @@
+Version 2.4
+
+- Added support for loading resource files encoded in JSON format
+- BaseModel now requires ARC. See README file for details on how to upgrade
+- Removed uniqueID property because it complicates the class interface for no good reason
+- Corrected a number of typos and innacuracies in the documentation
+
 Version 2.3.5
 
 - Fixed a bug when creating BaseModel instances that are initialised with a resource file from within the init method of another BaseModel instance.

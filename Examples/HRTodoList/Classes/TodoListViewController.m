@@ -31,7 +31,6 @@
 {	
 	UIViewController *viewController = [[NewItemViewController alloc] init];
 	[self.navigationController pushViewController:viewController animated:YES];
-    [viewController release];
 }
 
 #pragma mark -
@@ -73,7 +72,7 @@
 	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellType];
 	if (cell == nil)
 	{
-		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellType] autorelease];
+		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellType];
 	}
 	
 	TodoItem *item = [[TodoList sharedInstance].items objectAtIndex:indexPath.row];

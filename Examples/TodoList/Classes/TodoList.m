@@ -36,10 +36,5 @@
 	[aCoder encodeObject:items forKey:@"items"];
 }
 
-- (void)dealloc
-{
-	[items release];
-	[super dealloc];
-}
 
 @end

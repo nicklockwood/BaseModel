@@ -40,11 +40,6 @@
 	[[TodoList sharedInstance] save];
 }
 
-- (void)dealloc
-{
-	[label release];
-	[super dealloc];
-}
 
 
 @end

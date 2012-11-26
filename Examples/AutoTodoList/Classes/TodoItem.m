@@ -34,10 +34,5 @@
 //note: we've not implemented the NSCoding methods
 //the AutoCoding library takes care of this for us
 
-- (void)dealloc
-{
-	[label release];
-	[super dealloc];
-}
 
 @end

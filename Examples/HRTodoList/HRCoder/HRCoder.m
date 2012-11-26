@@ -1,7 +1,7 @@
 //
 //  HRCoder.m
 //
-//  Version 1.1.3
+//  Version 1.2
 //
 //  Created by Nick Lockwood on 24/04/2012.
 //  Copyright (c) 2011 Charcoal Design
@@ -33,7 +33,7 @@
 #import "HRCoder.h"
 
 
-@interface NSObject (HRCoding)
+@interface NSObject (HRCoding_Private)
 
 - (id)unarchiveObjectWithHRCoder:(HRCoder *)coder;
 - (id)archivedObjectWithHRCoder:(HRCoder *)coder;
@@ -67,6 +67,7 @@
 @property (nonatomic, strong) NSMutableDictionary *knownObjects;
 @property (nonatomic, strong) NSMutableDictionary *unresolvedAliases;
 @property (nonatomic, strong) NSString *keyPath;
+@property (nonatomic, strong) NSMutableData *data;
 
 + (NSString *)classNameKey;
 
@@ -90,12 +91,31 @@
 {
     if ((self = [super init]))
     {
-        _stack = [[NSMutableArray alloc] initWithObjects:[NSMutableDictionary dictionary], nil];
+        self.stack = [NSMutableArray arrayWithObject:[NSMutableDictionary dictionary]];
         _knownObjects = [[NSMutableDictionary alloc] init];
         _unresolvedAliases = [[NSMutableDictionary alloc] init];
+        _outputFormat = NSPropertyListXMLFormat_v1_0;
     }
     return self;
 }
+
+#if !__has_feature(objc_arc)
+
+- (void)dealloc
+{
+    [_stack release];
+    [_knownObjects release];
+    [_unresolvedAliases release];
+    [_keyPath release];
+    [_data release];
+    [super dealloc];
+}
+
+#endif
+
+
+#pragma mark -
+#pragma mark Unarchiving
 
 + (id)unarchiveObjectWithPlist:(id)plist
 {
@@ -105,65 +125,31 @@
     [coder autorelease];
 #endif
     
-    return [coder unarchiveObjectWithPlist:plist];
+    return [coder unarchiveRootObjectWithPlist:plist];
 }
 
 + (id)unarchiveObjectWithData:(NSData *)data
 {
-    HRCoder *coder = [[self alloc] init];
+    //attempt to deserialise data as a plist
+    id plist = nil;
+    if (data)
+    {
+        NSPropertyListFormat format;
+        NSPropertyListReadOptions options = NSPropertyListMutableContainersAndLeaves;
+        plist = [NSPropertyListSerialization propertyListWithData:data options:options format:&format error:NULL];
+    }
     
-#if !__has_feature(objc_arc)
-    [coder autorelease];
-#endif
-    
-    return [coder unarchiveObjectWithData:data];
+    //unarchive
+    return [self unarchiveObjectWithPlist:plist];
 }
 
 + (id)unarchiveObjectWithFile:(NSString *)path
 {
-    HRCoder *coder = [[self alloc] init];
-    
-#if !__has_feature(objc_arc)
-    [coder autorelease];
-#endif
-    
-    return [coder unarchiveObjectWithFile:path];
+    //load the file
+    return [self unarchiveObjectWithData:[NSData dataWithContentsOfFile:path]];
 }
 
-+ (id)archivedPlistWithRootObject:(id)rootObject
-{
-    HRCoder *coder = [[self alloc] init];
-    
-#if !__has_feature(objc_arc)
-    [coder autorelease];
-#endif
-    
-    return [coder archivedPlistWithRootObject:rootObject];
-}
-
-+ (NSData *)archivedDataWithRootObject:(id)rootObject
-{
-    HRCoder *coder = [[self alloc] init];
-    
-#if !__has_feature(objc_arc)
-    [coder autorelease];
-#endif
-    
-    return [coder archivedDataWithRootObject:rootObject];
-}
-
-+ (BOOL)archiveRootObject:(id)rootObject toFile:(NSString *)path
-{
-    HRCoder *coder = [[self alloc] init];
-    
-#if !__has_feature(objc_arc)
-    [coder autorelease];
-#endif
-    
-    return [coder archiveRootObject:rootObject toFile:path];
-}
-
-- (id)unarchiveObjectWithPlist:(id)plist
+- (id)unarchiveRootObjectWithPlist:(id)plist
 {
     [_stack removeAllObjects];
     [_knownObjects removeAllObjects];
@@ -203,68 +189,115 @@
             }
         }
     }
-    [_unresolvedAliases removeAllObjects];
-    [_knownObjects removeAllObjects];
-    [_stack removeAllObjects];
+    [self finishDecoding];
     return rootObject;
 }
 
-- (id)unarchiveObjectWithData:(NSData *)data
+- (id)initForReadingWithData:(NSData *)data
 {
-    //attempt to deserialise data as a plist
-    id plist = nil;
-    if (data)
+    if ((self = [self init]))
     {
-        NSPropertyListFormat format;
-        NSPropertyListReadOptions options = NSPropertyListMutableContainersAndLeaves;
-        plist = [NSPropertyListSerialization propertyListWithData:data options:options format:&format error:NULL];
+        //attempt to deserialise data as a plist
+        if (data)
+        {
+            //load plist
+            NSPropertyListReadOptions options = NSPropertyListMutableContainersAndLeaves;
+            id plist = [NSPropertyListSerialization propertyListWithData:data
+                                                                 options:options
+                                                                  format:&_outputFormat
+                                                                   error:NULL];
+            //only works if root object is a dictionary
+            if ([plist isKindOfClass:[NSDictionary class]])
+            {
+                [_stack addObject:plist];
+            }
+            else
+            {
+                [NSException raise:NSGenericException format:@"initForReadingWithData: method requires that the root object in the plist data is an NSDictionary. Decoding an %@ is not supported with this method. Try using unarchiveObjectWithData: instead.", [plist class]];
+            }
+        }
     }
+    return self;
+}
+
+- (void)finishDecoding
+{
+    [_unresolvedAliases removeAllObjects];
+    [_knownObjects removeAllObjects];
+    [_stack setArray:[NSMutableArray arrayWithObject:[NSMutableDictionary dictionary]]];
+}
+
+
+#pragma mark -
+#pragma mark Archiving
+
++ (id)archivedPlistWithRootObject:(id)rootObject
+{
+    HRCoder *coder = [[self alloc] init];
+    id plist = [coder archiveRootObject:rootObject];
     
-    //unarchive
-    return [self unarchiveObjectWithPlist:plist];
-}
-
-- (id)unarchiveObjectWithFile:(NSString *)path
-{
-    //load the file
-    return [self unarchiveObjectWithData:[NSData dataWithContentsOfFile:path]];
-}
-
-- (id)archivedPlistWithRootObject:(id)rootObject
-{
-    [_stack removeAllObjects];
-    [_knownObjects removeAllObjects];
-    if (rootObject) [_knownObjects setObject:rootObject forKey:HRCoderRootObjectKey];
-    id plist = [rootObject archivedObjectWithHRCoder:self];
-    [_knownObjects removeAllObjects];
-    [_stack removeAllObjects];
+#if !__has_feature(objc_arc)
+    [coder release];
+#endif
+    
     return plist;
 }
 
-- (NSData *)archivedDataWithRootObject:(id)rootObject
++ (NSData *)archivedDataWithRootObject:(id)rootObject
 {
-    id object = [self archivedPlistWithRootObject:rootObject];
-    NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
-    return [NSPropertyListSerialization dataWithPropertyList:object format:format options:0 error:NULL];
+    NSMutableData *data = [NSMutableData data];
+    HRCoder *coder = [[self alloc] initForWritingWithMutableData:data];
+    [coder archiveRootObject:rootObject];
+    
+#if !__has_feature(objc_arc)
+    [coder release];
+#endif
+    
+    return data;
 }
 
-- (BOOL)archiveRootObject:(id)rootObject toFile:(NSString *)path
++ (BOOL)archiveRootObject:(id)rootObject toFile:(NSString *)path
 {
     return [[self archivedDataWithRootObject:rootObject] writeToFile:path atomically:YES];
 }
 
-#if !__has_feature(objc_arc)
-
-- (void)dealloc
+- (id)initForWritingWithMutableData:(NSMutableData *)data
 {
-    [_stack release];
-    [_knownObjects release];
-    [_unresolvedAliases release];
-    [_keyPath release];
-    [super dealloc];
+    if ((self = [self init]))
+    {
+        //set data
+        self.data = data;
+    }
+    return self;
 }
 
-#endif
+- (id)archiveRootObject:(id)rootObject
+{
+    [_knownObjects removeAllObjects];
+    [self encodeRootObject:rootObject];
+    id plist = [_stack lastObject];
+    [self finishEncoding];
+    return plist;
+}
+
+- (void)finishEncoding
+{
+    if (_data)
+    {
+        NSData *data = [NSPropertyListSerialization dataWithPropertyList:[_stack lastObject]
+                                                                  format:_outputFormat
+                                                                 options:0
+                                                                   error:NULL];
+        [_data setData:data];
+        self.data = nil;
+    }
+    [_knownObjects removeAllObjects];
+    [_stack setArray:[NSMutableArray arrayWithObject:[NSMutableDictionary dictionary]]];
+}
+
+
+#pragma mark -
+#pragma mark NSCoding
 
 - (BOOL)allowsKeyedCoding
 {
@@ -306,6 +339,15 @@
 {
     id object = [self encodedObject:objv forKey:key];
     if (object) [[_stack lastObject] setObject:object forKey:key];
+}
+
+- (void)encodeRootObject:(id)rootObject
+{
+    if (rootObject)
+    {
+        [_knownObjects setObject:rootObject forKey:HRCoderRootObjectKey];
+        [_stack setArray:[NSMutableArray arrayWithObject:[rootObject archivedObjectWithHRCoder:self]]];
+    }
 }
 
 - (void)encodeConditionalObject:(id)objv forKey:(NSString *)key
@@ -433,14 +475,10 @@
 
 @implementation NSObject(HRCoding)
 
-- (BOOL)useHRCoderIfAvailable
-{
-    return YES;
-}
-
 - (id)unarchiveObjectWithHRCoder:(HRCoder *)coder
 {
-    return self;
+    [NSException raise:NSGenericException format:@"%@ is not a supported HRCoder archive type", [self class]];
+    return nil;
 }
 
 - (id)archivedObjectWithHRCoder:(HRCoder *)coder
@@ -540,7 +578,12 @@
 
 
 @implementation NSString(HRCoding)
-    
+
+- (id)unarchiveObjectWithHRCoder:(HRCoder *)coder
+{
+    return self;
+}
+
 - (id)archivedObjectWithHRCoder:(HRCoder *)coder
 {
     return self;
@@ -550,6 +593,11 @@
 
 
 @implementation NSData(HRCoding)
+
+- (id)unarchiveObjectWithHRCoder:(HRCoder *)coder
+{
+    return self;
+}
 
 - (id)archivedObjectWithHRCoder:(HRCoder *)coder
 {
@@ -561,6 +609,11 @@
 
 @implementation NSNumber(HRCoding)
 
+- (id)unarchiveObjectWithHRCoder:(HRCoder *)coder
+{
+    return self;
+}
+
 - (id)archivedObjectWithHRCoder:(HRCoder *)coder
 {
     return self;
@@ -570,6 +623,11 @@
 
 
 @implementation NSDate(HRCoding)
+
+- (id)unarchiveObjectWithHRCoder:(HRCoder *)coder
+{
+    return self;
+}
 
 - (id)archivedObjectWithHRCoder:(HRCoder *)coder
 {

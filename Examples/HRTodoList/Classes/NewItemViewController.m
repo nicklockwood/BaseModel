@@ -13,7 +13,7 @@
 
 @interface NewItemViewController()
 
-@property (nonatomic, retain) TodoItem *item;
+@property (nonatomic, strong) TodoItem *item;
 
 @end
 
@@ -46,10 +46,5 @@
 #pragma mark -
 #pragma mark Cleanup
 
-- (void)dealloc
-{	
-	[item release];
-	[super dealloc];
-}
 
 @end

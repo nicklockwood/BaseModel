@@ -1,7 +1,7 @@
 //
 //  BaseModel.h
 //
-//  Version 2.3.5
+//  Version 2.4
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -45,15 +45,13 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 
 //loading sequence:
 //setUp called first
-//then setWithDictionary/Array/String if resource file exists
+//then setWithDictionary/Array/String/etc if resource file exists
 //then setWithCoder if save file exists
 
 - (void)setUp;
 - (void)setWithDictionary:(NSDictionary *)dict;
 - (void)setWithArray:(NSArray *)array;
 - (void)setWithString:(NSString *)string;
-- (void)setWithNumber:(NSNumber *)number;
-- (void)setWithData:(NSData *)data;
 - (void)setWithCoder:(NSCoder *)coder;
 
 //coding
@@ -109,14 +107,5 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 //useful for creating universally unique
 //identifiers and filenames for model objects
 + (NSString *)newUniqueIdentifier;
-
-#ifdef BASEMODEL_ENABLE_UNIQUE_ID
-
-//optional uniqueID property
-//you can enable this by adding BASEMODEL_ENABLE_UNIQUE_ID
-//to your preprocessor macros in the project build settings
-@property (nonatomic, strong) NSString *uniqueID;
-
-#endif
 
 @end

@@ -3,23 +3,23 @@ Purpose
 
 BaseModel provides a base class for building model objects for your iOS or Mac OS projects. It saves you the hassle of writing boilerplate code, and encourages good practices by reducing the incentive to cut corners in your model implementation.
 
-The BaseModel object uses Plists and the NSCoding protocol for serialisation. It is not designed for use with Core Data, although in principle the class could be extended to work with Core Data if needed by changing the BaseModel superclass to an NSManagedObject.
+The BaseModel object uses property lists and the NSCoding protocol for serialisation. It is not designed for use with Core Data, although in principle the class could be extended to work with Core Data if needed by changing the BaseModel superclass to an NSManagedObject.
 
 BaseModel is really designed as an *alternative* to Core Data for developers who prefer to have a little more control over the implementation of their data stack. BaseModel gives you precise control over the location and serialisation of your data files, whilst still proving enough automatic behaviour to save you from writing the same code over and over again.
 
-BaseModel is designed to work with the AutoCoding library (https://github.com/nicklockwood/AutoCoding). It does not require this library to function, but when used in combination, BaseModel objects support automatic loading and saving without needing to write your own NSCoding methods. Use of AutoCoding is completely optional. For an example of how it works, check out the *AutoTodoList* example.
+BaseModel is designed to work with the AutoCoding library (https://github.com/nicklockwood/AutoCoding). It does not require this library to function but when used in combination, BaseModel objects support automatic loading and saving without needing to write your own NSCoding methods. Use of AutoCoding is completely optional. For an example of how it works, check out the *AutoTodoList* example.
 
-BaseModel is also designed to work with the HRCoder library (https://github.com/nicklockwood/HRCoder) as an alternative mechanism for loading an saving data in a human readable/editable format. When used in conjunction with AutoCoding, HRCoder allows you to specify your data files in a standard format and avoid having to write any `setWith...` methods. Use of HRCoder is completely optional. For an example of how this works, check out the *HRTodoList* example.
+BaseModel is also designed to work with the HRCoder library (https://github.com/nicklockwood/HRCoder) as an alternative mechanism for loading and saving data in a human readable/editable format. HRCoder allows you to specify your data files in a standard format, and when used in conjunction with AutoCoding avoids the need for you to write any `setWith...` methods. Use of HRCoder is completely optional. For an example of how this works, check out the *HRTodoList* example.
 
 BaseModel is also designed to work with the CryptoCoding library (https://github.com/nicklockwood/CryptoCoding). It does not require this library to function, but when used in conjunction with CryptoCoding, BaseModel objects support automatic AES encryption of the entire object when saved or loaded to disk. Use of CryptoCoding is completely optional. For an example of how it works, check out the *CryptoTodoList* example.
 
-**Note:** You can combine AutoCoding with either HRCoder or CryptoCoding. AutoCoding is independent of the coding scheme used.
+**Note:** You can combine AutoCoding with either HRCoder or CryptoCoding, or neither. AutoCoding is independent of the coding scheme used.
 
 
 Supported OS & SDK Versions
 -----------------------------
 
-* Supported build target - iOS 6.0 / Mac OS 10.8 (Xcode 4.5.1, Apple LLVM compiler 4.1)
+* Supported build target - iOS 6.0 / Mac OS 10.8 (Xcode 4.5.2, Apple LLVM compiler 4.1)
 * Earliest supported deployment target - iOS 5.0 / Mac OS 10.7
 * Earliest compatible deployment target - iOS 4.3 / Mac OS 10.6
 
@@ -29,19 +29,21 @@ NOTE: 'Supported' means that the library has been tested with this version. 'Com
 ARC Compatibility
 ------------------
 
-As of version 1.2.1, BaseModel automatically works with both ARC and non-ARC projects through conditional compilation. There is no need to exclude BaseModel files from the ARC validation process, or to convert BaseModel using the ARC conversion tool.
+As of version 2.4, BaseModel requires ARC. If you wish to use BaseModel in a non-ARC project, just add the -fobjc-arc compiler flag to the BaseModel.m class. To do this, go to the Build Phases tab in your target settings, open the Compile Sources group, double-click BaseModel.m in the list and type -fobjc-arc into the popover.
+
+If you wish to convert your whole project to ARC, comment out the #error line in BaseModel.m, then run the Edit > Refactor > Convert to Objective-C ARC... tool in Xcode and make sure all files that you wish to use ARC for (including BaseModel.m) are checked.
 
 
 Thread Safety
 --------------
 
-BaseModel instances can only be safely created on the main thread. Once created, it should be safe to access them from multiple threads, provided that any custom methods and properties that are added by the user are thread-safe.
+BaseModel instances can be safely created on any thread, however a number of BaseModel operations are synchronized on a per-class basis, so creating BaseModel instances or accessing the shared instance concurrently on multiple threads may lead to unexpected performance issues.
 
 
 Installation
 --------------
 
-To use the BaseModel class in your project, just drag the BaseModel.h and .m files into your project. BaseModel has no required dependencies, however you may wish to also include the optional AutoCoding library (https://github.com/nicklockwood/AutoCoding) to get the full benefits of using BaseModel, and you may also wish to include the HRCoding (https://github.com/nicklockwood/HRCoding) and CryptoCoding (https://github.com/nicklockwood/CryptoCoding) libraries to enable additional BaseModel functionality.
+To use the BaseModel class in your project, just drag the BaseModel.h and .m files into your project. BaseModel has no required dependencies, however you may wish to also include the optional AutoCoding library (https://github.com/nicklockwood/AutoCoding) to get the full benefits of using BaseModel, and you may also wish to include the HRCoding (https://github.com/nicklockwood/HRCoding) or CryptoCoding (https://github.com/nicklockwood/CryptoCoding) libraries to enable additional BaseModel functionality.
 
 
 Classes
@@ -57,14 +59,12 @@ The BaseModel class implements the BaseModel protocol, which specifies some opti
 
     - (void)setUp;
     
-BaseModel's initialisation routine is quite complex, and it is not advised that you attempt to override any of the constructor methods (there is no 'designated initializer'). Instead, to perform initialisation logic, implement the setUp method. This is called after the class has been successfully initialised, so there is no need to verify that self is not nil or call `[super setUp]` (although it is safe to do so). Like `init`, `setUp` is called only once at the start of the lifetime of an instance, so it is safe to set properties without releasing their existing values. You should never call `setUp` yourself directly, except in the context of calling `[super setUp]` when subclassing your own BaseModel subclasses.
+BaseModel's initialisation routine is quite complex and follows a multi-step process. To simplify configuration, BaseModel provides a `setUp` method that is called before anything else so you can pre-configure your instance. This is called only after a successful `[super init]`, so there is no need to verify that self is not nil or call `[super setUp]` (unless you are subclassing one of your own BaseModel subclasses). Like `init`, `setUp` is called only once at the start of the lifetime of an instance, so it is safe to set properties without releasing their existing values (relevant only if you are not using ARC). You should never call `setUp` yourself directly, except in the context of calling `[super setUp]` when subclassing your own BaseModel subclasses.
 
     - (void)setWithDictionary:(NSDictionary *)dict;
     - (void)setWithArray:(NSArray *)array;
     - (void)setWithString:(NSString *)string;
-    - (void)setWithNumber:(NSNumber *)number;
-    - (void)setWithData:(NSData *)data;
-
+    
 These methods are used to extend you model with the capability to be initialised from a standard object type (i.e. one that is supported by the Plist format). This is useful as it allows objects to be automatically loaded from a Plist in your application bundle. It could also be used to instantiate objects from other formats like JSON or XML.
 
 These methods are called after the `setUp` method, so you should not assume that class properties and ivars do not already have values at the point when this method is called. If you are not using ARC, be careful to safely release any property values before setting them. **Note:** these methods are defined in the protocol only to help with code autocompletion - it is actually possible to initialise a BaseModel instance with any kind of object if you define an appropriate setup method of the form `setWith[ClassName]:` in your BaseModel subclass.
@@ -80,16 +80,6 @@ This method is called by `initWithCoder:` as part of the NSCoding implementation
 The BaseModel class can optionally implement the NSCoding protocol methods. If you are implementing NSCoding serialisation for your class, you should implement this method. Note that if you are using the AutoCoding library, this method is already implemented for you.
 
 
-Optional properties
---------------
-
-The BaseModel class has the following instance property, which is disabled by default (to allow developer complete control over their model structure) but can be enabled by adding BASEMODEL_ENABLE_UNIQUE_ID to your project's preprocessor macros, which can be found in the build settings:
-
-    @property (nonatomic, retain) NSString *uniqueID;
-    
-This property is used to store a unique identifier for a given BaseModel instance. The uniqueID getter method is actually a lazy constructor that uses the `newUniqueIdentifier` method to create a globally unique ID the first time it is called for each model instance, so you should normally not need to set this property unless you need to override the ID for a specific object. Note however that responsibility for loading, saving and copying this ID is left to the developer. If you do not preserve this value when saving and loading your model then it will be different each time the object is re-instantiated (unless you are using the AutoCoding library in which case this property is automatically saved and loaded along with the other class properties).
-
-
 Methods
 ---------------
 
@@ -103,11 +93,11 @@ Create an autoreleased instance or initialises a retained instance of the class 
     + (instancetype)instanceWithObject:(NSDictionary *)dict;
     - (instancetype)initWithObject:(NSDictionary *)dict;
     
-Creates an instance of the class and initialises it using the supplied object. This is useful when loading a model from an embedded Plist file in the application bundle, or creating model objects from JSON data returned by a web service. This method requires that an appropriate setter method is defined on your class, where the setter name is of the form `setWith[ClassName]:`. For example, to initialise the model using an NSDictionary, your BaseModel subclass must have a method called `setWithDictionary:`. This method will attempt to initialise the class from `resourceFile` (if that file exists) prior to calling `setWith[ClassName]:`, so if your resourceFile contains a serialised object, this method will be called twice (with different input).
+Creates an instance of the class and initialises it using the supplied object. This is useful when loading a model from an embedded property list file in the application bundle, or creating model objects from JSON data returned by a web service. This method requires that an appropriate setter method is defined on your class, where the setter name is of the form `setWith[ClassName]:`. For example, to initialise the model using an NSDictionary, your BaseModel subclass must have a method called `setWithDictionary:`. This method will attempt to initialise the class from `resourceFile` (if that file exists) prior to calling `setWith[ClassName]:`, so if your resourceFile contains a serialised object, this method will be called twice (with different input).
     
     + (NSArray *)instancesWithArray:(NSArray *)array;
 
-This is similar to `instanceWithArray:` but instead of initialising the object with an array, it iterates over each item in the array and creates an instance from each object by calling `instanceWithArray:` or `instanceWithDictionary:`, depending on the object type. The resultant objects are then returned as a new array. It is expected that the  objects in the array will be either NSDictionary or NSArray instances. Any other object type will be returned unmodified.
+This is similar to calling `instanceWithObject:` with an array parameter, but instead of initialising the object with an array, it iterates over each item in the array and creates an instance from each object by calling `instanceWithObject:` for each array element. The resultant BaseModel instances are then returned as a new array.
 
     + (instancetype)instanceWithCoder:(NSCoder *)decoder;
     - (instancetype)initWithCoder:(NSCoder *)decoder;
@@ -117,7 +107,7 @@ Initialises the object from an NSCoded archive using the NSCoding protocol. This
     + (instancetype)instanceWithContentsOfFile:(NSString *)filePath;
     - (instancetype)initWithContentsOfFile:(NSString *)filePath;
     
-Creates/initialises an instance of the model class from a file. If the file is a Plist then the model will be initialised using the appropriate `setWith[ClassName]:` method, depending on the type of the root object in the Plist. If the file is an NSCoded archive of an instance of the model then the object will be initialised using `setWithCoder:`. If the file format is not recognised, or the appropriate setWith... function is not implemented, the method will return nil.
+Creates/initialises an instance of the model class from a file. If the file is a property list then the model will be initialised using the appropriate `setWith[ClassName]:` method, depending on the type of the root object in the Plist. If the file is an NSCoded archive of an instance of the model then the object will be initialised using `setWithCoder:`. If the file format is not recognised, or the appropriate setWith... function is not implemented, the method will return nil.
 
     + (instancetype)sharedInstance;
 
@@ -129,7 +119,7 @@ Because `sharedInstance` is a lazy constructor, you cannot call it to test if a 
 
     + (void)setSharedInstance:(BaseModel *)instance;
 
-This method lets you replace the current shared instance with another instance of the model. This is useful for mutable models that may be re-loaded from a file or downloaded from a web service. The previous shared instance will be autoreleased when the new one is set. Note that since the shared model instance is replaced, any objects hanging on to references to the model will need to be updated. The model broadcasts a `BaseModelSharedInstanceUpdatedNotification` via NSNotificationCenter whenever this method is called, so setting an observer for that event is a good way to make sure that any retained references are updated. You can also set the BaseModel shared instance to nil in order to reclaim memory for BaseModel shared instances if they are no longer needed, or in the event of a memory warning.
+This method lets you replace the current shared instance with another instance of the model. This is useful for models that may be re-loaded from a file or downloaded from a web service. The previous shared instance will be autoreleased when the new one is set. Note that since the shared model instance is replaced, any objects hanging on to references to the model will need to be updated. The model broadcasts a `BaseModelSharedInstanceUpdatedNotification` via NSNotificationCenter whenever this method is called, so setting an observer for that event is a good way to make sure that any retained references are updated. You can also set the BaseModel shared instance to nil in order to reclaim memory for BaseModel shared instances if they are no longer needed, or in the event of a memory warning.
 
     + (void)reloadSharedInstance;
 
@@ -141,11 +131,15 @@ This method attempts to serialise the model object to the specified file using N
 
     - (BOOL)useHRCoderIfAvailable;
 
-Normally, BaseModel saves files using NSCoding and the NSKeyedArchiver, which creates binary Plist files in a complex format that is not human-readable or editable. The HRCoder library provides an alternative format for NSCoding that is more similar to an ordinary, hand-written Plist file. BaseModel detects the presence of the HRCoder class if it's included in the project and will use it by default if available. If you do not want to use HRCoder for saving a particular model, override this method and return NO. BaseModel is still able to load archives that are encoded using the HRCoding protocol if this setting is set to NO, but if you save over the file it will use NSKeyedArchiver.
+Normally, BaseModel saves files using NSCoding and the NSKeyedArchiver, which creates binary property list files in a complex format that is not human-readable or editable. The HRCoder library provides an alternative format for NSCoding that is more similar to an ordinary, hand-written property list file. BaseModel detects the presence of the HRCoder class if it's included in the project and will use it by default if available. If you do not want to use HRCoder for saving a particular model, override this method and return NO. BaseModel is still able to load archives that are encoded using the HRCoding protocol if this method returns NO, but if you save over the original file it will use NSKeyedArchiver.
+
+    + (NSString *)newUniqueIdentifier;
+    
+This method is used to generate a new, globally unique identifier. Each time it is called it uses the CFUUID APIs to create a brand new value that will never be repeated on any device. You can store this value in a property in your model to give it a unique identifier suitable for maintaining references to the object when it is loaded and saved. Note however that responsibility for loading, saving and copying this ID is left to the developer. If you do not preserve this value when saving and loading your model then it will be different each time the object is re-instantiated.
 
     + (NSString *)resourceFile;
 
-This method returns the filename for a file to be used to initialise every instance of the object. This would typically be a Plist file stored in the application bundle, and is a fantastic way to quickly define complex default data sets for model objects without having to hard-code them in the `setUp` method. This can be a full or partial path name. Partial paths will be treated as being relative to the application bundle resources folder. The default return value for this method is *ClassName.plist* where ClassName is the name of the model class, but you can override this method in your own subclasses to change the file name.
+This method returns the filename for a file to be used to initialise every instance of the object. This would typically be a property list file stored in the application bundle, and is a fantastic way to quickly define complex default data sets for model objects without having to hard-code them in the `setUp` method. This can be a full or partial path name. Partial paths will be treated as being relative to the application bundle resources folder. The default return value for this method is *ClassName.plist* where ClassName is the name of the model class, but you can override this method in your own subclasses to change the file name.
 
 In case you are wondering, there is a small overhead to loading this file the first time you create an instance of your model, however the file is cached and re-used for subsequently created model instances where possible. For models that have no initialisation file, just make sure that no file called *ClassName.plist* exists in the bundle, and no initialisation will take place. It is not necessary to override this method and return nil, unless you need to have a resource file called *ClassName.plist* that isn't being used for this purpose (in which case you should probably just rename your file).
 
@@ -164,23 +158,16 @@ This method checks to see if the instance being saved is the shared instance. If
             [[RootModel sharedInstance] save];
         }
     
-2. Use the `saveFilePathForID:` method to return a unique file name for the instance and then save the object using the `writeToFile:atomically:` method. Here is a sample implementation:
+2. You could implement your own logic to save the class to a file using the `writeToFile:` method with a custom file path:
 
         - (void)save
         {
-            [self writeToFile:[self.uniqueID stringByAppendingFileExtension:@"plist"] atomically:YES];
+            [self writeToFile:@"some-unique-filename.plist" atomically:YES];
         }
         
-You can then load the file again later using:
+    You can then load the file again later using:
 
-        MyModel *instance = [MyModel instanceWithContentsOfFile:[THE_UNIQUE_ID stringByAppendingFileExtension:@"plist"]];
-
-Note: that if you are using this approach (and you are not using the AutoCoding library) you will need to ensure that you save and load the uniqueID property, or the class will be saved with a different file name each time (leading to a proliferation of files). Also, unless you are using a custom, hard-coded value for uniqueID, you will need to save a reference to it in another file, otherwise you won't know what the name of the file is in order to load it again.
-
-    + (NSString *)newUniqueIdentifier;
-    
-This method is used to generate a new, globally unique identifier. Each time it is called it uses the CFUUID APIs to create a new value that will never be repeated on any device. You can store this value in a property in your model to give it a unique identifier suitable for maintaining references to the object when it is loaded and saved (or enabled the built-in `uniqueID` property that does this already). Note however that responsibility for loading, saving and copying this ID is left to the developer. If you do not preserve this value when saving and loading your model then it will be different each time the object is re-instantiated.
-
+        MyModel *instance = [MyModel instanceWithContentsOfFile:@"some-unique-filename.plist"];
 
 Usage
 -----------
