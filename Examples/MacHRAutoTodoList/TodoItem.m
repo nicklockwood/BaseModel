@@ -8,28 +8,28 @@
 
 #import "Todos.h"
 
+@interface TodoItem ()
+@property (readwrite) NSDate *created;
+@end
+
 @implementation TodoItem
 
-//@synthesize label;
-//@synthesize checked;
-//@synthesize label = _label, checked = _checked;
-//
-//- (void) setUp
-//{
-//	_checked 	= NO;
-//	_created 	= [NSDate date];
-//	_label  	= [NSString stringWithFormat:@"New todo, created:%@", [_created descriptionWithLocale:nil]];
-//	_priority  	= @1;
-//
-//}
+- (void) setUp
+{
+	_checked 	= NO;
+	_created 	= [NSDate date];
+	_label  	= [NSString stringWithFormat:@"New todo, created:%@", [_created descriptionWithLocale:nil]];
+	_priority  	= @1;
+
+}
 
 + (instancetype)instanceWithLabel:(NSString *)label
 {
 	TodoItem *instance = [self instance];
-	instance.priority = @1;
     instance.label = label;
     return instance;
 }
+
 + (instancetype)instanceWithObject:(id)object
 {
 	TodoItem *instance = [self instance];
@@ -41,8 +41,8 @@
 
 - (NSColor*) color
 {
-	NSLog(@"Requewsting color");
-	return 	self.priority.intValue == 1 ? [NSColor colorWithCalibratedRed:0.843 green:0.000 blue:0.119 alpha:1.000] :
+	return 	self.checked				? [NSColor colorWithPatternImage:[NSImage imageNamed:@"thatch"]] 				:
+			self.priority.intValue == 1 ? [NSColor colorWithCalibratedRed:0.843 green:0.000 blue:0.119 alpha:1.000] :
 			self.priority.intValue == 2 ? [NSColor colorWithCalibratedRed:1.000 green:0.861 blue:0.225 alpha:1.000] :
 			self.priority.intValue == 3 ? [NSColor colorWithCalibratedRed:0.986 green:0.484 blue:0.032 alpha:1.000] :
 			self.priority.intValue == 4 ? [NSColor colorWithCalibratedRed:0.739 green:0.900 blue:0.000 alpha:1.000] :
@@ -52,15 +52,12 @@
 										  [NSColor colorWithCalibratedRed:0.883 green:0.254 blue:0.700 alpha:1.000];
 }
 
-- (void)save
-{
-	//save the todolist
-	[[TodoList sharedInstance] save];
-}
 
-//note: we've not implemented the NSCoding methods
-//or initWithString/Dictionary, etc because the HRCoder
-//and AutoCoding libraries take care of this for us
++ (NSSet*) keyPathsForValuesAffectingColor { return [NSSet setWithArray:@[@"checked", @"priority"]]; }
+
+
+/* note: we've not implemented the NSCoding methods or initWithString/Dictionary, etc
+	because the HRCoder and AutoCoding libraries take care of this for us */
 
 
 @end

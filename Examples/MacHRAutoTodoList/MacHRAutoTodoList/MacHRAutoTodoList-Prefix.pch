@@ -7,8 +7,7 @@
 	#import <Foundation/Foundation.h>
 	#import <Cocoa/Cocoa.h>
 
-@interface CheckedValueTransformer : NSValueTransformer
-@end
+#define NOTIFICATIONC [NSNotificationCenter defaultCenter]
 
 typedef void (^updateKVCKeyBlock)();
 @interface NSObject (KVONotifyBlock)

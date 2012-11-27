@@ -16,7 +16,7 @@
 @property (nonatomic, assign)  BOOL       checked;
 @property (nonatomic, strong)  NSNumber  *priority;
 
-//@property (readonly) NSDate *created;
+@property (readonly) NSDate *created;
 @property (readonly) NSColor  *color;
 
 //+ (instancetype)instanceWithLabel:(NSString *)label;
@@ -25,4 +25,7 @@
 
 @interface TodoList : BaseModel
 @property (nonatomic, retain) NSMutableArray *items;
+- (TodoItem*) newTodo;
+//- (void) loadDefaultTodos;
+- (TodoItem*) copyTodo:(TodoItem*)todo;
 @end

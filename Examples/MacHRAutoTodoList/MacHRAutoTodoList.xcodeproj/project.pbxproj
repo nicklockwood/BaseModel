@@ -19,6 +19,7 @@
 		7B71432A1663AFB100B7661A /* BaseModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B7143171663A79800B7661A /* BaseModel.m */; };
 		7B71432D1663AFE300B7661A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7B71432B1663AFE300B7661A /* MainMenu.xib */; };
 		7B714350166407F500B7661A /* scratch in Resources */ = {isa = PBXBuildFile; fileRef = 7B71434F166407F500B7661A /* scratch */; };
+		7B71435616641ABE00B7661A /* thatch.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 7B71435516641ABE00B7661A /* thatch.jpg */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +46,7 @@
 		7B7143281663AF5600B7661A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		7B71432C1663AFE300B7661A /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		7B71434F166407F500B7661A /* scratch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = scratch; sourceTree = "<group>"; };
+		7B71435516641ABE00B7661A /* thatch.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = thatch.jpg; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +73,7 @@
 				7B71431B1663AB8000B7661A /* Todos.h */,
 				7B71431C1663AB8000B7661A /* TodoItem.m */,
 				7B71431E1663AB8000B7661A /* TodoList.m */,
+				7B7143231663ACB200B7661A /* TodoList.plist */,
 				7B7142ED1663A72200B7661A /* Frameworks */,
 				7B7142EB1663A72200B7661A /* Products */,
 			);
@@ -106,10 +109,10 @@
 		7B7142F51663A72200B7661A /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				7B71435516641ABE00B7661A /* thatch.jpg */,
 				7B71432B1663AFE300B7661A /* MainMenu.xib */,
 				7B71434F166407F500B7661A /* scratch */,
 				7B7143271663AF5600B7661A /* InfoPlist.strings */,
-				7B7143231663ACB200B7661A /* TodoList.plist */,
 				7B7142F61663A72200B7661A /* MacHRAutoTodoList-Info.plist */,
 				7B7142FA1663A72200B7661A /* main.m */,
 				7B7142FC1663A72200B7661A /* MacHRAutoTodoList-Prefix.pch */,
@@ -203,6 +206,7 @@
 				7B7143291663AF5600B7661A /* InfoPlist.strings in Resources */,
 				7B71432D1663AFE300B7661A /* MainMenu.xib in Resources */,
 				7B714350166407F500B7661A /* scratch in Resources */,
+				7B71435616641ABE00B7661A /* thatch.jpg in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -341,6 +345,7 @@
 				7B71430A1663A72200B7661A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

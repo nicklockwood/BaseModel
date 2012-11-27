@@ -11,13 +11,19 @@
 
 @interface TodoColorCell : NSActionCell
 @end
+@interface TodoPriorityClickCell : NSActionCell
+@end
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 
 @property (weak) IBOutlet	NSTableView *table;
-@property (nonatomic) 		TodoList 	*todos;
+@property (nonatomic)		TodoList 	*todos;
 
-- (IBAction) newTodo: (id) sender;
+- (IBAction) newTodo:		(id)sender;
+- (IBAction) loadFromPlist:	(id)sender;
+- (IBAction) copyTodo:		(id)sender;
+- (IBAction) saveTodos:		(id)sender;
+- (IBAction) deleteAll:		(id)sender;
 
 @end
 
