@@ -7,11 +7,6 @@
 	#import <Foundation/Foundation.h>
 	#import <Cocoa/Cocoa.h>
 
-#define NOTIFICATIONC [NSNotificationCenter defaultCenter]
 
-typedef void (^updateKVCKeyBlock)();
-@interface NSObject (KVONotifyBlock)
-- (void)updateKey:(NSString*)key inBlock:(updateKVCKeyBlock)block;
-@end
 
 #endif

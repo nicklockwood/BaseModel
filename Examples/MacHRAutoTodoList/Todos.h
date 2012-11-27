@@ -1,12 +1,9 @@
-//
+
 //  TodoItem.h
 //  TodoList
-//
-//  Created by Nick Lockwood on 28/07/2011.
-//  Copyright 2011 Charcoal Design. All rights reserved.
-//
 
-
+//  Created by Alex Gray on 11/26/12.
+//	Part of BaseModel by Nick Lockwood.
 
 #import "BaseModel.h"
 
@@ -16,16 +13,23 @@
 @property (nonatomic, assign)  BOOL       checked;
 @property (nonatomic, strong)  NSNumber  *priority;
 
-@property (readonly) NSDate *created;
 @property (readonly) NSColor  *color;
-
-//+ (instancetype)instanceWithLabel:(NSString *)label;
-
 @end
 
 @interface TodoList : BaseModel
+
 @property (nonatomic, retain) NSMutableArray *items;
+
 - (TodoItem*) newTodo;
-//- (void) loadDefaultTodos;
 - (TodoItem*) copyTodo:(TodoItem*)todo;
+
+
+// Subclass specific KVO Compliant "items" accessors to trigger NSArrayController updates on inserts / removals.
+
+- (id)	 objectInItemsAtIndex:		   (NSUInteger) index;
+- (void) removeObjectFromItemsAtIndex: (NSUInteger) index;
+- (void) insertObject:				   (TodoItem*)  todo     inItemsAtIndex:(NSUInteger)index;
+- (NSUInteger)	countOfItems;
+
+
 @end

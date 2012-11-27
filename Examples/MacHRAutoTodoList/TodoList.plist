@@ -8,7 +8,19 @@
 			<key>$class</key>
 			<string>TodoItem</string>
 			<key>label</key>
+			<string>Pay the apple tax.</string>
+			<key>checked</key>
+			<false/>
+			<key>priority</key>
+			<integer>5</integer>
+		</dict>
+		<dict>
+			<key>$class</key>
+			<string>TodoItem</string>
+			<key>label</key>
 			<string>Do washing</string>
+			<key>priority</key>
+			<integer>3</integer>
 		</dict>
 		<dict>
 			<key>$class</key>
@@ -16,19 +28,35 @@
 			<key>label</key>
 			<string>Mow lawn</string>
 			<key>checked</key>
-			<true/>
+			<false/>
+			<key>priority</key>
+			<integer>6</integer>
 		</dict>
 		<dict>
 			<key>$class</key>
 			<string>TodoItem</string>
 			<key>label</key>
 			<string>Write an open source library</string>
+			<key>priority</key>
+			<integer>4</integer>
 		</dict>
 		<dict>
 			<key>$class</key>
 			<string>TodoItem</string>
 			<key>label</key>
 			<string>Feed the cat</string>
+			<key>priority</key>
+			<integer>2</integer>
+		</dict>
+		<dict>
+			<key>$class</key>
+			<string>TodoItem</string>
+			<key>label</key>
+			<string>Make peace with oneself.</string>
+			<key>checked</key>
+			<false/>
+			<key>priority</key>
+			<integer>1</integer>
 		</dict>
 	</array>
 	<key>$class</key>
