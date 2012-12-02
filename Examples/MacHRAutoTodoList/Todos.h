@@ -9,27 +9,25 @@
 
 @interface TodoItem : BaseModel
 
-@property (nonatomic, strong)  NSString  *label;
-@property (nonatomic, assign)  BOOL       checked;
-@property (nonatomic, strong)  NSNumber  *priority;
+@property (readonly) 		  NSColor  	*color;
+@property (nonatomic, strong) NSString  *label;
+@property (nonatomic, strong) NSNumber  *priority;
+@property (nonatomic) 		  BOOL       checked;
 
-@property (readonly) NSColor  *color;
 @end
 
 @interface TodoList : BaseModel
 
-@property (nonatomic, retain) NSMutableArray *items;
+@property (nonatomic, strong) NSMutableArray *items;
 
 - (TodoItem*) newTodo;
-- (TodoItem*) copyTodo:(TodoItem*)todo;
-
+- (TodoItem*) copyTodo: (TodoItem*)todo;
 
 // Subclass specific KVO Compliant "items" accessors to trigger NSArrayController updates on inserts / removals.
-
+- (NSUInteger)	 countOfItems;
 - (id)	 objectInItemsAtIndex:		   (NSUInteger) index;
 - (void) removeObjectFromItemsAtIndex: (NSUInteger) index;
-- (void) insertObject:				   (TodoItem*)  todo     inItemsAtIndex:(NSUInteger)index;
-- (NSUInteger)	countOfItems;
-
+- (void)         insertObject:		   (TodoItem*)  todo
+			   inItemsAtIndex:		   (NSUInteger) index;
 
 @end

@@ -9,11 +9,6 @@
 
 #import "Todos.h"
 
-@interface TodoColorCell : NSActionCell
-@end
-@interface TodoPriorityClickCell : NSActionCell
-@end
-
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 
 @property (weak) IBOutlet	NSTableView *table;

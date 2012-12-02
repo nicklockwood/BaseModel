@@ -8,6 +8,10 @@
 
 #import "AppDelegate.h"
 
+@interface TodoColorCell : NSActionCell
+@end
+@interface TodoPriorityClickCell : NSActionCell
+@end
 
 @implementation AppDelegate
 
@@ -29,8 +33,8 @@
 
 -(void)awakeFromNib
 {
-	((NSTableColumn*)_table.tableColumns[[_table columnWithIdentifier:   @"Status"]]).dataCell = [TodoColorCell new];
-	((NSTableColumn*)_table.tableColumns[[_table columnWithIdentifier: @"Priority"]]).dataCell = [TodoPriorityClickCell new];
+	((NSTableColumn*)_table.tableColumns[[_table columnWithIdentifier:   @"Status"]]).dataCell = TodoColorCell.new;
+	((NSTableColumn*)_table.tableColumns[[_table columnWithIdentifier: @"Priority"]]).dataCell = TodoPriorityClickCell.new;
 }
 
 @end
@@ -41,20 +45,21 @@
 
 - (id) target 	{ return self; 					  }
 
-- (SEL) action	{ return @selector(tickPriority); }
+- (SEL) action	{ return @selector( tickPriority ); }
 
 - (void) tickPriority
 {
-	NSUInteger val = [[self objectValue]unsignedIntegerValue];
-	((TodoItem*)[TodoList sharedInstance].items[[(NSTableView*)[self controlView]selectedRow]]).priority = @( val < 8 ? val + 1 : 0 );
+	NSUInteger val = [self.objectValue unsignedIntegerValue];
+	((TodoItem*)TodoList.sharedInstance.items[((NSTableView*)self.controlView).selectedRow]).priority = @( val < 8 ? val + 1 : 0 );
 }
 
 - (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
-	[[NSColor darkGrayColor]set]; NSRectFill(cellFrame);
+	[NSColor.darkGrayColor set];
+	NSRectFill ( cellFrame );
 	NSString	*string = ((NSNumber*)self.objectValue).stringValue;
-	NSDictionary *attrs = @{ NSFontAttributeName : [NSFont fontWithName:@"Lucida Grande Bold" size: cellFrame.size.height - 10], NSForegroundColorAttributeName : [NSColor whiteColor] };
-	NSSize stringSize 	= [string sizeWithAttributes:attrs];
+	NSDictionary *attrs = @{ NSFontAttributeName : [NSFont fontWithName:@"Lucida Grande Bold" size: cellFrame.size.height - 10], NSForegroundColorAttributeName : NSColor.whiteColor };
+	NSSize   stringSize = [string sizeWithAttributes:attrs];
  	[string drawInRect: (NSRect) { NSMidX(cellFrame) - stringSize.width / 2, cellFrame.origin.y + 3, stringSize.width, stringSize.height } withAttributes:attrs];
 }
 

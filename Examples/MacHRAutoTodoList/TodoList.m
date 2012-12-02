@@ -15,11 +15,11 @@
 
 - (TodoItem*) newTodo
 {
-	TodoItem *newOne = [TodoItem instance];
-	[self insertObject:newOne inItemsAtIndex:self.items.count];
+	TodoItem *newOne = TodoItem.instance;
+	[self insertObject:newOne inItemsAtIndex:self.items.count];  // KVO Array insertion trigger.
 	return newOne;
 }
-- (TodoItem*) copyTodo:(TodoItem*)todo;
+- (TodoItem*) copyTodo: (TodoItem*)todo;
 {
 	TodoItem *newOne = todo.copy;
 	[self insertObject:newOne inItemsAtIndex:self.items.count];
