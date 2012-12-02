@@ -1,7 +1,7 @@
 //
 //  BaseModel.h
 //
-//  Version 2.4.1
+//  Version 2.4.2
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -88,7 +88,7 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 //loading and saving the model from a plist file
 + (instancetype)instanceWithContentsOfFile:(NSString *)path;
 - (instancetype)initWithContentsOfFile:(NSString *)path;
-- (void)writeToFile:(NSString *)path atomically:(BOOL)atomically;
+- (BOOL)writeToFile:(NSString *)path atomically:(BOOL)atomically;
 - (BOOL)useHRCoderIfAvailable;
 
 //resourceFile is a file, typically within the resource bundle that

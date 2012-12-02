@@ -1,7 +1,7 @@
 //
 //  BaseModel.m
 //
-//  Version 2.4.1
+//  Version 2.4.2
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -505,7 +505,7 @@ static NSMutableDictionary *classValues = nil;
     return ((self = nil));
 }
 
-- (void)writeToFile:(NSString *)path atomically:(BOOL)atomically
+- (BOOL)writeToFile:(NSString *)path atomically:(BOOL)atomically
 {
     NSData *data = nil;
     Class CryptoCoderClass = NSClassFromString(@"CryptoCoder");
@@ -524,7 +524,7 @@ static NSMutableDictionary *classValues = nil;
     {
         data = [NSKeyedArchiver archivedDataWithRootObject:self];
     }
-    [data writeToFile:[[self class] BaseModel_saveFilePath:path] atomically:YES];
+    return [data writeToFile:[[self class] BaseModel_saveFilePath:path] atomically:YES];
 }
 
 

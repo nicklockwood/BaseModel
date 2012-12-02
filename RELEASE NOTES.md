@@ -1,3 +1,7 @@
+Version 2.4.2
+
+- writeToFile:atomically: now returns a boolean indicating success or failure.
+
 Version 2.4.1
 
 - BaseModel will no longer attempt to treat resource files as JSON unless the file has a "json" or "js" extension
