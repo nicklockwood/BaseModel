@@ -1,7 +1,7 @@
 //
 //  HRCoder.m
 //
-//  Version 1.2
+//  Version 1.2.1
 //
 //  Created by Nick Lockwood on 24/04/2012.
 //  Copyright (c) 2011 Charcoal Design
@@ -517,17 +517,13 @@
     {
         //ordinary dictionary
         NSMutableDictionary *result = [NSMutableDictionary dictionary];
+		[coder.stack addObject:self];
         for (NSString *key in self)
         {
             id object = [coder decodeObjectForKey:key];
             if (object) [result setObject:object forKey:key];
         }
-        result = [result copy];
-        
-#if !__has_feature(objc_arc)
-        [result autorelease];
-#endif
-        
+		[coder.stack removeLastObject];
         return result;
     }
 }
