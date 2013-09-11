@@ -1,7 +1,7 @@
 //
 //  AutoCoding.m
 //
-//  Version 2.0
+//  Version 2.0.3
 //
 //  Created by Nick Lockwood on 19/11/2011.
 //  Copyright (c) 2011 Charcoal Design
@@ -31,7 +31,8 @@
 //
 
 #import "AutoCoding.h"
-#import <objc/runtime.h> 
+#import <objc/runtime.h>
+
 
 static void AC_swizzleInstanceMethod(Class c, SEL original, SEL replacement)
 {
@@ -47,6 +48,12 @@ static void AC_swizzleInstanceMethod(Class c, SEL original, SEL replacement)
     }
 }
 
+@interface NSObject (AutoCoding_NSCopying)
+
+- (id)copyWithZone:(NSZone *)zone;
+
+@end
+
 @implementation NSObject (AutoCoding)
 
 + (BOOL)supportsSecureCoding
@@ -56,17 +63,14 @@ static void AC_swizzleInstanceMethod(Class c, SEL original, SEL replacement)
 
 + (void)load
 {
-    AC_swizzleInstanceMethod(self, @selector(copy), @selector(copy_AC));
+    AC_swizzleInstanceMethod(self, @selector(methodSignatureForSelector:), @selector(methodSignatureForSelector_AC:));
+    AC_swizzleInstanceMethod(self, @selector(forwardInvocation:), @selector(forwardInvocation_AC:));
+    AC_swizzleInstanceMethod(self, @selector(respondsToSelector:), @selector(respondsToSelector_AC:));
 }
 
-- (instancetype)copy_AC
+- (instancetype)copyWithZone_AC:(NSZone *)zone __attribute__((ns_returns_retained))
 {
-    if ([self respondsToSelector:@selector(copyWithZone:)])
-    {
-        return [(id<NSCopying>)self copyWithZone:nil];
-    }
-    Class class = [self class];
-    NSObject *copy = [[class alloc] init];
+    NSObject *copy = [[[self class] allocWithZone:zone] init];
     for (NSString *key in [self codableProperties])
     {
         id object = [self valueForKey:key];
@@ -75,8 +79,44 @@ static void AC_swizzleInstanceMethod(Class c, SEL original, SEL replacement)
     return copy;
 }
 
+- (NSMethodSignature *)methodSignatureForSelector_AC:(SEL)selector
+{
+    @synchronized([self class])
+    {
+        //look up method signature
+        NSMethodSignature *signature = [self methodSignatureForSelector_AC:selector];
+        if (!signature && selector == @selector(copyWithZone:))
+        {
+            return [NSMethodSignature signatureWithObjCTypes:"@@:@"];
+        }
+        return signature;
+    }
+}
+
+- (void)forwardInvocation_AC:(NSInvocation *)invocation
+{
+    if ([invocation selector] == @selector(copyWithZone:))
+    {
+        [invocation setSelector:@selector(copyWithZone_AC:)];
+        [invocation invokeWithTarget:self];
+    }
+    else
+    {
+        [self forwardInvocation_AC:invocation];
+    }
+}
+
+- (BOOL)respondsToSelector_AC:(SEL)selector
+{
+    if (selector == @selector(copyWithZone:))
+    {
+        return YES;
+    }
+    return [self respondsToSelector_AC:selector];
+}
+
 + (instancetype)objectWithContentsOfFile:(NSString *)filePath
-{   
+{
     //load the file
     NSData *data = [NSData dataWithContentsOfFile:filePath];
     
@@ -150,74 +190,91 @@ static void AC_swizzleInstanceMethod(Class c, SEL original, SEL replacement)
             {
                 NSLog(@"AutoCoding Warning: uncodableKeys method is no longer supported. Use uncodableProperties instead.");
             }
-     
+            
             codableProperties = [NSMutableDictionary dictionary];
             unsigned int propertyCount;
             objc_property_t *properties = class_copyPropertyList(self, &propertyCount);
-            for (int i = 0; i < propertyCount; i++)
+            for (unsigned int i = 0; i < propertyCount; i++)
             {
                 //get property name
                 objc_property_t property = properties[i];
                 const char *propertyName = property_getName(property);
                 NSString *key = [NSString stringWithCString:propertyName encoding:NSUTF8StringEncoding];
                 
-                //get property type
-                Class class = [NSObject class];
-                char *typeEncoding = property_copyAttributeValue(property, "T");
-                switch (typeEncoding[0])
+                //check if codable
+                if (![[self uncodableProperties] containsObject:key])
                 {
-                    case '@':
+                    //get property type
+                    Class class = nil;
+                    char *typeEncoding = property_copyAttributeValue(property, "T");
+                    switch (typeEncoding[0])
                     {
-                        if (strlen(typeEncoding) >= 3)
+                        case '@':
                         {
-                            char *className = strndup(typeEncoding + 2, strlen(typeEncoding) - 3);
-                            class = NSClassFromString([NSString stringWithUTF8String:className]);
-                            free(className);
+                            if (strlen(typeEncoding) >= 3)
+                            {
+                                char *className = strndup(typeEncoding + 2, strlen(typeEncoding) - 3);
+                                NSString *name = [NSString stringWithUTF8String:className];
+                                NSRange range = [name rangeOfString:@"<"];
+                                if (range.location != NSNotFound)
+                                {
+                                    name = [name substringToIndex:range.location];
+                                }
+                                class = NSClassFromString(name) ?: [NSObject class];
+                                free(className);
+                            }
+                            break;
                         }
-                        break;
-                    }
-                    case 'c':
-                    case 'i':
-                    case 's':
-                    case 'l':
-                    case 'q':
-                    case 'C':
-                    case 'I':
-                    case 'S':
-                    case 'f':
-                    case 'd':
-                    case 'B':
-                    {
-                        class = [NSNumber class];
-                        break;
-                    }
-                }
-                free(typeEncoding);
-                
-                //see if there is a backing ivar
-                char *ivar = property_copyAttributeValue(property, "V");
-                if (ivar)
-                {
-                    //check if read-only
-                    char *readonly = property_copyAttributeValue(property, "R");
-                    if (readonly)
-                    {
-                        //check if ivar has KVC-compliant name
-                        NSString *ivarName = [NSString stringWithFormat:@"%s", ivar];
-                        if ([ivarName isEqualToString:key] ||
-                            [ivarName isEqualToString:[@"_" stringByAppendingString:key]])
+                        case 'c':
+                        case 'i':
+                        case 's':
+                        case 'l':
+                        case 'q':
+                        case 'C':
+                        case 'I':
+                        case 'S':
+                        case 'f':
+                        case 'd':
+                        case 'B':
                         {
-                            //no setter, but setValue:forKey: will still work
-                            codableProperties[key] = class;
+                            class = [NSNumber class];
+                            break;
                         }
-                        free(readonly);
+                        case '{':
+                        {
+                            class = [NSValue class];
+                            break;
+                        }
                     }
-                    else if (![[self uncodableProperties] containsObject:key])
+                    free(typeEncoding);
+                    
+                    if (class)
                     {
-                        //there is a setter method so setValue:forKey: will work
-                        codableProperties[key] = class;
+                        //see if there is a backing ivar
+                        char *ivar = property_copyAttributeValue(property, "V");
+                        if (ivar)
+                        {
+                            char *readonly = property_copyAttributeValue(property, "R");
+                            if (readonly)
+                            {
+                                //check if ivar has KVC-compliant name
+                                NSString *ivarName = [NSString stringWithFormat:@"%s", ivar];
+                                if ([ivarName isEqualToString:key] ||
+                                    [ivarName isEqualToString:[@"_" stringByAppendingString:key]])
+                                {
+                                    //no setter, but setValue:forKey: will still work
+                                    codableProperties[key] = class;
+                                }
+                                free(readonly);
+                            }
+                            else
+                            {
+                                //there is a setter method so setValue:forKey: will work
+                                codableProperties[key] = class;
+                            }
+                            free(ivar);
+                        }
                     }
-                    free(ivar);
                 }
             }
             free(properties);
@@ -241,7 +298,7 @@ static void AC_swizzleInstanceMethod(Class c, SEL original, SEL replacement)
         {
             propertiesByClass = [[NSMutableDictionary alloc] init];
         }
-
+        
         NSString *className = NSStringFromClass([self class]);
         NSDictionary *codableProperties = propertiesByClass[className];
         if (codableProperties == nil)

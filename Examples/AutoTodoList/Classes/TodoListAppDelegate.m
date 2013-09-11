@@ -14,7 +14,7 @@
 @synthesize window;
 @synthesize viewController;
 
-- (void)applicationDidFinishLaunching:(UIApplication *)application
+- (void)applicationDidFinishLaunching:(__unused UIApplication *)application
 {        
     [window makeKeyAndVisible];
 }

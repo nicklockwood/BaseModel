@@ -1,3 +1,9 @@
+Version 2.4.3
+
+- Added explicit function pointer casts for all obc_msgSend calls.
+- atomic argument is now respected when calling -writeToFile:atomically:
+- Now complies with the -Wextra warning level
+
 Version 2.4.2
 
 - writeToFile:atomically: now returns a boolean indicating success or failure.

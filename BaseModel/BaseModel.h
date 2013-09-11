@@ -1,7 +1,7 @@
 //
 //  BaseModel.h
 //
-//  Version 2.4.2
+//  Version 2.4.3
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design

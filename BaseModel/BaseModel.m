@@ -1,7 +1,7 @@
 //
 //  BaseModel.m
 //
-//  Version 2.4.2
+//  Version 2.4.3
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -303,7 +303,7 @@ static NSMutableDictionary *classValues = nil;
             SEL setter = NSSelectorFromString([self setterNameForClass:class]);
             if ([self respondsToSelector:setter])
             {
-                objc_msgSend(self, setter, object);
+                ((void (*)(id, SEL, id))objc_msgSend)(self, setter, object);
                 return self;
             }
             if ([class superclass] == [NSObject class]) break;
@@ -411,7 +411,7 @@ static NSMutableDictionary *classValues = nil;
                 Class FXJSONClass = NSClassFromString(@"FXJSON");
                 if (FXJSONClass)
                 {
-                    object = objc_msgSend(FXJSONClass, @selector(objectWithJSONData:), data);
+                    object = ((id (*)(id, SEL, id))objc_msgSend)(FXJSONClass, @selector(objectWithJSONData:), data);
                 }
                 else
                 {
@@ -476,7 +476,7 @@ static NSMutableDictionary *classValues = nil;
                 NSString *classNameKey = [HRCoderClass valueForKey:@"classNameKey"];
                 if (object[classNameKey])
                 {
-                    object = objc_msgSend(HRCoderClass, @selector(unarchiveObjectWithPlist:), object);
+                    object = ((id (*)(id, SEL, id))objc_msgSend)(HRCoderClass, @selector(unarchiveObjectWithPlist:), object);
                 }
             }
             
@@ -516,7 +516,7 @@ static NSMutableDictionary *classValues = nil;
     }
     else if (HRCoderClass && [self useHRCoderIfAvailable])
     {
-        id plist = objc_msgSend(HRCoderClass, @selector(archivedPlistWithRootObject:), self);
+        id plist = ((id (*)(id, SEL, id))objc_msgSend)(HRCoderClass, @selector(archivedPlistWithRootObject:), self);
         NSPropertyListFormat format = NSPropertyListBinaryFormat_v1_0;
         data = [NSPropertyListSerialization dataWithPropertyList:plist format:format options:0 error:NULL];
     }
@@ -524,7 +524,7 @@ static NSMutableDictionary *classValues = nil;
     {
         data = [NSKeyedArchiver archivedDataWithRootObject:self];
     }
-    return [data writeToFile:[[self class] BaseModel_saveFilePath:path] atomically:YES];
+    return [data writeToFile:[[self class] BaseModel_saveFilePath:path] atomically:atomically];
 }
 
 
