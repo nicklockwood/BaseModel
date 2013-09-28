@@ -476,7 +476,7 @@ static NSMutableDictionary *classValues = nil;
                 NSString *classNameKey = [HRCoderClass valueForKey:@"classNameKey"];
                 if (object[classNameKey])
                 {
-                    object = ((id (*)(id, SEL, id))objc_msgSend)(HRCoderClass, @selector(unarchiveObjectWithPlist:), object);
+                    object = ((id (*)(id, SEL, id))objc_msgSend)(HRCoderClass, NSSelectorFromString(@"unarchiveObjectWithPlist:"), object);
                 }
             }
             
@@ -510,13 +510,13 @@ static NSMutableDictionary *classValues = nil;
     NSData *data = nil;
     Class CryptoCoderClass = NSClassFromString(@"CryptoCoder");
     Class HRCoderClass = NSClassFromString(@"HRCoder");
-    if (CryptoCoderClass && [[self class] respondsToSelector:@selector(CCPassword)])
+    if (CryptoCoderClass && [[self class] respondsToSelector:NSSelectorFromString(@"CCPassword")])
     {
         data = [CryptoCoderClass archivedDataWithRootObject:self];
     }
     else if (HRCoderClass && [self useHRCoderIfAvailable])
     {
-        id plist = ((id (*)(id, SEL, id))objc_msgSend)(HRCoderClass, @selector(archivedPlistWithRootObject:), self);
+        id plist = ((id (*)(id, SEL, id))objc_msgSend)(HRCoderClass, NSSelectorFromString(@"archivedPlistWithRootObject:"), self);
         NSPropertyListFormat format = NSPropertyListBinaryFormat_v1_0;
         data = [NSPropertyListSerialization dataWithPropertyList:plist format:format options:0 error:NULL];
     }
