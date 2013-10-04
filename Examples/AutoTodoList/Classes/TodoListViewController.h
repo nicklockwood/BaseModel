@@ -6,11 +6,10 @@
 //  Copyright Charcoal Design 2010. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
 
 @interface TodoListViewController : UITableViewController
 
-- (IBAction)createNewItem;
+- (IBAction) createNewItem;
 
 @end
 

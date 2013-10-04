@@ -9,29 +9,21 @@
 #import "TodoItem.h"
 #import "TodoList.h"
 
-
 @implementation TodoItem
 
-@synthesize label;
-@synthesize checked;
++ (instancetype) instanceWithLabel:(NSString*)label	{	TRACE_CALL(_cmd, self, label, nil);
 
-+ (instancetype)instanceWithLabel:(NSString *)label
-{
-    return [self instanceWithObject:label];
+	return [self instanceWithObject:label];
+}
+- 			 (void) setWithString:	  (NSString*)string	{	TRACE_CALL(_cmd, self, string, nil);
+
+	_label = string;
+}
+- 			 (void) save											{	TRACE_CALL(_cmd, self, nil);
+
+	[TodoList.sharedInstance save]; 	/*save the todolist*/
 }
 
-- (void)setWithString:(NSString *)string
-{
-	self.label = string;
-}
-
-- (void)save
-{
-	//save the todolist
-	[[TodoList sharedInstance] save];
-}
-
-//note: we've not implemented the NSCoding methods
-//the AutoCoding library takes care of this for us
+//- (BOOL) useHRCoderIfAvailable { return YES; } note: we don't implement NSCoding methods as the AutoCoding library takes care of this by default.
 
 @end

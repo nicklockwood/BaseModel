@@ -10,37 +10,19 @@
 #import "TodoList.h"
 #import "TodoItem.h"
 
-
-@interface NewItemViewController()
-
-@property (nonatomic, strong) TodoItem *item;
-
-@end
-
+@interface NewItemViewController()		@property TodoItem *item;		@end
 
 @implementation NewItemViewController
 
-@synthesize item;
+#pragma mark - UITextViewDelegate methods
 
-#pragma mark -
-#pragma mark UITextViewDelegate methods
+- (void)textViewDidChange:(UITextView *)tV	{
 
-- (void)textViewDidChange:(UITextView *)textView
-{	
-	if (item == nil)
-	{
-		//create a new TodoItem and add to list
-		self.item = [TodoItem instanceWithLabel:textView.text];
-		[[TodoList sharedInstance].items addObject:item];
-	}
-	else
-	{
-		//update the TodoItem
-		item.label = textView.text;
-	}
-	
-	//save the item
-	[item save];
+													//	either update the existing TodoItem (setLabel:)
+	_item ? [_item setLabel:tV.text]		//	or create a new TodoItem and add to list (addObject:)
+			: [TodoList.sharedInstance.items addObject:_item = [TodoItem instanceWithLabel:tV.text]];
+
+	[_item save]; 	//save the item
 }
 
 #pragma mark -

@@ -11,79 +11,62 @@
 #import "TodoItem.h"
 #import "TodoList.h"
 
-
 @implementation TodoListViewController
 
-- (void)viewDidLoad
-{
-	[super viewDidLoad];
-	self.navigationItem.leftBarButtonItem = self.editButtonItem;
-	self.clearsSelectionOnViewWillAppear = YES;
+#pragma mark - UITableViewDataSource methods
+
+-        (NSInteger) tableView:(UITableView*)tV numberOfRowsInSection:(NSInteger)sect		{
+
+	return TRACE_CALL(_cmd, self, @(TodoList.sharedInstance.items.count),nil), TodoList.sharedInstance.items.count;
+
 }
+- (UITableViewCell*) tableView:(UITableView*)tV cellForRowAtIndexPath:(NSIndexPath*)iPath	{ 	static NSString *cellType	= @"Cell";
 
-- (void)viewWillAppear:(__unused BOOL)animated
-{
-	[super viewWillAppear:YES];
-	[self.tableView reloadData];
-}
+	TRACE_CALL(_cmd, self, @(iPath.row), nil);
 
-- (IBAction)createNewItem
-{	
-	UIViewController *viewController = [[NewItemViewController alloc] init];
-	[self.navigationController pushViewController:viewController animated:YES];
-}
-
-#pragma mark -
-#pragma mark UITableViewDelegate methods
-
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{	
-	TodoItem *item = [[TodoList sharedInstance].items objectAtIndex:indexPath.row];
-	item.checked = !item.checked;
-	[item save];
+	UITableViewCell *cell 	= [tV dequeueReusableCellWithIdentifier:cellType]
+								  ?: [UITableViewCell.alloc initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellType];
 	
-	[tableView reloadData];
-}
-
-- (UITableViewCellEditingStyle)tableView:(__unused UITableView *)tableView editingStyleForRowAtIndexPath:(__unused NSIndexPath *)indexPath
-{
-	return UITableViewCellEditingStyleDelete;
-}
-
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(__unused UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
-{
-	[[TodoList sharedInstance].items removeObjectAtIndex:indexPath.row];
-	[[TodoList sharedInstance] save];
-	
-	[tableView reloadData];
-}
-
-#pragma mark -
-#pragma mark UITableViewDataSource methods
-
-- (NSInteger)tableView:(__unused UITableView *)table numberOfRowsInSection:(__unused NSInteger)section
-{	
-	return [[TodoList sharedInstance].items count];
-}
-
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{	
-	static NSString *cellType = @"Cell";
-	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellType];
-	if (cell == nil)
-	{
-		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellType];
-	}
-	
-	TodoItem *item = [[TodoList sharedInstance].items objectAtIndex:indexPath.row];
-	cell.textLabel.text = item.label;
-	if (item.checked) {
-		cell.accessoryType = UITableViewCellAccessoryCheckmark;
-	} else {
-		cell.accessoryType = UITableViewCellAccessoryNone;
-	}
-	
+	TodoItem *item 			= TodoList.sharedInstance.items[iPath.row];
+	cell.textLabel.text 		= item.label;
+	cell.accessoryType 		= item.checked ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
 	return cell;
 }
+
+#pragma mark - UITableViewDelegate methods
+
+-                        (void) tableView:(UITableView*)tV didSelectRowAtIndexPath:(NSIndexPath*)iPath					{
+
+	TRACE_CALL(_cmd, self, iPath, nil);
+
+	TodoItem *item 	= TodoList.sharedInstance.items[iPath.row];
+	item.checked 		= !item.checked;
+
+	[item save];	[tV reloadData];
+}
+- (UITableViewCellEditingStyle) tableView:(UITableView*)tV editingStyleForRowAtIndexPath:(NSIndexPath*)iPath 			{
+
+	return UITableViewCellEditingStyleDelete;
+}
+- 								 (void) tableView:(UITableView*)tV commitEditingStyle:(UITableViewCellEditingStyle)editStyle
+																				forRowAtIndexPath:(NSIndexPath*)iPath							{
+
+	TRACE_CALL(_cmd, self, nil);
+
+	[TodoList.sharedInstance.items removeObjectAtIndex:iPath.row];
+	[TodoList.sharedInstance save];
+	[tV reloadData];
+}
+
+#pragma mark - Standard view methods
+
+-     (void) viewDidLoad							{	[super viewDidLoad];
+
+	self.navigationItem.leftBarButtonItem 	= self.editButtonItem;
+	self.clearsSelectionOnViewWillAppear 	= YES;
+}
+-     (void) viewWillAppear:(BOOL)animated	{	[super viewWillAppear:YES];	[self.tableView reloadData];	}
+- (IBAction) createNewItem							{	[self.navigationController pushViewController:NewItemViewController.new animated:YES];	}
+
 
 @end

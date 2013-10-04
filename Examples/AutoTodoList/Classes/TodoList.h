@@ -13,6 +13,6 @@
 
 @interface TodoList : BaseModel
 
-@property (nonatomic, strong) NSMutableArray *items;
+@property NSMutableArray *items;
 
 @end
