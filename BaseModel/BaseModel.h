@@ -95,8 +95,6 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 //is used to initialise any BaseModel instance
 //saveFile is a path, typically within application support that
 //is used to save the shared instance of the model
-//saveFileForID is a path, typically within application support that
-//is used to save any instance of the model
 + (NSString *)resourceFile;
 + (NSString *)saveFile;
 
