@@ -13,9 +13,9 @@
 
 @interface TodoItem : BaseModel
 
-@property (nonatomic, strong) NSString *label;
-@property (nonatomic, assign) BOOL checked;
+@property  NSString * label;
+@property  	   BOOL   checked;
 
-+ (instancetype)instanceWithLabel:(NSString *)label;
++ (instancetype) instanceWithLabel:(NSString*)label;
 
 @end

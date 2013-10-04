@@ -8,17 +8,11 @@
 
 #import "TodoListAppDelegate.h"
 
-
 @implementation TodoListAppDelegate
 
-@synthesize window;
-@synthesize viewController;
+- (void)applicationDidFinishLaunching:(__unused UIApplication *)application	{
 
-- (void)applicationDidFinishLaunching:(__unused UIApplication *)application
-{        
-    [window makeKeyAndVisible];
+    [_window makeKeyAndVisible];
 }
-
-
 
 @end

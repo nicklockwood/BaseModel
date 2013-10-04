@@ -5,6 +5,19 @@
 #define OBJC_OLD_DISPATCH_PROTOTYPES 0
 
 #ifdef __OBJC__
-    #import <Foundation/Foundation.h>
-    #import <UIKit/UIKit.h>
+
+	#import <Foundation/Foundation.h>
+	#import <UIKit/UIKit.h>
+	#import <objc/runtime.h>
+
+NS_INLINE void TRACE_CALL(SEL _cmd_,id _obj_,...) {  NSMutableString *mark; id obj = nil; va_list args;
+
+	mark = [NSString stringWithFormat:@"%@[%@ %@", 	class_isMetaClass(object_getClass(_obj_)) ? @"+" : @"-",
+																	NSStringFromClass([_obj_ class]),
+																	NSStringFromSelector(_cmd_)].mutableCopy;
+																	
+	va_start(args, _obj_);	while ((obj = va_arg(args,id)))	[mark appendFormat:@"%@",obj];	va_end(args);
+	printf("%s];\n",mark.UTF8String);
+}
+
 #endif

@@ -6,7 +6,6 @@
 //  Copyright 2010 Charcoal Design. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
 
 @class TodoItem;
 
