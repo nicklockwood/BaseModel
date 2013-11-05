@@ -1,3 +1,7 @@
+Version 2.4.4
+
+- Fixed warning under Xcode 5
+
 Version 2.4.3
 
 - Added explicit function pointer casts for all obc_msgSend calls.

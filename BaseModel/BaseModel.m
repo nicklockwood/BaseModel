@@ -1,7 +1,7 @@
 //
 //  BaseModel.m
 //
-//  Version 2.4.3
+//  Version 2.4.4
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -411,7 +411,8 @@ static NSMutableDictionary *classValues = nil;
                 Class FXJSONClass = NSClassFromString(@"FXJSON");
                 if (FXJSONClass)
                 {
-                    object = ((id (*)(id, SEL, id))objc_msgSend)(FXJSONClass, @selector(objectWithJSONData:), data);
+                    SEL objectWithJSONData = NSSelectorFromString(@"objectWithJSONData:");
+                    object = ((id (*)(id, SEL, id))objc_msgSend)(FXJSONClass, objectWithJSONData, data);
                 }
                 else
                 {

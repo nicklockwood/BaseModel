@@ -21,7 +21,7 @@
 	self.clearsSelectionOnViewWillAppear = YES;
 }
 
-- (void)viewWillAppear:(BOOL)animated
+- (void)viewWillAppear:(__unused BOOL)animated
 {
 	[super viewWillAppear:YES];
 	[self.tableView reloadData];
@@ -45,12 +45,12 @@
 	[tableView reloadData];
 }
 
-- (UITableViewCellEditingStyle)tableView:(UITableView *)tableView editingStyleForRowAtIndexPath:(NSIndexPath *)indexPath
+- (UITableViewCellEditingStyle)tableView:(__unused UITableView *)tableView editingStyleForRowAtIndexPath:(__unused NSIndexPath *)indexPath
 {
 	return UITableViewCellEditingStyleDelete;
 }
 
-- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(__unused UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
 	[[TodoList sharedInstance].items removeObjectAtIndex:indexPath.row];
 	[[TodoList sharedInstance] save];
@@ -61,7 +61,7 @@
 #pragma mark -
 #pragma mark UITableViewDataSource methods
 
-- (NSInteger)tableView:(UITableView *)table numberOfRowsInSection:(NSInteger)section
+- (NSInteger)tableView:(__unused UITableView *)table numberOfRowsInSection:(__unused NSInteger)section
 {	
 	return [[TodoList sharedInstance].items count];
 }
