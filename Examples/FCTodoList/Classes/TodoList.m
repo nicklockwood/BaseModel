@@ -12,17 +12,15 @@
 
 @implementation TodoList
 
++ (BMFileFormat)saveFormat
+{
+    //this is the format that will be used to save the model
+    return BMFileFormatFastCoding;
+}
+
 - (void)setUp
 {
     self.items = [NSMutableArray array];
 }
-
-+ (BMFileFormat)saveFormat
-{
-    return BMFileFormatHRCodedXML;
-}
-
-//NOTE: no need to implement the NSCoding methods
-//BaseModel does that for us automagically
 
 @end

@@ -7,13 +7,15 @@ The BaseModel object uses property lists and the NSCoding protocol for serialisa
 
 BaseModel is really designed as an *alternative* to Core Data for developers who prefer to have a little more control over the implementation of their data stack. BaseModel gives you precise control over the location and serialisation of your data files, whilst still proving enough automatic behaviour to save you from writing the same code over and over again.
 
-BaseModel is designed to work with the AutoCoding library (https://github.com/nicklockwood/AutoCoding). It does not require this library to function but when used in combination, BaseModel objects support automatic loading and saving without needing to write your own NSCoding methods. Use of AutoCoding is completely optional. For an example of how it works, check out the *AutoTodoList* example.
+BaseModel is designed to work with the following serialization libraries:
 
-BaseModel is also designed to work with the HRCoder library (https://github.com/nicklockwood/HRCoder) as an alternative mechanism for loading and saving data in a human readable/editable format. HRCoder allows you to specify your data files in a standard format, and when used in conjunction with AutoCoding avoids the need for you to write any `setWith...` methods. Use of HRCoder is completely optional. For an example of how this works, check out the *HRTodoList* example.
+* HRCoder (https://github.com/nicklockwood/HRCoder). HRCoder provides an alternative mechanism for loading and saving data in a human readable/editable format. HRCoder allows you to specify your data files in a standard format, and avoids the need for you to override the `setWith...` methods. Use of HRCoder is completely optional. For an example of how this works, check out the *HRTodoList* example.
 
-BaseModel is also designed to work with the CryptoCoding library (https://github.com/nicklockwood/CryptoCoding). It does not require this library to function, but when used in conjunction with CryptoCoding, BaseModel objects support automatic AES encryption of the entire object when saved or loaded to disk. Use of CryptoCoding is completely optional. For an example of how it works, check out the *CryptoTodoList* example.
+* CryptoCoding library (https://github.com/nicklockwood/CryptoCoding). When used in conjunction with CryptoCoding, BaseModel objects support automatic AES encryption of the entire object when saved or loaded to disk. Use of CryptoCoding is completely optional. For an example of how it works, check out the *CryptoTodoList* example.
 
-**Note:** You can combine AutoCoding with either HRCoder or CryptoCoding, or neither. AutoCoding is independent of the coding scheme used.
+* FastCoding (https://github.com/nicklockwood/FastCoding). FastCoding provides an alternative mechanism for loading and saving data in a fast, compact binary format. FastCoding is a replacement for NSCoding that produces files tat at 50% of the size, and load in half the time as ordinary NScoded archives. Use of FastCoding is completely optional. For an example of how this works, check out the *FCTodoList* example.
+
+**Note:** HRCoder and CryptoCoding both take advantage of BaseModel's NSCoding implementation and will call the `setWithCoder:` and `encodeWithCoder:` methods. FastCoding uses its own serialization implementation and does not use these methods.
 
 
 Supported OS & SDK Versions
@@ -37,13 +39,13 @@ If you wish to convert your whole project to ARC, comment out the #error line in
 Thread Safety
 --------------
 
-BaseModel instances can be safely created on any thread, however a number of BaseModel operations are synchronized on a per-class basis, so creating BaseModel instances or accessing the shared instance concurrently on multiple threads may lead to unexpected performance issues.
+BaseModel instances can be safely created and accessed concurrently from multiple threads, however some BaseModel operations are synchronized on a per-class basis, so creating BaseModel instances or accessing the shared instance concurrently on multiple threads may lead to unexpected performance issues.
 
 
 Installation
 --------------
 
-To use the BaseModel class in your project, just drag the BaseModel.h and .m files into your project. BaseModel has no required dependencies, however you may wish to also include the optional AutoCoding library (https://github.com/nicklockwood/AutoCoding) to get the full benefits of using BaseModel, and you may also wish to include the HRCoding (https://github.com/nicklockwood/HRCoding) or CryptoCoding (https://github.com/nicklockwood/CryptoCoding) libraries to enable additional BaseModel functionality.
+To use the BaseModel class in your project, just drag the BaseModel.h and .m files into your project. BaseModel has no required dependencies, however you may wish to also include the optional HRCoder (https://github.com/nicklockwood/HRCoder), CryptoCoding (https://github.com/nicklockwood/CryptoCoding) and/or FastCoding (https://github.com/nicklockwood/FastCoding) libraries to enable additional BaseModel functionality.
 
 
 Classes
@@ -52,48 +54,44 @@ Classes
 There is a single class, BaseModel which you should use as the base class for any model-type classes. BaseModel provides a core set of functions for dealing with model data, and through the BaseModel protocol, provides hooks to implement additional bespoke behaviours with minimal coding.
 
 
-Optional methods
---------------
+Methods
+---------------
 
-The BaseModel class implements the BaseModel protocol, which specifies some optional methods that can be implemented by BaseModel subclasses to extend the functionality. The BaseModel protocol defines the following optional methods:
+The BaseModel class has the following methods:
 
     - (void)setUp;
     
 BaseModel's initialisation routine is quite complex and follows a multi-step process. To simplify configuration, BaseModel provides a `setUp` method that is called before anything else so you can pre-configure your instance. This is called only after a successful `[super init]`, so there is no need to verify that self is not nil or call `[super setUp]` (unless you are subclassing one of your own BaseModel subclasses). Like `init`, `setUp` is called only once at the start of the lifetime of an instance, so it is safe to set properties without releasing their existing values (relevant only if you are not using ARC). You should never call `setUp` yourself directly, except in the context of calling `[super setUp]` when subclassing your own BaseModel subclasses.
 
     - (void)setWithDictionary:(NSDictionary *)dict;
-    - (void)setWithArray:(NSArray *)array;
-    - (void)setWithString:(NSString *)string;
+
+If you are initializing your BaseModel instance using a dictionary (typically loaded from JSON or a Plist file) then this method will be called automatically. BaseModel provides a default implementation of `setWithDictionary:` that attempts to set the properties of your class automatically from the dictionary that is passed in, but you can override this if neccesary (e.g. if the property names or types don't match up exactly).
+
+    - (NSDictionary *)dictionaryRepresentation;
     
-These methods are used to extend you model with the capability to be initialised from a standard object type (i.e. one that is supported by the Plist format). This is useful as it allows objects to be automatically loaded from a Plist in your application bundle. It could also be used to instantiate objects from other formats like JSON or XML.
+This method returns a dictionary containing all the (non-nil) properties of the model. This is a useful way to transform a model that was initialized from a Plist or JSON file back into a form that can be saved out as such a file. Note: There is no guarantee that the objects in this dictionary are Plist-safe, so if you intend to generate a Plist or JSON file, you may be better off using the HRCoding library, which can automatically convert child objects to Plist/JSON-safe form recursively.
 
-These methods are called after the `setUp` method, so you should not assume that class properties and ivars do not already have values at the point when this method is called. If you are not using ARC, be careful to safely release any property values before setting them. **Note:** these methods are defined in the protocol only to help with code autocompletion - it is actually possible to initialise a BaseModel instance with any kind of object if you define an appropriate setup method of the form `setWith[ClassName]:` in your BaseModel subclass.
-
-If you are using the HRCoder library, you probably don't need to implement these methods, provided that you create your data files in the correct format. Files loaded using HRCoder will call the `setWithCoder:` method instead of `setWithDictionary/Array/etc:`.
+    - (void)setWithXXX:(XXX *)xxx;
+    
+BaseModel instances can be initialized with objects of any type, via the `instanceWithObject:`/`initWithObject:` method. To support a given object type, simply add a method `setWith[ClassName]:` where ClassName is the class of the object being set. For example to initialise your BaseModel using an NSArray, add a method setWithArray:` or `setWithNSArray:` and it will be called automatically.
 
     - (void)setWithCoder:(NSCoder *)aDecoder;
     
-This method is called by `initWithCoder:` as part of the NSCoding implementation. If you are implementing NSCoding serialisation for your class, you should implement this method instead of overriding `initWithCoder:`. This method is called after the `setUp` method and potentially may be called after default values have been loaded using `setWith[ClassName]:`, so you should not assume that class properties and ivars do not already have values at the point when this method is called. Be careful to safely release any property values before setting them. Note that if you are using the AutoCoding library, this method is already implemented for you.
+This method is called by `initWithCoder:` as part of the NSCoding implementation. BaseModel provides an automatic implementation of NSCoding by inspecting the properties of your class, so there is no need to implement this method yourself unless you need to customise the decoding behaviour. This method is called after the `setUp` method and potentially may be called after default values have been loaded using `setWith[ClassName]:`, so you should not assume that class properties and ivars do not already have values at the point when this method is called.
 
     - (void)encodeWithCoder:(NSCoder *)aCoder;
 
-The BaseModel class can optionally implement the NSCoding protocol methods. If you are implementing NSCoding serialisation for your class, you should implement this method. Note that if you are using the AutoCoding library, this method is already implemented for you.
-
-
-Methods
----------------
-
-The BaseModel class has the following methods:
+The BaseModel class provides an automatic default implementation of this method by inspecting the properties of your class, so there is no need to implement this method yourself unless you need to customise the decoding behaviour.
 
     + (instancetype)instance;
     - (instancetype)init;
     
-Create an autoreleased instance or initialises a retained instance of the class respectively. These methods will first call `setUp`, and will then attempt to initialise the class from `resourceFile` if that file exists.
+Creates an autoreleased instance or initialises a retained instance of the class respectively. These methods will first call `setUp`, and will then attempt to initialise the class from `resourceFile` if that file exists.
     
     + (instancetype)instanceWithObject:(NSDictionary *)dict;
     - (instancetype)initWithObject:(NSDictionary *)dict;
     
-Creates an instance of the class and initialises it using the supplied object. This is useful when loading a model from an embedded property list file in the application bundle, or creating model objects from JSON data returned by a web service. This method requires that an appropriate setter method is defined on your class, where the setter name is of the form `setWith[ClassName]:`. For example, to initialise the model using an NSDictionary, your BaseModel subclass must have a method called `setWithDictionary:`. This method will attempt to initialise the class from `resourceFile` (if that file exists) prior to calling `setWith[ClassName]:`, so if your resourceFile contains a serialised object, this method will be called twice (with different input).
+Creates an instance of the class and initialises it using the supplied object. This is useful when loading a model from an embedded property list file in the application bundle, or creating model objects from JSON data returned by a web service. This method requires that an appropriate setter method is defined on your class, where the setter name is of the form `setWith[ClassName]:`. For example, to initialise the model using an NSArray, your BaseModel subclass must have a method called `setWithArray:`. This method will attempt to initialise the class from `resourceFile` (if that file exists) prior to calling `setWith[ClassName]:`, so if your resourceFile contains a serialised object, this method will be called twice (with different input).
     
     + (NSArray *)instancesWithArray:(NSArray *)array;
 
@@ -125,13 +123,13 @@ This method lets you replace the current shared instance with another instance o
 
 This method reloads the shared instance of the model using the file specified by `saveFile`. This method replaces the sharedInstance by calling `setSharedInstance:` internally, so the same notes apply regarding updating references.
 
-    - (void)writeToFile:(NSString *)path atomically:(BOOL)atomically;
+    - (BOOL)writeToFile:(NSString *)path format:(BMFileFormat)format atomically:(BOOL)atomically;
 
-This method attempts to serialise the model object to the specified file using NSCoding. If you are not using the AutoCoding library, you will need to implement the `encodeWithCoder:` method, otherwise using this method will throw an exception. The path can be absolute or relative. Relative paths will be automatically prefixed with `~/Library/Application Support/`.
+This method attempts to serialise the model object to the specified file using the specified format. If you select anything other than BMFileFormatKeyedArchive as the format, you will need to include the requisite library in your project, otherwise using this will throw an exception. The path can be absolute or relative. Relative paths will be automatically prefixed with `~/Library/Application Support/`. Returns YES on success or NO on failure.
 
-    - (BOOL)useHRCoderIfAvailable;
+    - (BOOL)writeToFile:(NSString *)path atomically:(BOOL)atomically;
 
-Normally, BaseModel saves files using NSCoding and the NSKeyedArchiver, which creates binary property list files in a complex format that is not human-readable or editable. The HRCoder library provides an alternative format for NSCoding that is more similar to an ordinary, hand-written property list file. BaseModel detects the presence of the HRCoder class if it's included in the project and will use it by default if available. If you do not want to use HRCoder for saving a particular model, override this method and return NO. BaseModel is still able to load archives that are encoded using the HRCoding protocol if this method returns NO, but if you save over the original file it will use NSKeyedArchiver.
+This method attempts to serialise the model object to the specified file using the format specified by the +saveFormat method. The path can be absolute or relative. Relative paths will be automatically prefixed with `~/Library/Application Support/`. Returns YES on success or NO on failure.
 
     + (NSString *)newUniqueIdentifier;
     
@@ -145,7 +143,11 @@ In case you are wondering, there is a small overhead to loading this file the fi
 
     + (NSString *)saveFile;
 
-This method returns a path for a file to be used to load and save the shared instance of the class. By default this file is defined as *ClassName.plist* where ClassName is the name of the model class, but you can override this method in your own subclasses to change the filename or specify an explicit directory. If you specify a relative filename or path rather than absolute, it will be automatically prefixed with `~/Library/Application Support/`.
+This method returns a path for a file to be used to load and save the shared instance of the class. By default this method returns *ClassName.extension* where ClassName is the name of the model class and 'extension' is either 'plist', 'json' or 'fast', depending on the format specified in the +saveFormat method. you can override this method in your own subclasses to change the filename or specify an explicit directory. If you specify a relative filename or path rather than absolute, it will be automatically prefixed with `~/Library/Application Support/`.
+
+    + (BMFileFormat)saveFormat;
+
+This method returns the file format to use for saving the shared instance of the class. By default, this method returns BMFileFormatKeyedArchive, which means that the model will be saved and loaded using the NSKeyedArchiver/NSKeyedUnarchiver and the NSCoding protocol, but you can override this method in your own subclasses to change the file type. BaseModel supports a number of alternative serialisation formats by taking advantage of additional libraries such as CryptoCoding, FastCoding and HRCoder.
 
     - (void)save;
 
@@ -173,5 +175,3 @@ Usage
 -----------
 
 The BaseModel class is abstract, and is not designed to be instantiated directly. To implement a model object, create a new subclass of the BaseModel class and implement or override the methods that need to be customised for your specific requirements. Look at the *TodoList* project for an example of how to do this.
-
-By using the HRCoder and AutoCoding libraries, and following a conventional format for your configuration files, you can dramatically reduce your development time by eliminating boilerplate code. Compare the *AutoTodoList*, *HRTodoList* to the original *TodoList* project to see how these libraries can reduce setup code in your model objects.

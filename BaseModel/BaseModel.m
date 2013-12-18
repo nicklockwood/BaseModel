@@ -1,7 +1,7 @@
 //
 //  BaseModel.m
 //
-//  Version 2.4.4
+//  Version 2.5
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -42,10 +42,11 @@
 
 
 NSString *const BaseModelSharedInstanceUpdatedNotification = @"BaseModelSharedInstanceUpdatedNotification";
+NSString *const BaseModelException = @"BaseModelException";
 
-
-static NSString *const BaseModelSharedInstanceKey = @"sharedInstance";
-static NSString *const BaseModelLoadingFromResourceFileKey = @"loadingFromResourceFile";
+static char BMClassPropertiesKey;
+static char BMSharedInstanceKey;
+static char BMLoadingFromResourceFileKey;
 
 
 @implementation BaseModel
@@ -53,7 +54,7 @@ static NSString *const BaseModelLoadingFromResourceFileKey = @"loadingFromResour
 #pragma mark -
 #pragma mark Private utility methods
 
-+ (NSString *)BaseModel_resourceFilePath:(NSString *)path
++ (NSString *)BM_resourceFilePath:(NSString *)path
 {
     //check if the path is a full path or not
     if (![path isAbsolutePath])
@@ -63,12 +64,12 @@ static NSString *const BaseModelLoadingFromResourceFileKey = @"loadingFromResour
     return path;
 }
 
-+ (NSString *)BaseModel_resourceFilePath
++ (NSString *)BM_resourceFilePath
 {
-    return [self BaseModel_resourceFilePath:[self resourceFile]];
+    return [self BM_resourceFilePath:[self resourceFile]];
 }
 
-+ (NSString *)BaseModel_saveFilePath:(NSString *)path
++ (NSString *)BM_saveFilePath:(NSString *)path
 {
     //check if the path is a full path or not
     if (![path isAbsolutePath])
@@ -98,83 +99,107 @@ static NSString *const BaseModelLoadingFromResourceFileKey = @"loadingFromResour
     return path;
 }
 
-+ (NSString *)BaseModel_saveFilePath
++ (NSString *)BM_saveFilePath
 {
-    return [self BaseModel_saveFilePath:[self saveFile]];
+    return [self BM_saveFilePath:[self saveFile]];
 }
 
-static NSMutableDictionary *classValues = nil;
-
-+ (id)BaseModel_classPropertyForKey:(NSString *)key
++ (NSArray *)BM_propertyKeys
 {
-    NSString *className = NSStringFromClass(self);
-    return classValues[className][key];
-}
-
-+ (void)BaseModel_setClassProperty:(id)property forKey:(NSString *)key
-{
-    @synchronized ([BaseModel class])
+    __autoreleasing NSMutableArray *codableKeys = objc_getAssociatedObject(self, &BMClassPropertiesKey);
+    if (!codableKeys)
     {
-        NSString *className = NSStringFromClass(self);
-        if (!classValues)
+        codableKeys = [NSMutableArray array];
+        Class subclass = [self class];
+        while (subclass != [BaseModel class])
         {
-            classValues = [[NSMutableDictionary alloc] init];
+            unsigned int propertyCount;
+            objc_property_t *properties = class_copyPropertyList(subclass, &propertyCount);
+            for (unsigned int i = 0; i < propertyCount; i++)
+            {
+                //get property
+                objc_property_t property = properties[i];
+                const char *propertyName = property_getName(property);
+                NSString *key = @(propertyName);
+                
+                //see if there is a backing ivar
+                char *ivar = property_copyAttributeValue(property, "V");
+                if (ivar)
+                {
+                    //check if ivar has KVC-compliant name
+                    NSString *ivarName = [NSString stringWithFormat:@"%s", ivar];
+                    if ([ivarName isEqualToString:key] ||
+                        [ivarName isEqualToString:[@"_" stringByAppendingString:key]])
+                    {
+                        //setValue:forKey: will work
+                        [codableKeys addObject:key];
+                    }
+                    free(ivar);
+                }
+            }
+            free(properties);
+            NSArray *uncodable = [subclass uncodableProperties];
+            if ([uncodable count])
+            {
+                NSLog(@"You have implemented the AutoCoding +uncodableProperties method on the class %@. BaseModel supports this for now, but you should switch to using ivars for properties that you do not want to be saved instead.", subclass);
+                [codableKeys removeObjectsInArray:uncodable];
+            }
+            subclass = [subclass superclass];
         }
-        NSMutableDictionary *values = classValues[className];
-        if (!values)
-        {
-            values = [NSMutableDictionary dictionary];
-            classValues[className] = values;
-        }
-        if (property)
-        {
-            values[key] = property;
-        }
-        else
-        {
-            [values removeObjectForKey:key];
-        }
+        objc_setAssociatedObject(self, &BMClassPropertiesKey, codableKeys, OBJC_ASSOCIATION_RETAIN);
     }
+    return codableKeys;
 }
 
++ (NSArray *)uncodableProperties
+{
+    return nil;
+}
 
 #pragma mark -
 #pragma mark Singleton behaviour
 
 + (void)setSharedInstance:(BaseModel *)instance
 {
-    @synchronized ([self class])
+    if (instance && ![instance isKindOfClass:self])
     {
-        if (instance && ![instance isKindOfClass:self])
-        {
-            [NSException raise:NSGenericException format:@"setSharedInstance: instance class does not match"];
-        }
-        id oldInstance = [self BaseModel_classPropertyForKey:BaseModelSharedInstanceKey];
-        [self BaseModel_setClassProperty:instance forKey:BaseModelSharedInstanceKey];
-        if (oldInstance)
-        {
+        [NSException raise:BaseModelException format:@"setSharedInstance: instance class does not match"];
+    }
+    id oldInstance = objc_getAssociatedObject(self, &BMSharedInstanceKey);
+    objc_setAssociatedObject(self, &BMSharedInstanceKey, instance, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    if (oldInstance)
+    {
+        void (^update)() = ^{
             [[NSNotificationCenter defaultCenter] postNotificationName:BaseModelSharedInstanceUpdatedNotification object:oldInstance];
+        };
+        if ([NSThread currentThread] == [NSThread mainThread])
+        {
+            update();
+        }
+        else
+        {
+            dispatch_async(dispatch_get_main_queue(), update);
         }
     }
 }
 
 + (BOOL)hasSharedInstance
 {
-    return [self BaseModel_classPropertyForKey:BaseModelSharedInstanceKey] != nil;
+    return objc_getAssociatedObject(self, &BMSharedInstanceKey) != nil;
 }
 
 + (instancetype)sharedInstance
 {
     @synchronized ([self class])
     {
-        id instance = [self BaseModel_classPropertyForKey:BaseModelSharedInstanceKey];
+        id instance = objc_getAssociatedObject(self, &BMSharedInstanceKey);
         if (instance == nil)
         {
             //load or create instance
             [self reloadSharedInstance];
             
             //get loaded instance
-            instance = [self BaseModel_classPropertyForKey:BaseModelSharedInstanceKey];
+            instance = objc_getAssociatedObject(self, &BMSharedInstanceKey);
         }
         return instance;
     }
@@ -182,21 +207,18 @@ static NSMutableDictionary *classValues = nil;
 
 + (void)reloadSharedInstance
 {
-    @synchronized ([self class])
+    id instance = nil;
+    
+    //try loading previously saved version
+    instance = [self instanceWithContentsOfFile:[self BM_saveFilePath]];
+    if (instance == nil)
     {
-        id instance = nil;
-        
-        //try loading previously saved version
-        instance = [self instanceWithContentsOfFile:[self BaseModel_saveFilePath]];
-        if (instance == nil)
-        {
-            //construct a new instance
-            instance = [self instance];
-        }
-        
-        //set singleton
-        [self setSharedInstance:instance];
+        //construct a new instance
+        instance = [self instance];
     }
+    
+    //set singleton
+    [self setSharedInstance:instance];
 }
 
 + (NSString *)resourceFile
@@ -208,25 +230,56 @@ static NSMutableDictionary *classValues = nil;
 + (NSString *)saveFile
 {
     //used to save shared (singleton) instance
-    return [NSStringFromClass(self) stringByAppendingPathExtension:@"plist"];
+    NSString *extension = nil;
+    switch ([self saveFormat])
+    {
+        case BMFileFormatKeyedArchive:
+        case BMFileFormatCryptoCoding:
+        case BMFileFormatHRCodedXML:
+        case BMFileFormatHRCodedBinary:
+        {
+            extension = @"plist";
+            break;
+        }
+        case BMFileFormatHRCodedJSON:
+        {
+            extension = @"json";
+            break;
+        }
+        case BMFileFormatFastCoding:
+        {
+            extension = @"fast";
+            break;
+        }
+    }
+    return [NSStringFromClass(self) stringByAppendingPathExtension:extension];
 }
 
-- (BOOL)useHRCoderIfAvailable
++ (BMFileFormat)saveFormat
 {
-    return YES;
+    if ([self respondsToSelector:NSSelectorFromString(@"useHRCoderIfAvailable")])
+    {
+        [NSException raise:BaseModelException format:@"You are using the deprecated useHRCoderIfAvailable method instead of specifying the saveFormat as BMFileFormatHRCodedBinary."];
+    }
+    if ([self respondsToSelector:NSSelectorFromString(@"CCPassword")])
+    {
+        NSLog(@"You have implemented the CCPassword method without specifying the saveFormat as BMFileFormatCryptoCoding. This is a warning for now, but may become an error in future.");
+        return BMFileFormatCryptoCoding;
+    }
+    return BMFileFormatKeyedArchive;
 }
 
 - (void)save
 {
-    if ([[self class] BaseModel_classPropertyForKey:BaseModelSharedInstanceKey] == self)
+    if (objc_getAssociatedObject([self class], &BMSharedInstanceKey) == self)
     {
         //shared (singleton) instance
-        [self writeToFile:[[self class] BaseModel_saveFilePath] atomically:YES];
+        [self writeToFile:[[self class] BM_saveFilePath] atomically:YES];
     }
     else
     {
         //no save implementation
-        [NSException raise:NSGenericException format:@"Unable to save object, save method not implemented"];
+        [NSException raise:BaseModelException format:@"Unable to save object, save method not implemented"];
     }
 }
 
@@ -239,6 +292,27 @@ static NSMutableDictionary *classValues = nil;
     //override this
 }
 
+- (void)setWithCoder:(NSCoder *)coder
+{
+    for (__unsafe_unretained NSString *key in [[self class] BM_propertyKeys])
+    {
+        id value = [coder decodeObjectForKey:key];
+        if (value) [self setValue:value forKey:key];
+    }
+}
+
+- (void)setWithDictionary:(NSDictionary *)dict
+{
+    [dict enumerateKeysAndObjectsUsingBlock:^(__unsafe_unretained id key, __unsafe_unretained id obj, BOOL *stop) {
+        [self setValue:obj forKey:key];
+    }];
+}
+
+- (void)setValue:(id)value forUndefinedKey:(NSString *)key
+{
+    //fail silently
+}
+
 + (instancetype)instance
 {
     return [[self alloc] init];
@@ -248,12 +322,12 @@ static NSMutableDictionary *classValues = nil;
 {
     @synchronized ([self class])
     {
-        if (![[[self class] BaseModel_classPropertyForKey:BaseModelLoadingFromResourceFileKey] boolValue])
+        if (!objc_getAssociatedObject([self class], &BMLoadingFromResourceFileKey))
         {
             //attempt to load from resource file
-            [[self class] BaseModel_setClassProperty:@YES forKey:BaseModelLoadingFromResourceFileKey];
-            id object = [[[self class] alloc] initWithContentsOfFile:[[self class] BaseModel_resourceFilePath]];
-            [[self class] BaseModel_setClassProperty:nil forKey:BaseModelLoadingFromResourceFileKey];
+            objc_setAssociatedObject([self class], &BMLoadingFromResourceFileKey, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            id object = [[[self class] alloc] initWithContentsOfFile:[[self class] BM_resourceFilePath]];
+            objc_setAssociatedObject([self class], &BMLoadingFromResourceFileKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
             if (object)
             {
                 return ((self = object));
@@ -263,7 +337,7 @@ static NSMutableDictionary *classValues = nil;
         {
             if ([self class] == [BaseModel class])
             {
-                [NSException raise:NSGenericException format:@"BaseModel class is abstract and should be subclassed rather than instantiated directly"];
+                [NSException raise:BaseModelException format:@"BaseModel class is abstract and should be subclassed rather than instantiated directly"];
             }
             
             [self setUp];
@@ -309,8 +383,7 @@ static NSMutableDictionary *classValues = nil;
             if ([class superclass] == [NSObject class]) break;
             class = [class superclass];
         }
-        [NSException raise:NSGenericException
-                    format:@"%@ not implemented", [self setterNameForClass:class]];
+        [NSException raise:BaseModelException format:@"%@ not implemented", [self setterNameForClass:class]];
     }
     return self;
 }
@@ -318,7 +391,7 @@ static NSMutableDictionary *classValues = nil;
 + (NSArray *)instancesWithArray:(NSArray *)array
 {
     NSMutableArray *result = [NSMutableArray array];
-    for (id object in array)
+    for (__unsafe_unretained id object in array)
     {
         [result addObject:[self instanceWithObject:object]];
     }
@@ -335,14 +408,7 @@ static NSMutableDictionary *classValues = nil;
 {
     if ((self = [self init]))
     {
-        if ([self respondsToSelector:@selector(setWithCoder:)])
-        {
-            [self setWithCoder:decoder];
-        }
-        else
-        {
-            [NSException raise:NSGenericException format:@"setWithCoder: not implemented"];
-        }
+        [self setWithCoder:decoder];
     }
     return self;
 }
@@ -354,11 +420,11 @@ static NSMutableDictionary *classValues = nil;
     if (![path isAbsolutePath])
     {
         //try resources
-        path = [self BaseModel_resourceFilePath:filePath];
+        path = [self BM_resourceFilePath:filePath];
         if (![[NSFileManager defaultManager] fileExistsAtPath:path])
         {
             //try application support
-            path = [self BaseModel_saveFilePath:filePath];
+            path = [self BM_saveFilePath:filePath];
         }
     }
     
@@ -404,36 +470,31 @@ static NSMutableDictionary *classValues = nil;
         
         if (data)
         {
-            NSString *extension = [[filePath pathExtension] lowercaseString];
-            if ([extension isEqualToString:@"json"] || [extension isEqualToString:@"js"])
+            //attempt to guess file type
+            char byte = *((char *)data.bytes);
+            if (byte == 'T')
+            {
+                //attempt to deserialise using FastCoding
+                Class coderClass = NSClassFromString(@"FastCoder");
+                object = ((id (*)(id, SEL, id))objc_msgSend)(coderClass, NSSelectorFromString(@"objectWithData:"), data);
+            }
+            
+            if (!object && (byte == '{' || byte == '[' || byte == '"' || byte == 'n'))
             {
                 //attempt to deserialise data as json
-                Class FXJSONClass = NSClassFromString(@"FXJSON");
-                if (FXJSONClass)
-                {
-                    SEL objectWithJSONData = NSSelectorFromString(@"objectWithJSONData:");
-                    object = ((id (*)(id, SEL, id))objc_msgSend)(FXJSONClass, objectWithJSONData, data);
-                }
-                else
-                {
-                    
-#if __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_5_0 || __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_7
-
-                    object = [NSJSONSerialization JSONObjectWithData:data
+                object = [NSJSONSerialization JSONObjectWithData:data
                                                              options:NSJSONReadingAllowFragments
                                                                error:NULL];
-#else
-                    [NSException raise:NSGenericException format:@"NSJSONSerialization is not available on some of the platforms you are targeting. Add FXJSON (https://github.com/nicklockwood/FXJSON) to the project to resolve this."];
-#endif
-                }
             }
-            else
+            
+            if (!object)
             {
                 //attempt to deserialise data as a plist
                 NSPropertyListFormat format;
                 NSPropertyListReadOptions options = NSPropertyListMutableContainersAndLeaves;
                 object = [NSPropertyListSerialization propertyListWithData:data options:options format:&format error:NULL];
             }
+            
             if (!object)
             {
                 //data is not a known serialisation format
@@ -477,20 +538,25 @@ static NSMutableDictionary *classValues = nil;
                 NSString *classNameKey = [HRCoderClass valueForKey:@"classNameKey"];
                 if (object[classNameKey])
                 {
-                    object = ((id (*)(id, SEL, id))objc_msgSend)(HRCoderClass, NSSelectorFromString(@"unarchiveObjectWithPlist:"), object);
+                    SEL selector = NSSelectorFromString(@"unarchiveObjectWithPlistOrJSON:");
+                    if (![HRCoderClass respondsToSelector:selector])
+                    {
+                        [NSException raise:BaseModelException format:@"This version of HRCoder is not compatibile with this version BaseModel. Please ensure you have upgraded both libraries to the latest version."];
+                    }
+                    object = ((id (*)(id, SEL, id))objc_msgSend)(HRCoderClass, selector, object);
                 }
-            }
-            
-            if ([object isKindOfClass:[self class]])
-            {
-                //return object
-                return ((self = object));
             }
         }
         else if (isResourceFile)
         {
             //cache object for next time
             [cachedResourceFiles setObject:object forKey:filePath];
+        }
+        
+        if ([object isKindOfClass:[self class]])
+        {
+            //return object
+            return ((self = object));
         }
         
         //load with object
@@ -506,26 +572,84 @@ static NSMutableDictionary *classValues = nil;
     return ((self = nil));
 }
 
-- (BOOL)writeToFile:(NSString *)path atomically:(BOOL)atomically
+#pragma mark -
+#pragma mark Serializing
+
+- (NSDictionary *)dictionaryRepresentation
+{
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    for (__unsafe_unretained NSString *key in [[self class] BM_propertyKeys])
+    {
+        id value = [self valueForKey:key];
+        if (value) dict[key] = value;
+    }
+    return dict;
+}
+
+- (void)encodeWithCoder:(NSCoder *)coder
+{
+    for (__unsafe_unretained NSString *key in [[self class] BM_propertyKeys])
+    {
+        id value = [self valueForKey:key];
+        if (value) [coder encodeObject:value forKey:key];
+    }
+}
+
+- (BOOL)writeToFile:(NSString *)path format:(BMFileFormat)format atomically:(BOOL)atomically
 {
     NSData *data = nil;
-    Class CryptoCoderClass = NSClassFromString(@"CryptoCoder");
-    Class HRCoderClass = NSClassFromString(@"HRCoder");
-    if (CryptoCoderClass && [[self class] respondsToSelector:NSSelectorFromString(@"CCPassword")])
+    switch (format)
     {
-        data = [CryptoCoderClass archivedDataWithRootObject:self];
+        case BMFileFormatKeyedArchive:
+        {
+            data = [NSKeyedArchiver archivedDataWithRootObject:self];
+            break;
+        }
+        case BMFileFormatCryptoCoding:
+        {
+            Class coderClass = NSClassFromString(@"CryptoCoder");
+            NSAssert(coderClass, @"CryptoCoding library was not found");
+            data = [coderClass archivedDataWithRootObject:self];
+            break;
+        }
+        case BMFileFormatHRCodedXML:
+        case BMFileFormatHRCodedJSON:
+        case BMFileFormatHRCodedBinary:
+        {
+            Class coderClass = NSClassFromString(@"HRCoder");
+            NSAssert(coderClass, @"HRCoder library was not found");
+            id plist = ((id (*)(id, SEL, id))objc_msgSend)(coderClass, NSSelectorFromString(@"archivedPlistWithRootObject:"), self);
+            if (format == BMFileFormatHRCodedXML)
+            {
+                NSPropertyListFormat format = NSPropertyListXMLFormat_v1_0;
+                data = [NSPropertyListSerialization dataWithPropertyList:plist format:format options:0 error:NULL];
+            }
+            else if (format == BMFileFormatHRCodedBinary)
+            {
+                NSPropertyListFormat format = NSPropertyListBinaryFormat_v1_0;
+                data = [NSPropertyListSerialization dataWithPropertyList:plist format:format options:0 error:NULL];
+            }
+            else
+            {
+                data = [NSJSONSerialization dataWithJSONObject:plist options:(NSJSONWritingOptions)0 error:NULL];
+            }
+            break;
+        }
+        case BMFileFormatFastCoding:
+        {
+            Class coderClass = NSClassFromString(@"FastCoder");
+            NSAssert(coderClass, @"FastCoding library was not found");
+            data = ((id (*)(id, SEL, id))objc_msgSend)(coderClass, NSSelectorFromString(@"dataWithRootObject:"), self);
+            break;
+        }
     }
-    else if (HRCoderClass && [self useHRCoderIfAvailable])
-    {
-        id plist = ((id (*)(id, SEL, id))objc_msgSend)(HRCoderClass, NSSelectorFromString(@"archivedPlistWithRootObject:"), self);
-        NSPropertyListFormat format = NSPropertyListBinaryFormat_v1_0;
-        data = [NSPropertyListSerialization dataWithPropertyList:plist format:format options:0 error:NULL];
-    }
-    else
-    {
-        data = [NSKeyedArchiver archivedDataWithRootObject:self];
-    }
-    return [data writeToFile:[[self class] BaseModel_saveFilePath:path] atomically:atomically];
+    
+    return [data writeToFile:[[self class] BM_saveFilePath:path] atomically:atomically];
+}
+
+- (BOOL)writeToFile:(NSString *)path atomically:(BOOL)atomically
+{
+    return [self writeToFile:path format:[[self class] saveFormat] atomically:atomically];
 }
 
 

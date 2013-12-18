@@ -1,3 +1,12 @@
+Version 2.5
+
+- Now implements NSCoding (-setWithCoder:, -encodeWithCoder:) automatically, so there is no need to use the AutoCoding library
+- Now provides a default implementation of -setWithDictionary: that uses property inspection to map dictionary values to properties automatically
+- Added support for the FastCoding protocol for saving/loading models
+- Added +saveFormat method as a more convenient way to specify the file format to use for saving
+- Improved multithreaded performance by eliminating internal @synchronized calls
+- Now complies with the -Weverything warning level
+
 Version 2.4.4
 
 - Fixed warning under Xcode 5

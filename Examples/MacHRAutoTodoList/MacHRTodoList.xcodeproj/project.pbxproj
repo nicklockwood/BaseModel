@@ -1,0 +1,332 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		01864D491861E0910081685A /* HRCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 01864D481861E0910081685A /* HRCoder.m */; };
+		7B7142EF1663A72200B7661A /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7B7142EE1663A72200B7661A /* Cocoa.framework */; };
+		7B7142FB1663A72200B7661A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B7142FA1663A72200B7661A /* main.m */; };
+		7B7143021663A72200B7661A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B7143011663A72200B7661A /* AppDelegate.m */; };
+		7B7143201663AB8100B7661A /* TodoItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B71431C1663AB8000B7661A /* TodoItem.m */; };
+		7B7143221663AB8100B7661A /* TodoList.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B71431E1663AB8000B7661A /* TodoList.m */; };
+		7B7143241663ACB200B7661A /* TodoList.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7B7143231663ACB200B7661A /* TodoList.plist */; };
+		7B71432A1663AFB100B7661A /* BaseModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B7143171663A79800B7661A /* BaseModel.m */; };
+		7B71432D1663AFE300B7661A /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 7B71432B1663AFE300B7661A /* MainMenu.xib */; };
+		7B71435616641ABE00B7661A /* thatch.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 7B71435516641ABE00B7661A /* thatch.jpg */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		01864D471861E0910081685A /* HRCoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HRCoder.h; sourceTree = "<group>"; };
+		01864D481861E0910081685A /* HRCoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HRCoder.m; sourceTree = "<group>"; };
+		7B7142EA1663A72200B7661A /* MacHRTodoList.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacHRTodoList.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7B7142EE1663A72200B7661A /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		7B7142F11663A72200B7661A /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		7B7142F21663A72200B7661A /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		7B7142F31663A72200B7661A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		7B7142F61663A72200B7661A /* MacHRTodoList-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "MacHRTodoList-Info.plist"; sourceTree = "<group>"; };
+		7B7142FA1663A72200B7661A /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		7B7142FC1663A72200B7661A /* MacHRTodoList-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MacHRTodoList-Prefix.pch"; sourceTree = "<group>"; };
+		7B7143001663A72200B7661A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.objj.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		7B7143011663A72200B7661A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		7B7143161663A79800B7661A /* BaseModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = BaseModel.h; sourceTree = "<group>"; };
+		7B7143171663A79800B7661A /* BaseModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseModel.m; sourceTree = "<group>"; };
+		7B71431B1663AB8000B7661A /* Todos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.objj.h; path = Todos.h; sourceTree = "<group>"; };
+		7B71431C1663AB8000B7661A /* TodoItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TodoItem.m; sourceTree = "<group>"; };
+		7B71431E1663AB8000B7661A /* TodoList.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TodoList.m; sourceTree = "<group>"; };
+		7B7143231663ACB200B7661A /* TodoList.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = TodoList.plist; sourceTree = SOURCE_ROOT; };
+		7B71432C1663AFE300B7661A /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		7B71435516641ABE00B7661A /* thatch.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = thatch.jpg; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		7B7142E71663A72200B7661A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7B7142EF1663A72200B7661A /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		01864D461861E0910081685A /* HRCoder */ = {
+			isa = PBXGroup;
+			children = (
+				01864D471861E0910081685A /* HRCoder.h */,
+				01864D481861E0910081685A /* HRCoder.m */,
+			);
+			name = HRCoder;
+			path = ../Libraries/HRCoder;
+			sourceTree = "<group>";
+		};
+		7B7142DF1663A72200B7661A = {
+			isa = PBXGroup;
+			children = (
+				01864D461861E0910081685A /* HRCoder */,
+				7B7143151663A79800B7661A /* BaseModel */,
+				7B7142F51663A72200B7661A /* Supporting Files */,
+				7B7143001663A72200B7661A /* AppDelegate.h */,
+				7B7143011663A72200B7661A /* AppDelegate.m */,
+				7B71431B1663AB8000B7661A /* Todos.h */,
+				7B71431C1663AB8000B7661A /* TodoItem.m */,
+				7B71431E1663AB8000B7661A /* TodoList.m */,
+				7B7143231663ACB200B7661A /* TodoList.plist */,
+				7B7142ED1663A72200B7661A /* Frameworks */,
+				7B7142EB1663A72200B7661A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		7B7142EB1663A72200B7661A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7B7142EA1663A72200B7661A /* MacHRTodoList.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7B7142ED1663A72200B7661A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7B7142EE1663A72200B7661A /* Cocoa.framework */,
+				7B7142F01663A72200B7661A /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		7B7142F01663A72200B7661A /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7B7142F11663A72200B7661A /* AppKit.framework */,
+				7B7142F21663A72200B7661A /* CoreData.framework */,
+				7B7142F31663A72200B7661A /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		7B7142F51663A72200B7661A /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				7B71435516641ABE00B7661A /* thatch.jpg */,
+				7B71432B1663AFE300B7661A /* MainMenu.xib */,
+				7B7142F61663A72200B7661A /* MacHRTodoList-Info.plist */,
+				7B7142FA1663A72200B7661A /* main.m */,
+				7B7142FC1663A72200B7661A /* MacHRTodoList-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			path = MacHRAutoTodoList;
+			sourceTree = "<group>";
+		};
+		7B7143151663A79800B7661A /* BaseModel */ = {
+			isa = PBXGroup;
+			children = (
+				7B7143161663A79800B7661A /* BaseModel.h */,
+				7B7143171663A79800B7661A /* BaseModel.m */,
+			);
+			name = BaseModel;
+			path = ../../BaseModel;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		7B7142E91663A72200B7661A /* MacHRTodoList */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7B7143081663A72200B7661A /* Build configuration list for PBXNativeTarget "MacHRTodoList" */;
+			buildPhases = (
+				7B7142E61663A72200B7661A /* Sources */,
+				7B7142E71663A72200B7661A /* Frameworks */,
+				7B7142E81663A72200B7661A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MacHRTodoList;
+			productName = MacHRAutoTodoList;
+			productReference = 7B7142EA1663A72200B7661A /* MacHRTodoList.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		7B7142E11663A72200B7661A /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0500;
+				ORGANIZATIONNAME = "Alex Gray";
+			};
+			buildConfigurationList = 7B7142E41663A72200B7661A /* Build configuration list for PBXProject "MacHRTodoList" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 7B7142DF1663A72200B7661A;
+			productRefGroup = 7B7142EB1663A72200B7661A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7B7142E91663A72200B7661A /* MacHRTodoList */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		7B7142E81663A72200B7661A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7B7143241663ACB200B7661A /* TodoList.plist in Resources */,
+				7B71432D1663AFE300B7661A /* MainMenu.xib in Resources */,
+				7B71435616641ABE00B7661A /* thatch.jpg in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7B7142E61663A72200B7661A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7B7142FB1663A72200B7661A /* main.m in Sources */,
+				7B7143021663A72200B7661A /* AppDelegate.m in Sources */,
+				7B7143201663AB8100B7661A /* TodoItem.m in Sources */,
+				01864D491861E0910081685A /* HRCoder.m in Sources */,
+				7B7143221663AB8100B7661A /* TodoList.m in Sources */,
+				7B71432A1663AFB100B7661A /* BaseModel.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		7B71432B1663AFE300B7661A /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7B71432C1663AFE300B7661A /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		7B7143061663A72200B7661A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		7B7143071663A72200B7661A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		7B7143091663A72200B7661A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "MacHRAutoTodoList/MacHRTodoList-Prefix.pch";
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				INFOPLIST_FILE = "MacHRAutoTodoList/MacHRTodoList-Info.plist";
+				OTHER_LDFLAGS = (
+					"-Wall",
+					"-Wextra",
+				);
+				PRODUCT_NAME = MacHRTodoList;
+				VALID_ARCHS = x86_64;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		7B71430A1663A72200B7661A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "MacHRAutoTodoList/MacHRTodoList-Prefix.pch";
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				INFOPLIST_FILE = "MacHRAutoTodoList/MacHRTodoList-Info.plist";
+				OTHER_LDFLAGS = (
+					"-Wall",
+					"-Wextra",
+				);
+				PRODUCT_NAME = MacHRTodoList;
+				VALID_ARCHS = x86_64;
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7B7142E41663A72200B7661A /* Build configuration list for PBXProject "MacHRTodoList" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7B7143061663A72200B7661A /* Debug */,
+				7B7143071663A72200B7661A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7B7143081663A72200B7661A /* Build configuration list for PBXNativeTarget "MacHRTodoList" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7B7143091663A72200B7661A /* Debug */,
+				7B71430A1663A72200B7661A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 7B7142E11663A72200B7661A /* Project object */;
+}

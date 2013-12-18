@@ -25,7 +25,4 @@
 	[[TodoList sharedInstance] save];
 }
 
-//NOTE: no need to implement the NSCoding methods
-//BaseModel does that for us automagically
-
 @end

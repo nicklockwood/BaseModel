@@ -7,13 +7,12 @@
 //
 
 #import "TodoListAppDelegate.h"
-#import "HRCoder.h"
 
 
 @implementation TodoListAppDelegate
 
-- (void)applicationDidFinishLaunching:(UIApplication *)application
-{    
+- (void)applicationDidFinishLaunching:(__unused UIApplication *)application
+{        
     [self.window makeKeyAndVisible];
 }
 

@@ -7,13 +7,17 @@
 
 #import "Todos.h"
 
+
 @interface TodoItem ()
+
 @property (readwrite) NSDate *created;
+
 @end
+
 
 @implementation TodoItem
 
-- (void) setUp
+- (void)setUp
 {
 	_checked 	= NO;
 	_created 	= [NSDate date];
@@ -41,7 +45,7 @@
 
 #pragma readonly properties
 
-- (NSColor*) color
+- (NSColor *)color
 {
 	return 	self.checked				? [NSColor colorWithPatternImage:[NSImage imageNamed:@"thatch"]] 				:
 			self.priority.intValue == 1 ? [NSColor colorWithCalibratedRed:0.843 green:0.000 blue:0.119 alpha:1.000] :
@@ -56,11 +60,9 @@
 
 #pragma  KVO junk
 
-+ (NSSet*) keyPathsForValuesAffectingColor { return [NSSet setWithArray:@[@"checked", @"priority"]]; }
-
-
-/* note: we've not implemented the NSCoding methods or initWithString/Dictionary, etc
-	because the HRCoder and AutoCoding libraries take care of this for us */
-
++ (NSSet *)keyPathsForValuesAffectingColor
+{
+    return [NSSet setWithArray:@[@"checked", @"priority"]];
+}
 
 @end

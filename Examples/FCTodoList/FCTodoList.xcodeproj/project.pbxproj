@@ -7,10 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		014579F11176FCB8005BBF82 /* TodoList.plist in Resources */ = {isa = PBXBuildFile; fileRef = 014579F01176FCB8005BBF82 /* TodoList.plist */; };
 		01457AEB117723E2005BBF82 /* NewItemViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 01457AE9117723E2005BBF82 /* NewItemViewController.m */; };
 		01457AEC117723E2005BBF82 /* NewItemViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 01457AEA117723E2005BBF82 /* NewItemViewController.xib */; };
-		01864D511861E3490081685A /* HRCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 01864D501861E3490081685A /* HRCoder.m */; };
+		01864D4D1861E2D00081685A /* FastCoder.m in Sources */ = {isa = PBXBuildFile; fileRef = 01864D4C1861E2D00081685A /* FastCoder.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		01CDB20C161133F600B929AD /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 01CDB20B161133F600B929AD /* Default-568h@2x.png */; };
 		1D3623260D0F684500981E51 /* TodoListAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 1D3623250D0F684500981E51 /* TodoListAppDelegate.m */; };
 		1D60589B0D05DD56006BFB54 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; };
@@ -26,17 +25,16 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		014579F01176FCB8005BBF82 /* TodoList.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = TodoList.plist; sourceTree = "<group>"; };
 		01457AE8117723E2005BBF82 /* NewItemViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewItemViewController.h; sourceTree = "<group>"; };
 		01457AE9117723E2005BBF82 /* NewItemViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NewItemViewController.m; sourceTree = "<group>"; };
 		01457AEA117723E2005BBF82 /* NewItemViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = NewItemViewController.xib; path = Classes/NewItemViewController.xib; sourceTree = "<group>"; };
-		01864D4F1861E3490081685A /* HRCoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HRCoder.h; sourceTree = "<group>"; };
-		01864D501861E3490081685A /* HRCoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HRCoder.m; sourceTree = "<group>"; };
+		01864D4B1861E2D00081685A /* FastCoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FastCoder.h; sourceTree = "<group>"; };
+		01864D4C1861E2D00081685A /* FastCoder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FastCoder.m; sourceTree = "<group>"; };
 		01CDB20B161133F600B929AD /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		1D3623240D0F684500981E51 /* TodoListAppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TodoListAppDelegate.h; path = Classes/TodoListAppDelegate.h; sourceTree = SOURCE_ROOT; };
 		1D3623250D0F684500981E51 /* TodoListAppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TodoListAppDelegate.m; sourceTree = "<group>"; };
-		1D6058910D05DD3D006BFB54 /* HRTodoList.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HRTodoList.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D6058910D05DD3D006BFB54 /* FCTodoList.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FCTodoList.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DF5F4DF0D08C38300B7A737 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		288765A40DF7441C002DB57D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		2899E5210DE3E06400AC0155 /* TodoListViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = TodoListViewController.xib; sourceTree = "<group>"; };
@@ -44,8 +42,8 @@
 		28D7ACF60DDB3853001CB0EB /* TodoListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TodoListViewController.h; sourceTree = "<group>"; };
 		28D7ACF70DDB3853001CB0EB /* TodoListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TodoListViewController.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		32CA4F630368D1EE00C91783 /* HRTodoList_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HRTodoList_Prefix.pch; sourceTree = "<group>"; };
-		8D1107310486CEB800E47090 /* HRTodoList-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "HRTodoList-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
+		32CA4F630368D1EE00C91783 /* FCTodoList_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FCTodoList_Prefix.pch; sourceTree = "<group>"; };
+		8D1107310486CEB800E47090 /* FCTodoList-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "FCTodoList-Info.plist"; plistStructureDefinitionIdentifier = "com.apple.xcode.plist.structure-definition.iphone.info-plist"; sourceTree = "<group>"; };
 		B25BC0F9146AA0FB00008FB3 /* BaseModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseModel.h; sourceTree = "<group>"; };
 		B25BC0FA146AA0FB00008FB3 /* BaseModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseModel.m; sourceTree = "<group>"; };
 		B2CE7D5213E1729C00AB7DB4 /* TodoItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TodoItem.h; sourceTree = "<group>"; };
@@ -92,14 +90,14 @@
 			name = Model;
 			sourceTree = "<group>";
 		};
-		01864D4E1861E3490081685A /* HRCoder */ = {
+		01864D4A1861E2D00081685A /* FastCoder */ = {
 			isa = PBXGroup;
 			children = (
-				01864D4F1861E3490081685A /* HRCoder.h */,
-				01864D501861E3490081685A /* HRCoder.m */,
+				01864D4B1861E2D00081685A /* FastCoder.h */,
+				01864D4C1861E2D00081685A /* FastCoder.m */,
 			);
-			name = HRCoder;
-			path = ../Libraries/HRCoder;
+			name = FastCoder;
+			path = ../Libraries/FastCoder;
 			sourceTree = "<group>";
 		};
 		080E96DDFE201D6D7F000001 /* Classes */ = {
@@ -114,7 +112,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1D6058910D05DD3D006BFB54 /* HRTodoList.app */,
+				1D6058910D05DD3D006BFB54 /* FCTodoList.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -122,7 +120,7 @@
 		29B97314FDCFA39411CA2CEA /* CustomTemplate */ = {
 			isa = PBXGroup;
 			children = (
-				01864D4E1861E3490081685A /* HRCoder */,
+				01864D4A1861E2D00081685A /* FastCoder */,
 				B25BC0F8146AA0FB00008FB3 /* BaseModel */,
 				080E96DDFE201D6D7F000001 /* Classes */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
@@ -136,7 +134,7 @@
 		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
-				32CA4F630368D1EE00C91783 /* HRTodoList_Prefix.pch */,
+				32CA4F630368D1EE00C91783 /* FCTodoList_Prefix.pch */,
 				29B97316FDCFA39411CA2CEA /* main.m */,
 			);
 			name = "Other Sources";
@@ -149,8 +147,7 @@
 				2899E5210DE3E06400AC0155 /* TodoListViewController.xib */,
 				01457AEA117723E2005BBF82 /* NewItemViewController.xib */,
 				28AD733E0D9D9553002E5188 /* MainWindow.xib */,
-				8D1107310486CEB800E47090 /* HRTodoList-Info.plist */,
-				014579F01176FCB8005BBF82 /* TodoList.plist */,
+				8D1107310486CEB800E47090 /* FCTodoList-Info.plist */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -178,9 +175,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		1D6058900D05DD3D006BFB54 /* HRTodoList */ = {
+		1D6058900D05DD3D006BFB54 /* FCTodoList */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "HRTodoList" */;
+			buildConfigurationList = 1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "FCTodoList" */;
 			buildPhases = (
 				1D60588D0D05DD3D006BFB54 /* Resources */,
 				1D60588E0D05DD3D006BFB54 /* Sources */,
@@ -190,9 +187,9 @@
 			);
 			dependencies = (
 			);
-			name = HRTodoList;
+			name = FCTodoList;
 			productName = TodoList1;
-			productReference = 1D6058910D05DD3D006BFB54 /* HRTodoList.app */;
+			productReference = 1D6058910D05DD3D006BFB54 /* FCTodoList.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -203,7 +200,7 @@
 			attributes = {
 				LastUpgradeCheck = 0450;
 			};
-			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "HRTodoList" */;
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "FCTodoList" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 1;
@@ -217,7 +214,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				1D6058900D05DD3D006BFB54 /* HRTodoList */,
+				1D6058900D05DD3D006BFB54 /* FCTodoList */,
 			);
 		};
 /* End PBXProject section */
@@ -229,7 +226,6 @@
 			files = (
 				28AD733F0D9D9553002E5188 /* MainWindow.xib in Resources */,
 				2899E5220DE3E06400AC0155 /* TodoListViewController.xib in Resources */,
-				014579F11176FCB8005BBF82 /* TodoList.plist in Resources */,
 				01457AEC117723E2005BBF82 /* NewItemViewController.xib in Resources */,
 				01CDB20C161133F600B929AD /* Default-568h@2x.png in Resources */,
 			);
@@ -243,9 +239,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				1D60589B0D05DD56006BFB54 /* main.m in Sources */,
+				01864D4D1861E2D00081685A /* FastCoder.m in Sources */,
 				1D3623260D0F684500981E51 /* TodoListAppDelegate.m in Sources */,
 				28D7ACF80DDB3853001CB0EB /* TodoListViewController.m in Sources */,
-				01864D511861E3490081685A /* HRCoder.m in Sources */,
 				01457AEB117723E2005BBF82 /* NewItemViewController.m in Sources */,
 				B2CE7D5413E1729C00AB7DB4 /* TodoItem.m in Sources */,
 				B2CE7D5713E172A700AB7DB4 /* TodoList.m in Sources */,
@@ -265,10 +261,10 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = HRTodoList_Prefix.pch;
+				GCC_PREFIX_HEADER = FCTodoList_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "HRTodoList-Info.plist";
-				PRODUCT_NAME = HRTodoList;
+				INFOPLIST_FILE = "FCTodoList-Info.plist";
+				PRODUCT_NAME = FCTodoList;
 				SDKROOT = iphoneos;
 			};
 			name = Debug;
@@ -280,10 +276,10 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				COPY_PHASE_STRIP = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = HRTodoList_Prefix.pch;
+				GCC_PREFIX_HEADER = FCTodoList_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
-				INFOPLIST_FILE = "HRTodoList-Info.plist";
-				PRODUCT_NAME = HRTodoList;
+				INFOPLIST_FILE = "FCTodoList-Info.plist";
+				PRODUCT_NAME = FCTodoList;
 			};
 			name = Release;
 		};
@@ -318,7 +314,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "HRTodoList" */ = {
+		1D6058960D05DD3E006BFB54 /* Build configuration list for PBXNativeTarget "FCTodoList" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1D6058940D05DD3E006BFB54 /* Debug */,
@@ -327,7 +323,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "HRTodoList" */ = {
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "FCTodoList" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,

@@ -1,7 +1,7 @@
 //
 //  BaseModel.h
 //
-//  Version 2.4.4
+//  Version 2.5
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -35,37 +35,34 @@
 
 
 extern NSString *const BaseModelSharedInstanceUpdatedNotification;
+extern NSString *const BaseModelException;
 
 
-//the BaseModel protocol defines optional methods that
-//you can define on your BaseModel subclasses to extend their functionality
-
-@protocol BaseModel <NSObject>
-@optional
-
-//loading sequence:
-//setUp called first
-//then setWithDictionary/Array/String/etc if resource file exists
-//then setWithCoder if save file exists
-
-- (void)setUp;
-- (void)setWithDictionary:(NSDictionary *)dict;
-- (void)setWithArray:(NSArray *)array;
-- (void)setWithString:(NSString *)string;
-- (void)setWithCoder:(NSCoder *)coder;
-
-//coding
-
-- (void)encodeWithCoder:(NSCoder *)coder;
-
-@end
+typedef NS_ENUM(NSUInteger, BMFileFormat)
+{
+    BMFileFormatKeyedArchive = 0, //default
+    BMFileFormatCryptoCoding, //requires CryptoCoding library
+    BMFileFormatHRCodedXML, //requires HRCoder library
+    BMFileFormatHRCodedJSON, //requires HRCoder library
+    BMFileFormatHRCodedBinary, //requires HRCoder library
+    BMFileFormatFastCoding, //requires FastCoding library
+};
 
 
 //use the BaseModel class as the base class for any of your
 //model objects. BaseModels can be standalone objects, or
 //act as sub-properties of a larger object
 
-@interface BaseModel : NSObject <BaseModel>
+@interface BaseModel : NSObject <NSCoding>
+
+//loading sequence:
+//setUp called first
+//then setWithDictionary/Coder/etc if resource file exists
+//then setWithDictionary/Coder/etc again if save file exists
+
+- (void)setUp;
+- (void)setWithDictionary:(NSDictionary *)dict;
+- (void)setWithCoder:(NSCoder *)decoder;
 
 //new autoreleased instance
 + (instancetype)instance;
@@ -76,7 +73,7 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 + (void)setSharedInstance:(BaseModel *)instance;
 + (void)reloadSharedInstance;
 
-//creating instances from collection or string
+//creating instances from a configuration object
 + (instancetype)instanceWithObject:(id)object;
 - (instancetype)initWithObject:(id)object;
 + (NSArray *)instancesWithArray:(NSArray *)array;
@@ -85,18 +82,23 @@ extern NSString *const BaseModelSharedInstanceUpdatedNotification;
 + (instancetype)instanceWithCoder:(NSCoder *)decoder;
 - (instancetype)initWithCoder:(NSCoder *)decoder;
 
-//loading and saving the model from a plist file
+//loading and saving the model from a data file
 + (instancetype)instanceWithContentsOfFile:(NSString *)path;
 - (instancetype)initWithContentsOfFile:(NSString *)path;
 - (BOOL)writeToFile:(NSString *)path atomically:(BOOL)atomically;
-- (BOOL)useHRCoderIfAvailable;
+- (BOOL)writeToFile:(NSString *)path format:(BMFileFormat)format atomically:(BOOL)atomically;
+
+//extract properties as a dictionary
+- (NSDictionary *)dictionaryRepresentation;
 
 //resourceFile is a file, typically within the resource bundle that
 //is used to initialise any BaseModel instance
 //saveFile is a path, typically within application support that
 //is used to save the shared instance of the model
+//saveFormat is the preferred format to use when saving the file
 + (NSString *)resourceFile;
 + (NSString *)saveFile;
++ (BMFileFormat)saveFormat;
 
 //save the model
 - (void)save;

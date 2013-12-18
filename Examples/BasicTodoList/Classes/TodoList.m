@@ -17,9 +17,10 @@
     self.items = [NSMutableArray array];
 }
 
-+ (BMFileFormat)saveFormat
+- (void)setWithArray:(NSArray *)array
 {
-    return BMFileFormatHRCodedXML;
+	//initialise with default list from plist
+	[self.items setArray:[TodoItem instancesWithArray:array]];
 }
 
 //NOTE: no need to implement the NSCoding methods
