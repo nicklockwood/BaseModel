@@ -1,7 +1,7 @@
 //
 //  HRCoder.m
 //
-//  Version 1.3
+//  Version 1.3.1
 //
 //  Created by Nick Lockwood on 24/04/2012.
 //  Copyright (c) 2011 Charcoal Design
@@ -46,6 +46,7 @@ NSString *const HRCoderException = @"HRCoderException";
 NSString *const HRCoderClassNameKey = @"$class";
 NSString *const HRCoderRootObjectKey = @"$root";
 NSString *const HRCoderObjectAliasKey = @"$alias";
+NSString *const HRCoderBase64DataKey = @"$data";
 
 
 @interface HRCoderAliasPlaceholder : NSObject
@@ -393,7 +394,7 @@ NSString *const HRCoderObjectAliasKey = @"$alias";
 
 - (void)encodeConditionalObject:(id)objv forKey:(__unsafe_unretained NSString *)key
 {
-    for (__unsafe_unretained id object in _knownObjects)
+    for (__unsafe_unretained id object in [_knownObjects allValues])
     {
         if (object == objv)
         {
@@ -448,7 +449,8 @@ NSString *const HRCoderObjectAliasKey = @"$alias";
         //check if object is an alias
         if ([object isKindOfClass:[NSDictionary class]])
         {
-            __autoreleasing NSString *aliasKeyPath = ((NSDictionary *)object)[HRCoderObjectAliasKey];
+            NSDictionary *dictionary = object;
+            __autoreleasing NSString *aliasKeyPath = dictionary[HRCoderObjectAliasKey];
             if (aliasKeyPath)
             {
                 //object alias
@@ -459,6 +461,30 @@ NSString *const HRCoderObjectAliasKey = @"$alias";
                     decodedObject = [HRCoderAliasPlaceholder placeholder];
                 }
                 return decodedObject;
+            }
+            else
+            {
+                __autoreleasing NSString *base64Data = dictionary[HRCoderBase64DataKey];
+                if (base64Data)
+                {
+                    Class dataClass = NSClassFromString(dictionary[HRCoderClassNameKey] ?: @"NSData");
+                    
+#if __MAC_OS_X_VERSION_MIN_REQUIRED < __MAC_10_9 || __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_7_0
+                    
+                    if (![NSData instancesRespondToSelector:@selector(initWithBase64EncodedString:options:)])
+                    {
+                        object = [[dataClass alloc] initWithBase64Encoding:base64Data];
+                    }
+                    else
+#endif
+                    {
+                        object = [[dataClass alloc] initWithBase64EncodedString:base64Data options:0];
+                    }
+                    if (!object)
+                    {
+                        return nil;
+                    }
+                }
             }
         }
         
@@ -654,7 +680,25 @@ NSString *const HRCoderObjectAliasKey = @"$alias";
 
 - (id)archivedObjectWithHRCoder:(__unsafe_unretained HRCoder *)coder
 {
-    if (coder.outputFormat == HRCoderFormatJSON || [self classForCoder] == [NSMutableData class])
+    Class coderClass = [self classForCoder];
+    if (coder.outputFormat == HRCoderFormatJSON)
+    {
+        NSString *base64String = nil;
+        
+#if __MAC_OS_X_VERSION_MIN_REQUIRED < __MAC_10_9 || __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_7_0
+        
+        if (![self respondsToSelector:@selector(base64EncodedStringWithOptions:)])
+        {
+            base64String = [self base64Encoding];
+        }
+        else
+#endif
+        {
+            base64String = [self base64EncodedStringWithOptions:0];
+        }
+        return @{HRCoderClassNameKey: NSStringFromClass(coderClass), HRCoderBase64DataKey: base64String};
+    }
+    else if ([self classForCoder] == [NSMutableData class])
     {
         return [super archivedObjectWithHRCoder:coder];
     }

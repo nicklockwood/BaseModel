@@ -1,7 +1,7 @@
 //
 //  HRCoder.h
 //
-//  Version 1.3
+//  Version 1.3.1
 //
 //  Created by Nick Lockwood on 24/04/2012.
 //  Copyright (c) 2011 Charcoal Design
@@ -41,6 +41,7 @@ extern NSString *const HRCoderException;
 extern NSString *const HRCoderClassNameKey;
 extern NSString *const HRCoderRootObjectKey;
 extern NSString *const HRCoderObjectAliasKey;
+extern NSString *const HRCoderBase64DataKey;
 
 
 typedef NS_ENUM(NSUInteger, HRCoderFormat)
