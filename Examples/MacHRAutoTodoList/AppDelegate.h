@@ -1,24 +1,19 @@
-//
-//  AppDelegate.h
-//  MacHRAutoTodoList
-//
-//  Created by Alex Gray on 11/26/12.
-//  Copyright (c) 2012 Alex Gray. All rights reserved.
-//
 
+//  AppDelegate.h -  MacHRAutoTodoList
+//  Created by Alex Gray on 11/26/12.   Copyright (c) 2012 Alex Gray. All rights reserved.
 
 #import "Todos.h"
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
+@interface                AppDelegate : NSObject
 
-@property (weak) IBOutlet	NSTableView *table;
-@property (nonatomic)		TodoList 	*todos;
+@property (weak) IBOutlet	NSTableView * table;
+@property (readonly)		     TodoList * todos;
 
-- (IBAction) newTodo:		(id)sender;
-- (IBAction) loadFromPlist:	(id)sender;
-- (IBAction) copyTodo:		(id)sender;
-- (IBAction) saveTodos:		(id)sender;
-- (IBAction) deleteAll:		(id)sender;
+- (IBAction) newTodo:       (id)x;
+- (IBAction) loadFromPlist:	(id)x;
+- (IBAction) copyTodo:      (id)x;
+- (IBAction) saveTodos:     (id)x;
+- (IBAction) deleteAll:     (id)x;
 
 @end
 
