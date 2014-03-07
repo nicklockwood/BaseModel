@@ -63,6 +63,10 @@ The BaseModel class has the following methods:
     
 BaseModel's initialisation routine is quite complex and follows a multi-step process. To simplify configuration, BaseModel provides a `setUp` method that is called before anything else so you can pre-configure your instance. This is called only after a successful `[super init]`, so there is no need to verify that self is not nil or call `[super setUp]` (unless you are subclassing one of your own BaseModel subclasses). Like `init`, `setUp` is called only once at the start of the lifetime of an instance, so it is safe to set properties without releasing their existing values (relevant only if you are not using ARC). You should never call `setUp` yourself directly, except in the context of calling `[super setUp]` when subclassing your own BaseModel subclasses.
 
+    - (void)tearDown;
+    
+The tearDown method complements setUp. It is called when the object is destroyed, but will only be called if the setUp method was called first. This is useful in situations where the class gets destroyed before it is initialised, which might for example happen if it was created by calling [[Model alloc] initWithObject:nil]. By putting your destructor logic in tearDown instead of dealloc, you can avoid unbalanced calls to removeObserver, etc. You should never call `tearDown` yourself directly, except in the context of calling `[super tearDown]` (it is called automatically by BaseModel's `dealloc` method).  There is no need to call `[super tearDown]` unless you have subclassed one of your own BaseModel subclasses. 
+
     - (void)setWithDictionary:(NSDictionary *)dict;
 
 If you are initializing your BaseModel instance using a dictionary (typically loaded from JSON or a Plist file) then this method will be called automatically. BaseModel provides a default implementation of `setWithDictionary:` that attempts to set the properties of your class automatically from the dictionary that is passed in, but you can override this if neccesary (e.g. if the property names or types don't match up exactly).
@@ -147,11 +151,11 @@ This method returns a path for a file to be used to load and save the shared ins
 
     + (BMFileFormat)saveFormat;
 
-This method returns the file format to use for saving the shared instance of the class. By default, this method returns BMFileFormatKeyedArchive, which means that the model will be saved and loaded using the NSKeyedArchiver/NSKeyedUnarchiver and the NSCoding protocol, but you can override this method in your own subclasses to change the file type. BaseModel supports a number of alternative serialisation formats by taking advantage of additional libraries such as CryptoCoding, FastCoding and HRCoder.
+This method returns the file format to use for saving the shared instance of the class. By default, this method returns BMFileFormatKeyedArchive, which means that the model will be saved and loaded using the NSKeyedArchiver/NSKeyedUnarchiver and the NSCoding protocol, but you can override this method in your own subclasses to change the file type. BaseModel supports a number of alternative serialisation formats by taking advantage of additional libraries such as CryptoCoding, FastCoding and HRCoder. See BMFileFormat options below.
 
-    - (void)save;
+    - (BOOL)save;
 
-This method checks to see if the instance being saved is the shared instance. If so, it will save to the file specified by the `saveFile` method by using the NSCoding protocol and calling `encodeWithCoder:`. If the instance is not the shared instance it will throw an exception. You can override the save method in your subclasses to provide an implementation for saving individual models. There are a couple of approaches (which is why there is no default implementation): 
+Attempts to save the model, and returns YES if successful or NO if saving fails. This method checks to see if the instance being saved is the shared instance. If so, it will save to the file specified by the `saveFile` method by using the NSCoding protocol and calling `encodeWithCoder:`. If the instance is not the shared instance it will throw an exception. You can override the save method in your subclasses to provide an implementation for saving individual models. There are a couple of approaches (which is why there is no default implementation):
 
 1. If the instance is a member of a larger object graph, where the root node is another BaseModel of the same or different type, you could modify the save method to call `save` on the root node, that way the entire tree can be saved by calling `save` on any node:
 
@@ -171,7 +175,171 @@ This method checks to see if the instance being saved is the shared instance. If
 
         MyModel *instance = [MyModel instanceWithContentsOfFile:@"some-unique-filename.plist"];
 
+
+BMFileFormat Options
+----------------------
+
+BaseModel can save files in a number of different formats. The default is NSKeyedArchiver, but there are some other choices, each with different strengths and weaknesses.
+
+    BMFileFormatKeyedArchive
+
+This is the default save format. This saves the model as a binary-coded property list using NSKeyedArchiver. BaseModel fully supports NSCoding, so this option allows you to save more-or-less any type of object without any additional effort on your part. The only exception is if you need to save properties that are structs, or other types not supported by NSCoding, in which case you may need to override encodeWithCoder:/setWithCoder: to handle these cases.
+
+    BMFileFormatXMLPropertyList
+    
+This saves the model as an XML property list. This differs from the NSCoded file saved by BMFileFormatKeyedArchive because it is human-readabled. This is great for saving data that you want to be able to view or hand-edit in a text editor. XML property lists do not include class information however, so you may need to override the setWithDictionary: method on either your root or child model classes in order to load the resultant file correctly. You may want to consider using the BMFileFormatHRCodedXML option instead, which uses the HRCoder library to produce XML property lists that include the class information.
+    
+    BMFileFormatBinaryPropertyList
+    
+This is the same as the BMFileFormatXMLPropertyList option (with the same limitations), but saves the file as a binary property list. This cannot be viewed in a text editor, but can be opened and edited in property list editors, such as the one built into Xcode.
+
+    BMFileFormatJSON
+    
+This is the similar to the BMFileFormatXMLPropertyList option (with the same limitations), but saves the data as a JSON file.
+   
+    BMFileFormatUserDefaults
+    
+This is the same as the BMFileFormatBinaryPropertyList option, except that when calling the save method, instead of saving to a file, the model will be saved in [NSUserDefaults standardUserDefaults]. This is a great option for introducing a strongly-typed settings model for your project.
+
+    BMFileFormatKeychain
+    
+This is the similar to the BMFileFormatBinaryPropertyList option, except that when calling the save method, instead of saving to a file, the model will be securely saved in the keychain (meaning that every property will be individually encoded as a password in the keychain). This is a great option for models that represent user login credentials, or other secure data. Use of this option requires you to include the FXKeychain library. Note that the keychain has limited storage space, so you should not use this for storing large amounts of secure data (for that, try the BMFileFormatCryptoCoding option instead).
+    
+    BMFileFormatCryptoCoding
+    
+This option used the CryptoCoding library to save the model using AES encryption. The model is saved using NSCoding before being encrypted, so should work automatically.
+
+    BMFileFormatHRCodedXML
+    
+This option saves the file as a human-readabled XML property list using the HRCoder library. The file includes all the object class names, so no additional work is required in the setWithDictionary: method in order to load the models again. 
+    
+    BMFileFormatHRCodedJSON
+        
+This option saves the file as a human-readabled JSON file using the HRCoder library. The file includes all the object class names, so no additional work is required in the setWithDictionary: method in order to load the models again. 
+        
+    BMFileFormatHRCodedBinary
+    
+This option saves the file as a binary property list using the HRCoder library. The file cannot be viewed in a text editor, but if opened with a property list editor (such as the one built into Xcode), it can be read and edited by hand. The file includes all the object class names, so no additional work is required in the setWithDictionary: method in order to load the models again. 
+
+    BMFileFormatFastCoding
+    
+This option saves the file as a binary file using the FastCoding library. This is similar to a binary property list, but is much faster to save and load, and creates a smaller file on disk. FastCoding works automatically with most property type, the only exception is if you need to save properties that are structs, or other types not supported by KVC, in which case you may need to do some additional work to handle these cases.
+
+
 Usage
 -----------
 
 The BaseModel class is abstract, and is not designed to be instantiated directly. To implement a model object, create a new subclass of the BaseModel class and implement or override the methods that need to be customised for your specific requirements. Look at the *TodoList* project for an example of how to do this.
+
+
+Release Notes
+-------------------
+
+Version 2.6
+
+- Added tearDown method to complement setUp
+- save method now return a BOOL to indicate success
+- BaseModel can now automatically serialize to a Property List or JSON file
+- BaseModel can now automatically save instances to NSUserDefaults and the keychain
+- Added +allPropertyKeys and +codablePropertyKeys public properties
+- Passing NSNull to -initWithObject: now returns nil instead of crashing
+- returning nil from a BaseModel constructor no longer crashes +instancesWithArray:
+- BaseModel now provides a nice default implementation for -debugDescription method
+
+Version 2.5
+
+- Now implements NSCoding (-setWithCoder:, -encodeWithCoder:) automatically, so there is no need to use the AutoCoding library
+- Now provides a default implementation of -setWithDictionary: that uses property inspection to map dictionary values to properties automatically
+- Added support for the FastCoding protocol for saving/loading models
+- Added +saveFormat method as a more convenient way to specify the file format to use for saving
+- Improved multithreaded performance by eliminating internal @synchronized calls
+- Now complies with the -Weverything warning level
+
+Version 2.4.4
+
+- Fixed warning under Xcode 5
+
+Version 2.4.3
+
+- Added explicit function pointer casts for all obc_msgSend calls.
+- atomic argument is now respected when calling -writeToFile:atomically:
+- Now complies with the -Wextra warning level
+
+Version 2.4.2
+
+- writeToFile:atomically: now returns a boolean indicating success or failure.
+
+Version 2.4.1
+
+- BaseModel will no longer attempt to treat resource files as JSON unless the file has a "json" or "js" extension
+- Added more robust warning if using JSON when targeting platforms that do not support it
+
+Version 2.4
+
+- Added support for loading resource files encoded in JSON format
+- BaseModel now requires ARC. See README file for details on how to upgrade
+- Removed uniqueID property because it complicates the class interface for no good reason
+- Corrected a number of typos and innacuracies in the documentation
+
+Version 2.3.5
+
+- Fixed a bug when creating BaseModel instances that are initialised with a resource file from within the init method of another BaseModel instance.
+
+Version 2.3.4
+
+- Fixed bug in resource file caching mechanism
+
+Version 2.3.3
+
+- Added support for CryptoCoding
+- Updated for iOS6 / Xcode 4.5
+
+Version 2.3.2
+
+- It is now possible to set the shared instance of a BaseModel to nil, which allows you to reclaim memory for BaseModel shared instances if they are no longer needed, or in the event of a memory warning.
+
+Version 2.3.1
+
+- Switched constructors to return new type-safe `instancetype` instead of id, making it easier to use dot-syntax property accessors on basemodel singletons.
+
+Version 2.3
+
+- Removed the uniqueID property by default and replaced it with a more flexible `newUniqueIdentifier` class method. To re-enable the uniqueID property, add BASEMODEL_ENABLE_UNIQUE_ID to your project's preprocessor macros
+
+Version 2.2.2
+
+- Added support for the HRCoder library, which provides human-readable object serialisation and de-serialisation using NSCoding
+
+Version 2.2.1
+
+- Fixed minor bug in setter name generation logic
+- Removed deprecated property list serialisation methods
+
+Version 2.2
+
+- Added new instancesWithArray: method for loading an array of models in one go.
+- Added setWithString:, setWithNumber: and setWithData: methods.
+- Replaced instanceWithDictionary/Array: and initWithDictionary/Array: methods and replaced them with instanceWithObject: and initWithObject:
+
+Version 2.1
+
+- Added automatic support for ARC compile targets
+- BaseModel is now designed to work hand-in-hand with the AutoCoding library, which provides completely automatic object serialisation via NSCoding
+- NSObject (BaseModel) category has now been removed from the BaseModel library. You can now find this functionality in the AutoCoding library instead (https://github.com/nicklockwood/AutoCoding).
+- Fixed a bug where `setUp` method could be called multiple times
+
+Version 2.0
+
+- Major API redesign. It is not recommended to update projects that use BaseModel 1.1 or earlier to version 2.0
+
+Version 1.1
+
+- Added mergeValuesFromObject method.
+- Renamed documentsPath to savePath.
+- Updated loading and saving methods to use the application support folder by default, instead of the documents folder.
+- Fixed nil object exception in loading code.
+- Fixed bug in NSCoded loading logic.
+
+Version 1.0
+
+- Initial release

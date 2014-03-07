@@ -38,7 +38,7 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {	
-	TodoItem *item = [TodoList sharedInstance].items[indexPath.row];
+	TodoItem *item = [TodoList sharedInstance].items[(NSUInteger)indexPath.row];
 	item.checked = !item.checked;
 	[item save];
 	
@@ -52,7 +52,7 @@
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(__unused UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
 {
-	[[TodoList sharedInstance].items removeObjectAtIndex:indexPath.row];
+	[[TodoList sharedInstance].items removeObjectAtIndex:(NSUInteger)indexPath.row];
 	[[TodoList sharedInstance] save];
 	
 	[tableView reloadData];
@@ -63,7 +63,7 @@
 
 - (NSInteger)tableView:(__unused UITableView *)table numberOfRowsInSection:(__unused NSInteger)section
 {	
-	return [[TodoList sharedInstance].items count];
+	return (NSInteger)[[TodoList sharedInstance].items count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -75,7 +75,7 @@
 		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellType];
 	}
 	
-	TodoItem *item = [TodoList sharedInstance].items[indexPath.row];
+	TodoItem *item = [TodoList sharedInstance].items[(NSUInteger)indexPath.row];
 	cell.textLabel.text = item.label;
 	cell.accessoryType = item.checked? UITableViewCellAccessoryCheckmark: UITableViewCellAccessoryNone;
 	return cell;

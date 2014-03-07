@@ -469,7 +469,8 @@ NSString *const HRCoderBase64DataKey = @"$data";
                 {
                     Class dataClass = NSClassFromString(dictionary[HRCoderClassNameKey] ?: @"NSData");
                     
-#if __MAC_OS_X_VERSION_MIN_REQUIRED < __MAC_10_9 || __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_7_0
+#if (defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && __MAC_OS_X_VERSION_MIN_REQUIRED < __MAC_10_9) || \
+    (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_7_0)
                     
                     if (![NSData instancesRespondToSelector:@selector(initWithBase64EncodedString:options:)])
                     {
@@ -685,7 +686,8 @@ NSString *const HRCoderBase64DataKey = @"$data";
     {
         NSString *base64String = nil;
         
-#if __MAC_OS_X_VERSION_MIN_REQUIRED < __MAC_10_9 || __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_7_0
+#if (defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && __MAC_OS_X_VERSION_MIN_REQUIRED < __MAC_10_9) || \
+    (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_7_0)
         
         if (![self respondsToSelector:@selector(base64EncodedStringWithOptions:)])
         {

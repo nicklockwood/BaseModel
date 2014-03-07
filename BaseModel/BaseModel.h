@@ -1,7 +1,7 @@
 //
 //  BaseModel.h
 //
-//  Version 2.5
+//  Version 2.6
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -41,6 +41,11 @@ extern NSString *const BaseModelException;
 typedef NS_ENUM(NSUInteger, BMFileFormat)
 {
     BMFileFormatKeyedArchive = 0, //default
+    BMFileFormatXMLPropertyList,
+    BMFileFormatBinaryPropertyList,
+    BMFileFormatJSON,
+    BMFileFormatUserDefaults,
+    BMFileFormatKeychain, //requires FXKeychain library
     BMFileFormatCryptoCoding, //requires CryptoCoding library
     BMFileFormatHRCodedXML, //requires HRCoder library
     BMFileFormatHRCodedJSON, //requires HRCoder library
@@ -59,10 +64,12 @@ typedef NS_ENUM(NSUInteger, BMFileFormat)
 //setUp called first
 //then setWithDictionary/Coder/etc if resource file exists
 //then setWithDictionary/Coder/etc again if save file exists
+//tearDown is called prior to dealloc (but only if setUp was called)
 
 - (void)setUp;
 - (void)setWithDictionary:(NSDictionary *)dict;
 - (void)setWithCoder:(NSCoder *)decoder;
+- (void)tearDown;
 
 //new autoreleased instance
 + (instancetype)instance;
@@ -88,7 +95,9 @@ typedef NS_ENUM(NSUInteger, BMFileFormat)
 - (BOOL)writeToFile:(NSString *)path atomically:(BOOL)atomically;
 - (BOOL)writeToFile:(NSString *)path format:(BMFileFormat)format atomically:(BOOL)atomically;
 
-//extract properties as a dictionary
+//get model properties
++ (NSArray *)allPropertyKeys;
++ (NSArray *)codablePropertyKeys;
 - (NSDictionary *)dictionaryRepresentation;
 
 //resourceFile is a file, typically within the resource bundle that
@@ -101,7 +110,7 @@ typedef NS_ENUM(NSUInteger, BMFileFormat)
 + (BMFileFormat)saveFormat;
 
 //save the model
-- (void)save;
+- (BOOL)save;
 
 //generate unique identifier
 //useful for creating universally unique

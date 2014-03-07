@@ -22,10 +22,10 @@
     self.label = string;
 }
 
-- (void)save
+- (BOOL)save
 {
 	//save the todolist
-	[[TodoList sharedInstance] save];
+	return [[TodoList sharedInstance] save];
 }
 
 //NOTE: no need to implement the NSCoding methods
