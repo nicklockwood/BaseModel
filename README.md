@@ -21,7 +21,7 @@ BaseModel is designed to work with the following serialization libraries:
 Supported OS & SDK Versions
 -----------------------------
 
-* Supported build target - iOS 7.0 / Mac OS 10.8 (Xcode 5.0, Apple LLVM compiler 5.0)
+* Supported build target - iOS 7.1 / Mac OS 10.9 (Xcode 5.1, Apple LLVM compiler 5.1)
 * Earliest supported deployment target - iOS 5.0 / Mac OS 10.7
 * Earliest compatible deployment target - iOS 4.3 / Mac OS 10.6
 
@@ -234,6 +234,11 @@ The BaseModel class is abstract, and is not designed to be instantiated directly
 
 Release Notes
 -------------------
+
+Version 2.6.1
+
+- Fixed infinite loop when -initWithObject: is passed a nil value
+- Saving models using the BMFileFormatHRCodedJSON format now works correctly
 
 Version 2.6
 
