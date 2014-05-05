@@ -12,13 +12,17 @@
 @interface TestModel : BaseModel
 
 @property (nonatomic, strong) NSString *string;
+@property (nonatomic, strong) NSDate *date;
 
 @end
 
 
 @implementation TestModel
 
-@synthesize string;
++ (BMFileFormat)saveFormat
+{
+    return BMFileFormatJSON;
+}
 
 @end
 
@@ -35,6 +39,12 @@
     
     //verify that it worked
     NSAssert([TestModel sharedInstance].string == nil, @"Failed to clear shared instance");
+}
+
+- (void)testSaveDateAsJSON
+{
+    [TestModel sharedInstance].date = [NSDate date];
+    [[TestModel sharedInstance] save];
 }
 
 @end

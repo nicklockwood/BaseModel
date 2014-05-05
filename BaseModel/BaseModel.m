@@ -653,6 +653,10 @@ static const NSUInteger BMStringDescriptionMaxLength = 16;
 
 - (instancetype)initWithObject:(id)object
 {
+    if (!object)
+    {
+        return nil;
+    }
     if ((self = [self init]))
     {
         Class class = [object class];
@@ -997,7 +1001,8 @@ static const NSUInteger BMStringDescriptionMaxLength = 16;
         {
             Class coderClass = NSClassFromString(@"HRCoder");
             NSAssert(coderClass, @"HRCoder library was not found");
-            id plist = ((id (*)(id, SEL, id))objc_msgSend)(coderClass, NSSelectorFromString(@"archivedPlistWithRootObject:"), self);
+            NSString *selString = (format == BMFileFormatHRCodedJSON)? @"archivedJSONWithRootObject:": @"archivedPlistWithRootObject:";
+            id plist = ((id (*)(id, SEL, id))objc_msgSend)(coderClass, NSSelectorFromString(selString), self);
             if (format == BMFileFormatHRCodedXML)
             {
                 NSPropertyListFormat fmt = NSPropertyListXMLFormat_v1_0;
