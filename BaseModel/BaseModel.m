@@ -1,7 +1,7 @@
 //
 //  BaseModel.m
 //
-//  Version 2.6
+//  Version 2.6.1
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -521,9 +521,11 @@ static const NSUInteger BMStringDescriptionMaxLength = 16;
             Class keychainClass = NSClassFromString(@"FXKeychain");
             NSAssert(keychainClass, @"FXKeychain library was not found");
             id defaultKeychain = [keychainClass valueForKey:@"defaultKeychain"];
-            [[self BM_propertyListRepresentation] enumerateKeysAndObjectsUsingBlock:^(NSString *key, id obj, __unused BOOL *stop) {
-                defaultKeychain[key] = obj;
-            }];
+            for (NSString *key in [[self class] codablePropertyKeys])
+            {
+                id value = [self valueForKey:key];
+                if (value) defaultKeychain[key] = value;
+            }
             return YES;
         }
         else
