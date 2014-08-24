@@ -1,11 +1,12 @@
 //
-//  Tests.m
+//  BaseModelTests.m
 //
 //  Created by Nick Lockwood on 12/01/2012.
 //  Copyright (c) 2012 Charcoal Design. All rights reserved.
 //
 
-#import "Tests.h"
+
+#import <XCTest/XCTest.h>
 #import "BaseModel.h"
 
 
@@ -27,7 +28,12 @@
 @end
 
 
-@implementation Tests
+@interface BaseModelTests : XCTestCase
+
+@end
+
+
+@implementation BaseModelTests
 
 - (void)testSetSharedInstanceToNil
 {
@@ -38,13 +44,15 @@
     [TestModel setSharedInstance:nil];
     
     //verify that it worked
-    NSAssert([TestModel sharedInstance].string == nil, @"Failed to clear shared instance");
+    XCTAssertFalse([TestModel hasSharedInstance]);
+    XCTAssertNil([TestModel sharedInstance].string);
 }
 
 - (void)testSaveDateAsJSON
 {
     [TestModel sharedInstance].date = [NSDate date];
-    [[TestModel sharedInstance] save];
+    XCTAssertNoThrow([[TestModel sharedInstance] save]);
 }
 
 @end
+

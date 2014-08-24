@@ -1,7 +1,7 @@
 //
 //  BaseModel.m
 //
-//  Version 2.6.1
+//  Version 2.6.3
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -597,7 +597,7 @@ static const NSUInteger BMStringDescriptionMaxLength = 16;
         {
             //attempt to load from resource file
             objc_setAssociatedObject([self class], BMLoadingFromResourceFileKey, @YES, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-            id object = [[[self class] alloc] initWithContentsOfFile:[[self class] BM_resourceFilePath]];
+            id object = [(BaseModel *)[[self class] alloc] initWithContentsOfFile:[[self class] BM_resourceFilePath]];
             objc_setAssociatedObject([self class], BMLoadingFromResourceFileKey, nil, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
             if (object)
             {
@@ -722,7 +722,7 @@ static const NSUInteger BMStringDescriptionMaxLength = 16;
     }
     
     //return nil if file does not exist
-    return [[NSFileManager defaultManager] fileExistsAtPath:path]? [[self alloc] initWithContentsOfFile:path]: nil;
+    return [[NSFileManager defaultManager] fileExistsAtPath:path]? [(BaseModel *)[self alloc] initWithContentsOfFile:path]: nil;
 }
 
 - (instancetype)initWithContentsOfFile:(NSString *)filePath
@@ -1034,6 +1034,12 @@ static const NSUInteger BMStringDescriptionMaxLength = 16;
 - (BOOL)writeToFile:(NSString *)path atomically:(BOOL)atomically
 {
     return [self writeToFile:path format:[[self class] saveFormat] atomically:atomically];
+}
+
+- (BOOL)preferFastCoding
+{
+    //prefer FastCoding over NSCoding if available
+    return YES;
 }
 
 

@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/nicklockwood/BaseModel.svg)](https://travis-ci.org/nicklockwood/BaseModel)
+
+
 Purpose
 --------------
 
@@ -21,7 +24,7 @@ BaseModel is designed to work with the following serialization libraries:
 Supported OS & SDK Versions
 -----------------------------
 
-* Supported build target - iOS 7.1 / Mac OS 10.9 (Xcode 5.1, Apple LLVM compiler 5.1)
+* Supported build target - iOS 8.0 / Mac OS 10.9 (Xcode 6.0, Apple LLVM compiler 6.0)
 * Earliest supported deployment target - iOS 5.0 / Mac OS 10.7
 * Earliest compatible deployment target - iOS 4.3 / Mac OS 10.6
 
@@ -234,6 +237,11 @@ The BaseModel class is abstract, and is not designed to be instantiated directly
 
 Release Notes
 -------------------
+
+Version 2.6.3
+
+- Updated to improve performance when using FastCoding 2.3
+- Updated tests to use Travis CI
 
 Version 2.6.2
 
