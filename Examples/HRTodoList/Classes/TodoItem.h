@@ -13,7 +13,7 @@
 
 @interface TodoItem : BaseModel
 
-@property (nonatomic, strong) NSString *label;
+@property (nonatomic, copy) NSString *label;
 @property (nonatomic, assign) BOOL checked;
 
 + (instancetype)instanceWithLabel:(NSString *)label;

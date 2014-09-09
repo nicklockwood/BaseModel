@@ -19,7 +19,7 @@
 
 + (BMFileFormat)saveFormat
 {
-    return BMFileFormatHRCodedXML;
+    return BMFileFormatHRCodedJSON;
 }
 
 //NOTE: no need to implement the NSCoding methods

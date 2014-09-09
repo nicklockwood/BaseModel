@@ -1,7 +1,7 @@
 //
 //  HRCoder.m
 //
-//  Version 1.3.1
+//  Version 1.3.2
 //
 //  Created by Nick Lockwood on 24/04/2012.
 //  Copyright (c) 2011 Charcoal Design
@@ -352,9 +352,8 @@ NSString *const HRCoderBase64DataKey = @"$data";
 {
     if (object && key)
     {
-        if (![object isKindOfClass:[NSNumber class]] &&
-            ![object isKindOfClass:[NSDate class]] &&
-            (![object isKindOfClass:[NSString class]] || [(NSString *)object length] < 32))
+        Class coderClass = [object classForCoder];
+        if (![@[[NSString class], [NSNumber class], [NSValue class], [NSDate class], [NSNull class]] containsObject:coderClass])
         {
             for (__unsafe_unretained NSString *aliasKeyPath in _knownObjects)
             {
@@ -436,7 +435,7 @@ NSString *const HRCoderBase64DataKey = @"$data";
 
 - (void)encodeBytes:(const uint8_t *)bytesp length:(NSUInteger)lenv forKey:(__unsafe_unretained NSString *)key
 {
-    [_stack lastObject][key] = [NSData dataWithBytes:bytesp length:lenv];
+    [_stack lastObject][key] = [[NSData dataWithBytes:bytesp length:lenv] archivedObjectWithHRCoder:self];
 }
 
 - (id)decodeObject:(id)object forKey:(__unsafe_unretained NSString *)key
@@ -446,7 +445,7 @@ NSString *const HRCoderBase64DataKey = @"$data";
         //new keypath
         __autoreleasing NSString *newKeyPath = _keyPath? [_keyPath stringByAppendingPathExtension:key]: key;
         
-        //check if object is an alias
+        //check if object is an alias (TODO: move this into NSictionary.unarchiveObjectWithDecoder:)
         if ([object isKindOfClass:[NSDictionary class]])
         {
             NSDictionary *dictionary = object;
@@ -461,31 +460,6 @@ NSString *const HRCoderBase64DataKey = @"$data";
                     decodedObject = [HRCoderAliasPlaceholder placeholder];
                 }
                 return decodedObject;
-            }
-            else
-            {
-                __autoreleasing NSString *base64Data = dictionary[HRCoderBase64DataKey];
-                if (base64Data)
-                {
-                    Class dataClass = NSClassFromString(dictionary[HRCoderClassNameKey] ?: @"NSData");
-                    
-#if (defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && __MAC_OS_X_VERSION_MIN_REQUIRED < __MAC_10_9) || \
-    (defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_7_0)
-                    
-                    if (![NSData instancesRespondToSelector:@selector(initWithBase64EncodedString:options:)])
-                    {
-                        object = [[dataClass alloc] initWithBase64Encoding:base64Data];
-                    }
-                    else
-#endif
-                    {
-                        object = [[dataClass alloc] initWithBase64EncodedString:base64Data options:0];
-                    }
-                    if (!object)
-                    {
-                        return nil;
-                    }
-                }
             }
         }
         
@@ -537,7 +511,7 @@ NSString *const HRCoderBase64DataKey = @"$data";
 
 - (const uint8_t *)decodeBytesForKey:(__unsafe_unretained NSString *)key returnedLength:(NSUInteger *)lengthp
 {
-    __autoreleasing NSData *data = [_stack lastObject][key];
+    __autoreleasing NSData *data = [[_stack lastObject][key] unarchiveObjectWithHRCoder:self];
     *lengthp = [data length];
     return data.bytes;
 }
@@ -570,7 +544,26 @@ NSString *const HRCoderBase64DataKey = @"$data";
 - (id)unarchiveObjectWithHRCoder:(__unsafe_unretained HRCoder *)coder
 {
     __autoreleasing NSString *className = self[HRCoderClassNameKey];
-    if (className)
+    __autoreleasing NSString *base64Data = self[HRCoderBase64DataKey];
+    if (base64Data)
+    {
+        //data
+        Class dataClass = NSClassFromString(className ?: @"NSData");
+        
+#if (defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && __MAC_OS_X_VERSION_MIN_REQUIRED < __MAC_10_9) || \
+(defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_7_0)
+        
+        if (![NSData instancesRespondToSelector:@selector(initWithBase64EncodedString:options:)])
+        {
+            return [[dataClass alloc] initWithBase64Encoding:base64Data];
+        }
+        else
+#endif
+        {
+            return [[dataClass alloc] initWithBase64EncodedString:base64Data options:0];
+        }
+    }
+    else if (className)
     {
         //encoded object
         [coder.stack addObject:self];
