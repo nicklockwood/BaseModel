@@ -34,6 +34,7 @@
 #import <Foundation/Foundation.h>
 
 
+#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wobjc-missing-property-synthesis"
 
 
@@ -70,3 +71,6 @@ typedef NS_ENUM(NSUInteger, HRCoderFormat)
 - (void)finishEncoding;
 
 @end
+
+
+#pragma GCC diagnostic pop

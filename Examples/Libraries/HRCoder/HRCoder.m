@@ -33,7 +33,10 @@
 #import "HRCoder.h"
 
 
+#pragma GCC diagnostic ignored "-Wobjc-missing-property-synthesis"
 #pragma GCC diagnostic ignored "-Wdirect-ivar-access"
+#pragma GCC diagnostic ignored "-Wselector"
+#pragma GCC diagnostic ignored "-Wgnu"
 
 
 #import <Availability.h>
@@ -560,7 +563,7 @@ NSString *const HRCoderBase64DataKey = @"$data";
         else
 #endif
         {
-            return [[dataClass alloc] initWithBase64EncodedString:base64Data options:0];
+            return [[dataClass alloc] initWithBase64EncodedString:base64Data options:(NSDataBase64DecodingOptions)0];
         }
     }
     else if (className)
@@ -689,7 +692,7 @@ NSString *const HRCoderBase64DataKey = @"$data";
         else
 #endif
         {
-            base64String = [self base64EncodedStringWithOptions:0];
+            base64String = [self base64EncodedStringWithOptions:(NSDataBase64EncodingOptions)0];
         }
         return @{HRCoderClassNameKey: NSStringFromClass(coderClass), HRCoderBase64DataKey: base64String};
     }
