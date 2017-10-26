@@ -20,6 +20,8 @@
 
 @implementation TestModel
 
+@synthesize string, date;
+
 + (BMFileFormat)saveFormat
 {
     return BMFileFormatJSON;
@@ -37,6 +39,7 @@
 
 - (void)testSetSharedInstanceToNil
 {
+    
     //set property on shared instance
     [TestModel sharedInstance].string = @"foo";
     

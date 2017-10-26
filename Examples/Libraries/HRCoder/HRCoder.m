@@ -1,7 +1,7 @@
 //
 //  HRCoder.m
 //
-//  Version 1.3.2
+//  Version 1.3.3
 //
 //  Created by Nick Lockwood on 24/04/2012.
 //  Copyright (c) 2011 Charcoal Design
@@ -312,22 +312,25 @@ NSString *const HRCoderBase64DataKey = @"$data";
 
 - (void)finishEncoding
 {
-    if (_data)
+    if (_data && _stack.count)
     {
+        id object = (__nonnull id)[_stack lastObject];
         switch (_outputFormat)
         {
             case HRCoderFormatXML:
             case HRCoderFormatBinary:
             {
-                [_data setData:[NSPropertyListSerialization dataWithPropertyList:[_stack lastObject]
-                                                                          format:(_outputFormat == HRCoderFormatXML)? NSPropertyListXMLFormat_v1_0: NSPropertyListBinaryFormat_v1_0
-                                                                         options:0
-                                                                           error:NULL]];
+                NSData *data = (NSData *__nonnull)[NSPropertyListSerialization dataWithPropertyList:object
+                                                                                          format:(_outputFormat == HRCoderFormatXML)?  NSPropertyListXMLFormat_v1_0: NSPropertyListBinaryFormat_v1_0
+                                                                                            options:0
+                                                                                              error:NULL];
+                [_data setData:data];
                 break;
             }
             case HRCoderFormatJSON:
             {
-                [_data setData:[NSJSONSerialization dataWithJSONObject:[_stack lastObject] options:(NSJSONWritingOptions)0 error:NULL]];
+                NSData *data = (NSData *__nonnull)[NSJSONSerialization dataWithJSONObject:object options:(NSJSONWritingOptions)0 error:NULL];
+                [_data setData:data];
                 break;
             }
         }

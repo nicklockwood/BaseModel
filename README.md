@@ -24,8 +24,8 @@ BaseModel is designed to work with the following serialization libraries:
 Supported OS & SDK Versions
 -----------------------------
 
-* Supported build target - iOS 8.0 / Mac OS 10.9 (Xcode 6.0, Apple LLVM compiler 6.0)
-* Earliest supported deployment target - iOS 5.0 / Mac OS 10.7
+* Supported build target - iOS 11.0 / Mac OS 10.12 (Xcode 9.0)
+* Earliest supported deployment target - iOS 9.0 / Mac OS 10.10
 * Earliest compatible deployment target - iOS 4.3 / Mac OS 10.6
 
 NOTE: 'Supported' means that the library has been tested with this version. 'Compatible' means that the library should work on this iOS version (i.e. it doesn't rely on any unavailable SDK features) but is no longer being tested for compatibility and may require tweaking or bug fixes to run correctly.
@@ -237,6 +237,10 @@ The BaseModel class is abstract, and is not designed to be instantiated directly
 
 Release Notes
 -------------------
+
+Version 2.6.4
+
+- Fixed warnings in Xcode 9
 
 Version 2.6.3
 

@@ -1,7 +1,7 @@
 //
 //  CryptoCoding.h
 //
-//  Version 1.0.1
+//  Version 1.1.1
 //
 //  Created by Nick Lockwood on 23/09/2012.
 //  Copyright (c) 2011 Charcoal Design
@@ -34,6 +34,10 @@
 #import <Foundation/Foundation.h>
 
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wobjc-missing-property-synthesis"
+
+
 extern NSString *const CryptoCoderErrorDomain;
 extern NSString *const CryptoCoderException;
 
@@ -43,9 +47,17 @@ extern const float CryptoCodingVersion;
 
 @interface NSData (CryptoCoding)
 
-- (NSData *)AESEncryptedDataWithPassword:(NSString *)password IV:(NSData **)IV salt:(NSData **)salt error:(NSError **)error;
-- (NSData *)AESDecryptedDataWithPassword:(NSString *)password IV:(NSData *)IV salt:(NSData *)salt error:(NSError **)error;
+- (NSData *)AESEncryptedDataWithPassword:(NSString *)password
+                                      IV:(NSData **)IV
+                                    salt:(NSData **)salt
+                                   error:(NSError **)error
+                                 version:(float)version;
 
+- (NSData *)AESDecryptedDataWithPassword:(NSString *)password
+                                      IV:(NSData *)IV
+                                    salt:(NSData *)salt
+                                   error:(NSError **)error
+                                 version:(float)version;
 @end
 
 
@@ -57,7 +69,7 @@ extern const float CryptoCodingVersion;
 @property (nonatomic, strong, readonly) Class rootObjectClass;
 @property (nonatomic, assign, readonly) float version;
 
-- (id)initWithRootObject:(id<NSCoding>)rootObject password:(NSString *)password;
+- (instancetype)initWithRootObject:(id<NSCoding>)rootObject password:(NSString *)password;
 - (id)unarchiveRootObjectWithPassword:(NSString *)password;
 
 @end
@@ -83,3 +95,7 @@ extern const float CryptoCodingVersion;
 + (Class)classForClassName:(NSString *)codedName;
 
 @end
+
+
+#pragma GCC diagnostic pop
+

@@ -1,7 +1,7 @@
 //
 //  BaseModel.m
 //
-//  Version 2.6.3
+//  Version 2.6.4
 //
 //  Created by Nick Lockwood on 25/06/2011.
 //  Copyright 2011 Charcoal Design
@@ -77,7 +77,7 @@ static const NSUInteger BMStringDescriptionMaxLength = 16;
 
 - (NSString *)BM_shortDescription
 {
-    return [NSString stringWithFormat:@"<%@: %p>", [self classForCoder], self];
+    return [NSString stringWithFormat:@"<%@: %p>", [self classForCoder], (void *)self];
 }
 
 @end
@@ -354,7 +354,7 @@ static const NSUInteger BMStringDescriptionMaxLength = 16;
 
 - (NSString *)debugDescription
 {
-    NSMutableString *description = [NSMutableString stringWithFormat:@"<%@: %p", [self class], self];
+    NSMutableString *description = [NSMutableString stringWithFormat:@"<%@: %p", [self class], (void *)self];
     [[self dictionaryRepresentation] enumerateKeysAndObjectsUsingBlock:^(NSString *key, id obj, __unused BOOL *stop) {
         
         [description appendFormat:@"; %@ = %@", key, [obj BM_shortDescription]];
@@ -377,7 +377,7 @@ static const NSUInteger BMStringDescriptionMaxLength = 16;
     objc_setAssociatedObject(self, BMSharedInstanceKey, instance, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     if (oldInstance)
     {
-        void (^update)() = ^{
+        void (^update)(void) = ^{
             [[NSNotificationCenter defaultCenter] postNotificationName:BaseModelSharedInstanceUpdatedNotification object:oldInstance];
         };
         if ([NSThread currentThread] == [NSThread mainThread])
@@ -633,7 +633,7 @@ static const NSUInteger BMStringDescriptionMaxLength = 16;
 + (instancetype)instanceWithObject:(id)object
 {
     //return nil if object is nil
-    return object? [[self alloc] initWithObject:object]: nil;
+    return object? [(BaseModel *)[self alloc] initWithObject:object]: nil;
 }
 
 - (NSString *)setterNameForClass:(Class)class
@@ -765,7 +765,7 @@ static const NSUInteger BMStringDescriptionMaxLength = 16;
         if (data)
         {
             //attempt to guess file type
-            char byte = *((char *)data.bytes);
+            char byte = *((const char *)data.bytes);
             if (byte == 'T')
             {
                 //attempt to deserialise using FastCoding
